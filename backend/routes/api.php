@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\UsuarioController;
 
 // Manejar solicitudes OPTIONS para CORS
@@ -46,6 +47,16 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         Route::patch('/{id}', [UsuarioController::class, 'actualizarUsuario']);
         Route::put('/{id}/estado', [UsuarioController::class, 'cambiarEstadoUsuario']);
     });
+
+    Route::prefix('plantillas')->group(function () {
+        Route::post('/', [PlantillaController::class, 'crearPlantilla']);
+        Route::get('/', [PlantillaController::class, 'listarPlantillas']);
+        Route::get('/{id}', [PlantillaController::class, 'obtenerPlantillaPorId']);
+        Route::patch('/{id}', [PlantillaController::class, 'actualizarPlantilla']);
+        Route::put('/{id}/estado', [PlantillaController::class, 'cambiarEstadoPlantilla']);
+    });
+
+
 
 });
 
