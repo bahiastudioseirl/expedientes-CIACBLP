@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { iniciarSesion } from "./services/IniciarSesion";
 import { AuthStore } from "./services/AuthStore";
 import { Eye, EyeOff } from "lucide-react";
+import logoCiacblp from "../../../assets/logo-ciacblp.webp";
 
 
 export const LoginForm = () => {
@@ -64,7 +65,7 @@ export const LoginForm = () => {
                     {/* Header */}
                     <div className="text-center">
                         <div className="mx-auto h-20 w-60 rounded-full flex items-center justify-center mb-2">
-                            <img src="https://postulacionesdev.ciacblp.com/images/logo-dark2x.png" alt="Logo CIACBLP" />
+                            <img src={logoCiacblp} alt="Logo CIACBLP" className="max-h-full max-w-full object-contain" />
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900">Iniciar Sesión</h2>
                         <p className="mt-2 text-sm text-gray-600">

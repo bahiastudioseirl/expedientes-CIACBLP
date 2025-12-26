@@ -8,6 +8,7 @@ import {
     Hand,
     Users,
     BookOpen,
+    FileText,
     type LucideIcon
 } from 'lucide-react';
 
@@ -26,8 +27,13 @@ export interface SubMenuItem {
 
 export const menuItems: MenuItem[] = [
     {
-        titulo: 'Empresa',
+        titulo: 'Expedientes',
+        icon: FileText,
+        link: '/administrator/expediente'
+    },
+    {
+        titulo: 'Plantillas',
         icon: Building,
-        link: '/administrator/empresa'
+        link: '/administrator/plantilla'
     },
 ];

@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import { menuItems, type MenuItem, type SubMenuItem } from '../context/items-sidebar';
+import logoCiacblp from '../../assets/logo-ciacblp.webp';
 
-export const Sidebar = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
@@ -30,14 +36,28 @@ export const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-white shadow-lg h-full border-r border-gray-200">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="mx-auto h-10 w-40 rounded-full flex items-center justify-center">
-             <img src="https://www.eprojectperu.com/wp-content/uploads/2025/08/logo-fondo-blanco.png" alt="Logo Eproject" />
-            </div>
-        <p className="text-sm text-gray-600 text-center">Panel Administrativo</p>
-      </div>
+    <>
+      {/* Sidebar */}
+      <div className={`
+        fixed top-0 left-0 h-full bg-white shadow-lg border-r border-gray-200 z-50 transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:relative lg:translate-x-0 lg:block
+        w-64
+      `}>
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="mx-auto h-10 w-48 flex items-center justify-center relative">
+            <img src={logoCiacblp} alt="Logo CIACBLP" className="max-h-full max-w-full object-contain" />
+            
+            {/* Botón cerrar solo visible en mobile */}
+            <button
+              onClick={onClose}
+              className="absolute -right-2 top-1/2 transform -translate-y-1/2 lg:hidden p-1 hover:bg-gray-100 rounded"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        </div>
 
       {/* Menu Items */}
       <nav className="p-4">
@@ -49,9 +69,10 @@ export const Sidebar = () => {
                 // Item sin submenú - enlace directo
                 <Link
                   to={item.link}
+                  onClick={onClose}
                   className={`flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isItemActive(item)
-                      ? 'bg-[#224666]/20 text-[#132436] border-l-4 border-red-600'
+                      ? 'bg-[#224666]/20 text-[#132436] border-l-4 border-[#733AEA]'
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
@@ -87,6 +108,7 @@ export const Sidebar = () => {
                     <li key={subItem.titulo}>
                       <Link
                         to={subItem.link}
+                        onClick={onClose}
                         className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${
                           isItemActive(subItem)
                             ? 'bg-[#224666]/20 text-[#132436] border-l-2 border-[#CD321A]'
@@ -105,5 +127,14 @@ export const Sidebar = () => {
         </ul>
       </nav>
     </div>
+
+      {/* Overlay para mobile - DESPUÉS del sidebar */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+    </>
   );
 };

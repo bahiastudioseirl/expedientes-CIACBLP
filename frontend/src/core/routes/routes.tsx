@@ -11,8 +11,12 @@ const LoginForm = lazy(() =>
 
 
 //ADMINISTRADOR
-const EmpresaAdmin = lazy(() =>
-    import('../../admin/features/empresaAdmin/pages/EmpresaAdmin').then((module) => ({ default: module.default }))
+const ExpedienteAdmin = lazy(() =>
+    import('../../admin/features/expedienteAdmin/pages/ExpedienteAdmin').then((module) => ({ default: module.default }))
+);
+
+const PlantillaAdmin = lazy(() =>
+    import('../../admin/features/plantillaAdmin/pages/PlantillaAdmin').then((module) => ({ default: module.default }))
 );
 
 
@@ -50,14 +54,23 @@ export const routes = [
     children: [
       {
         index: true,
-        element: <Navigate to="/administrator/empresa" replace />,
+        element: <Navigate to="/administrator/expediente" replace />,
       },
-      // Gestión de Contenido
+      // Gestión de Expedientes
       {
-        path: 'empresa',
+        path: 'expediente',
         element: (
           <LazyWrapper>
-            <EmpresaAdmin />
+            <ExpedienteAdmin />
+          </LazyWrapper>
+        ),
+      },
+      // Gestión de Plantillas
+      {
+        path: 'plantilla',
+        element: (
+          <LazyWrapper>
+            <PlantillaAdmin />
           </LazyWrapper>
         ),
       },
