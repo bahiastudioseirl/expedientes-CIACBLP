@@ -13,7 +13,7 @@ class UsuariosSeeder extends Seeder
             [
                 'nombre' => 'Admin',
                 'apellido' => 'Principal',
-                'numero_documento' => '12345678',
+                'numero_documento' => '77777777',
                 'contrasena' => 'admindev@bahia.pe',
                 'telefono' => '123456789',
                 'activo' => true,

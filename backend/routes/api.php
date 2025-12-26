@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\ExpedienteController;
 
 // Manejar solicitudes OPTIONS para CORS
 Route::options('{any}', function () {
@@ -54,6 +55,19 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         Route::get('/{id}', [PlantillaController::class, 'obtenerPlantillaPorId']);
         Route::patch('/{id}', [PlantillaController::class, 'actualizarPlantilla']);
         Route::put('/{id}/estado', [PlantillaController::class, 'cambiarEstadoPlantilla']);
+    });
+
+    // Rutas de expedientes
+    Route::prefix('expedientes')->group(function () {
+        Route::post('/', [ExpedienteController::class, 'crearExpediente']);
+        Route::get('/', [ExpedienteController::class, 'listarExpedientes']);
+        Route::get('/{id}', [ExpedienteController::class, 'obtenerExpedientePorId']);
+        Route::patch('/{id}', [ExpedienteController::class, 'actualizarExpediente']);
+        Route::get('/codigo/{codigo}', [ExpedienteController::class, 'obtenerPorCodigoExpediente']);
+        Route::put('/{id}/estado', [ExpedienteController::class, 'cambiarEstadoExpediente']);
+        
+        // Ruta para verificar usuarios por número de documento (útil para el frontend)
+        Route::get('/verificar-usuario/{numeroDocumento}', [ExpedienteController::class, 'verificarUsuarioPorDocumento']);
     });
 
 

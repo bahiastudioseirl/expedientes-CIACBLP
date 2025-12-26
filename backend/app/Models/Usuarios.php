@@ -64,5 +64,10 @@ class Usuarios extends Authenticatable implements JWTSubject
     {
         return $this->belongsTo(Roles::class, 'id_rol', 'id_rol');
     }
+
+    public function correos()
+    {
+        return $this->hasMany(Correos::class, 'id_usuario', 'id_usuario');
+    }
     
 }

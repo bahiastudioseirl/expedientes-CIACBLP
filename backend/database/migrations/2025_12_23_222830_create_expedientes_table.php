@@ -12,7 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('expedientes', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_expediente');
+            $table->string('codigo_expediente')->unique();
+            $table->string('asunto');
+            $table->unsignedBigInteger('id_plantilla');
+            $table->unsignedBigInteger('id_usuario');
+            $table->boolean('activo')->default(true);
+
+            $table->foreign('id_plantilla')->references('id_plantilla')->on('plantillas')->onDelete('cascade');
+            $table->foreign('id_usuario')->references('id_usuario')->on('usuarios')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

@@ -40,6 +40,11 @@ class UsuarioRepository
         return Usuarios::with('rol')->find($id);
     }
 
+    public function obtenerPorNumeroDocumento(string $numeroDocumento): ?Usuarios
+    {
+        return Usuarios::with(['rol', 'correos'])->where('numero_documento', $numeroDocumento)->first();
+    }
+
     public function cambiarEstadoUsuario(Usuarios $usuario, bool $activo): bool
     {
         $usuario->activo = $activo;
