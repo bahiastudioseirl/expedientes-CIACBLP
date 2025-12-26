@@ -24,7 +24,7 @@ export default function FormParticipanteComponent({
 
   // Buscar usuario cuando cambia el número de documento
   useEffect(() => {
-    const numeroDocumento = data.numero_documento.trim();
+    const numeroDocumento = (data.numero_documento || "").trim();
     
     if (numeroDocumento && numeroDocumento.length >= 8) {
       if (searchTimeout) {
@@ -44,26 +44,31 @@ export default function FormParticipanteComponent({
               nombre: usuario.nombre,
               apellido: usuario.apellido,
               telefono: usuario.telefono,
-              correos: usuario.correos,
+              correos: usuario.correos && usuario.correos.length > 0 ? usuario.correos : [""], // Asegurar que siempre haya al menos un campo de correo
               existe: true,
               loading: false,
-              error: ""
+              error: "",
+              usuarioTipo: usuario.tipo, // Guardar el tipo de usuario
+              usuarioRol: usuario.rol || (usuario.tipo === 'arbitro' ? 'Árbitro' : '')
             });
           } else {
             onChange({
               ...data,
               existe: false,
               loading: false,
-              error: ""
+              error: "",
+              usuarioTipo: undefined,
+              usuarioRol: undefined
             });
           }
         } catch (error: any) {
-          console.error('Error al verificar usuario:', error);
           onChange({
             ...data,
             existe: false,
             loading: false,
-            error: "Error al verificar usuario"
+            error: "Error al verificar usuario",
+            usuarioTipo: undefined,
+            usuarioRol: undefined
           });
         }
       }, 800);
@@ -74,7 +79,9 @@ export default function FormParticipanteComponent({
         ...data,
         existe: false,
         loading: false,
-        error: ""
+        error: "",
+        usuarioTipo: undefined,
+        usuarioRol: undefined
       });
     }
 
@@ -97,28 +104,33 @@ export default function FormParticipanteComponent({
       correos: [""],
       existe: false,
       loading: false,
-      error: ""
+      error: "",
+      usuarioTipo: undefined,
+      usuarioRol: undefined
     });
   };
 
   const handleAddCorreo = () => {
+    const currentCorreos = Array.isArray(data.correos) ? data.correos : [""];
     onChange({
       ...data,
-      correos: [...data.correos, ""]
+      correos: [...currentCorreos, ""]
     });
   };
 
   const handleRemoveCorreo = (index: number) => {
-    if (data.correos.length > 1) {
+    const currentCorreos = Array.isArray(data.correos) ? data.correos : [""];
+    if (currentCorreos.length > 1) {
       onChange({
         ...data,
-        correos: data.correos.filter((_, i) => i !== index)
+        correos: currentCorreos.filter((_, i) => i !== index)
       });
     }
   };
 
   const handleCorreoChange = (index: number, value: string) => {
-    const newCorreos = [...data.correos];
+    const currentCorreos = Array.isArray(data.correos) ? data.correos : [""];
+    const newCorreos = [...currentCorreos];
     newCorreos[index] = value;
     onChange({
       ...data,
@@ -145,7 +157,7 @@ export default function FormParticipanteComponent({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            value={data.numero_documento}
+            value={data.numero_documento || ""}
             onChange={(e) => handleNumeroDocumentoChange(e.target.value)}
             placeholder="Ingrese número de documento"
             maxLength={20}
@@ -171,10 +183,26 @@ export default function FormParticipanteComponent({
         {data.numero_documento.length >= 8 && !data.loading && (
           <div className="mt-1">
             {data.existe && (
-              <p className="text-xs text-green-600 flex items-center space-x-1">
-                <CheckCircle className="w-3 h-3" />
-                <span>Usuario encontrado - puede editar los datos si es necesario</span>
-              </p>
+              <>
+                <p className="text-xs text-green-600 flex items-center space-x-1">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>
+                    {data.usuarioTipo === 'arbitro' 
+                      ? 'Árbitro encontrado en el sistema - datos obtenidos automáticamente'
+                      : 'Usuario encontrado - puede editar los datos si es necesario'
+                    }
+                  </span>
+                </p>
+                {data.usuarioTipo && (
+                  <p className="text-xs text-blue-600 mt-1 flex items-center space-x-1">
+                    <span className="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                    <span>
+                      Tipo: {data.usuarioTipo === 'arbitro' ? 'Árbitro Registrado' : 'Usuario del Sistema'}
+                      {data.usuarioRol && ` - ${data.usuarioRol}`}
+                    </span>
+                  </p>
+                )}
+              </>
             )}
             {data.existe === false && (
               <p className="text-xs text-orange-600 flex items-center space-x-1">
@@ -205,7 +233,7 @@ export default function FormParticipanteComponent({
           </label>
           <input
             type="text"
-            value={data.nombre}
+            value={data.nombre || ""}
             onChange={(e) => onChange({ ...data, nombre: e.target.value })}
             placeholder="Nombre"
             disabled={isFieldsDisabled}
@@ -220,7 +248,7 @@ export default function FormParticipanteComponent({
           </label>
           <input
             type="text"
-            value={data.apellido}
+            value={data.apellido || ""}
             onChange={(e) => onChange({ ...data, apellido: e.target.value })}
             placeholder="Apellido"
             disabled={isFieldsDisabled}
@@ -238,7 +266,7 @@ export default function FormParticipanteComponent({
           <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="tel"
-            value={data.telefono}
+            value={data.telefono || ""}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, '');
               onChange({ ...data, telefono: value });
@@ -275,7 +303,7 @@ export default function FormParticipanteComponent({
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="email"
-                  value={correo}
+                  value={correo || ""}
                   onChange={(e) => handleCorreoChange(index, e.target.value)}
                   placeholder="correo@ejemplo.com"
                   disabled={isFieldsDisabled}

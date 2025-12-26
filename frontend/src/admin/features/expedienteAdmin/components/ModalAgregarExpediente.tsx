@@ -28,7 +28,9 @@ const initialParticipante: FormParticipanteType = {
   correos: [""],
   loading: false,
   existe: false,
-  error: ""
+  error: "",
+  usuarioTipo: undefined,
+  usuarioRol: undefined
 };
 
 export default function ModalAgregarExpediente({ 
@@ -51,10 +53,13 @@ export default function ModalAgregarExpediente({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loadingPlantillas, setLoadingPlantillas] = useState(true);
 
-  // Cargar plantillas al abrir modal
+  // Cargar plantillas y resetear formulario al abrir modal
   useEffect(() => {
     if (open) {
       cargarPlantillas();
+      resetForm();
+    } else {
+      // También resetear cuando se cierra el modal para asegurar limpieza
       resetForm();
     }
   }, [open]);
@@ -75,14 +80,27 @@ export default function ModalAgregarExpediente({
   };
 
   const resetForm = () => {
+    const newInitialParticipante: FormParticipanteType = {
+      numero_documento: "",
+      nombre: "",
+      apellido: "",
+      telefono: "",
+      correos: [""],
+      loading: false,
+      existe: false,
+      error: "",
+      usuarioTipo: undefined,
+      usuarioRol: undefined
+    };
+
     setFormData({
       codigo_expediente: "",
       asunto: "",
       id_plantilla: 0,
-      demandante: { ...initialParticipante },
-      demandado: { ...initialParticipante },
-      secretario_arbitral: { ...initialParticipante },
-      arbitro_a_cargo: { ...initialParticipante }
+      demandante: { ...newInitialParticipante },
+      demandado: { ...newInitialParticipante },
+      secretario_arbitral: { ...newInitialParticipante },
+      arbitro_a_cargo: { ...newInitialParticipante }
     });
     setErrors({});
   };

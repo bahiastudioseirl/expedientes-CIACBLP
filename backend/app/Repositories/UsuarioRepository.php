@@ -3,11 +3,18 @@
 namespace App\Repositories;
 
 use App\Models\Usuarios;
+use App\Repositories\SecondDB\PostulantesArbitroRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 
 class UsuarioRepository
 {
+    protected $arbitroRepository;
+
+    public function __construct(PostulantesArbitroRepository $arbitroRepository)
+    {
+        $this->arbitroRepository = $arbitroRepository;
+    }
 
     public function crear(array $data): Usuarios
     {
@@ -40,7 +47,31 @@ class UsuarioRepository
         return Usuarios::with('rol')->find($id);
     }
 
-    public function obtenerPorNumeroDocumento(string $numeroDocumento): ?Usuarios
+    public function obtenerPorNumeroDocumento(string $numeroDocumento): ?array
+    {
+        // Primer búsqueda: BD primaria (usuarios)
+        $usuario = Usuarios::with(['rol', 'correos'])->where('numero_documento', $numeroDocumento)->first();
+        
+        if ($usuario) {
+            return [
+                'id' => $usuario->id_usuario,
+                'nombre' => ucfirst(strtolower($usuario->nombre)),
+                'apellido' => ucfirst(strtolower($usuario->apellido)),
+                'numero_documento' => $usuario->numero_documento,
+                'telefono' => $usuario->telefono,
+                'correos' => $usuario->correos->pluck('direccion')->toArray(),
+                'tipo' => 'usuario_sistema',
+                'rol' => $usuario->rol?->nombre
+            ];
+        }
+
+        $arbitro = $this->arbitroRepository->obtenerPorNumeroDocumento($numeroDocumento);
+        
+        return $arbitro;
+    }
+
+
+    public function obtenerPorNumeroDocumentoLegacy(string $numeroDocumento): ?Usuarios
     {
         return Usuarios::with(['rol', 'correos'])->where('numero_documento', $numeroDocumento)->first();
     }

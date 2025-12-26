@@ -30,7 +30,9 @@ const initialParticipante: FormParticipanteType = {
   correos: [""],
   loading: false,
   existe: false,
-  error: ""
+  error: "",
+  usuarioTipo: undefined,
+  usuarioRol: undefined
 };
 
 export default function ModalEditarExpediente({ 
@@ -124,7 +126,9 @@ export default function ModalEditarExpediente({
         correos: [...demandante.usuario.correos],
         loading: false,
         existe: true,
-        error: ""
+        error: "",
+        usuarioTipo: undefined,
+        usuarioRol: undefined
       } : { ...initialParticipante },
       demandado: demandado ? {
         numero_documento: demandado.usuario.numero_documento,
@@ -134,7 +138,9 @@ export default function ModalEditarExpediente({
         correos: [...demandado.usuario.correos],
         loading: false,
         existe: true,
-        error: ""
+        error: "",
+        usuarioTipo: undefined,
+        usuarioRol: undefined
       } : { ...initialParticipante },
       secretario_arbitral: secretario ? {
         numero_documento: secretario.usuario.numero_documento,
@@ -144,7 +150,9 @@ export default function ModalEditarExpediente({
         correos: [...secretario.usuario.correos],
         loading: false,
         existe: true,
-        error: ""
+        error: "",
+        usuarioTipo: undefined,
+        usuarioRol: undefined
       } : { ...initialParticipante },
       arbitro_a_cargo: arbitro ? {
         numero_documento: arbitro.usuario.numero_documento,
@@ -154,7 +162,9 @@ export default function ModalEditarExpediente({
         correos: [...arbitro.usuario.correos],
         loading: false,
         existe: true,
-        error: ""
+        error: "",
+        usuarioTipo: undefined,
+        usuarioRol: undefined
       } : { ...initialParticipante }
     };
 

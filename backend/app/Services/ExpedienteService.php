@@ -5,7 +5,6 @@ namespace App\Services;
 use App\DTOs\Expedientes\CrearExpedienteDTO;
 use App\DTOs\Expedientes\ActualizarExpedienteDTO;
 use App\Models\Expediente;
-use App\Models\Usuarios;
 use App\Repositories\ExpedienteRepository;
 use App\Repositories\UsuarioRepository;
 use App\Repositories\CorreoRepository;
@@ -91,7 +90,7 @@ class ExpedienteService
         $usuarioExistente = $this->usuarioRepository->obtenerPorNumeroDocumento($numeroDocumento);
         
         if ($usuarioExistente) {
-            return $this->actualizarUsuarioExistente($usuarioExistente, $dataParticipante, $rol);
+            return $this->actualizarUsuarioExistenteDual($usuarioExistente, $dataParticipante, $rol);
         } else {
             return $this->crearNuevoUsuario($dataParticipante, $rol);
         }
@@ -120,6 +119,28 @@ class ExpedienteService
             'rol' => $rol,
             'contrasena_generada' => null
         ];
+    }
+
+    /**
+     * Maneja usuarios existentes que pueden venir del sistema o de árbitros
+     * Para árbitros, crea un nuevo usuario en el sistema basado en sus datos
+     */
+    private function actualizarUsuarioExistenteDual(array $usuarioData, array $dataParticipante, string $rol): array
+    {
+        if ($usuarioData['tipo'] === 'usuario_sistema') {
+            $usuario = $this->usuarioRepository->obtenerPorNumeroDocumentoLegacy($usuarioData['numero_documento']);
+            return $this->actualizarUsuarioExistente($usuario, $dataParticipante, $rol);
+        } else {
+            $datosParticipante = [
+                'nombre' => $usuarioData['nombre'],
+                'apellido' => $usuarioData['apellido'],
+                'numero_documento' => $usuarioData['numero_documento'],
+                'telefono' => $usuarioData['telefono'] ?? $dataParticipante['telefono'],
+                'correos' => $usuarioData['correos'] ?? ($dataParticipante['correos'] ?? [])
+            ];
+
+            return $this->crearNuevoUsuario($datosParticipante, $rol);
+        }
     }
 
     /**
@@ -241,13 +262,14 @@ class ExpedienteService
             return [
                 'existe' => true,
                 'usuario' => [
-                    'id_usuario' => $usuario->id_usuario,
-                    'nombre' => $usuario->nombre,
-                    'apellido' => $usuario->apellido,
-                    'numero_documento' => $usuario->numero_documento,
-                    'telefono' => $usuario->telefono,
-                    'correos' => $usuario->correos->pluck('direccion')->toArray(),
-                    'rol' => $usuario->rol->nombre ?? null
+                    'id_usuario' => $usuario['id'],
+                    'nombre' => $usuario['nombre'],
+                    'apellido' => $usuario['apellido'],
+                    'numero_documento' => $usuario['numero_documento'],
+                    'telefono' => $usuario['telefono'],
+                    'correos' => $usuario['correos'] ?? [], 
+                    'rol' => $usuario['rol'] ?? 'Árbitro',
+                    'tipo' => $usuario['tipo'] 
                 ]
             ];
         }

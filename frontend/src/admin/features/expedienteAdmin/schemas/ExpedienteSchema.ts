@@ -150,6 +150,8 @@ export interface VerificarUsuarioResponse {
       apellido: string;
       telefono: string;
       correos: string[];
+      rol?: string;
+      tipo: 'usuario_sistema' | 'arbitro'; // Nuevo campo para identificar el tipo
     } | null;
     existe: boolean;
   };
@@ -169,6 +171,9 @@ export interface FormParticipante {
   loading?: boolean;
   existe?: boolean;
   error?: string;
+  // Información adicional del usuario encontrado
+  usuarioTipo?: 'usuario_sistema' | 'arbitro';
+  usuarioRol?: string;
 }
 
 export interface ExpedienteFormData {
