@@ -150,8 +150,8 @@ export default function PlantillaAdmin() {
                 <div className="p-6 border-b border-slate-200">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                            <div className="p-2 rounded-lg bg-[#733AEA]/20">
-                                <Building className="w-6 h-6 text-[#733AEA]-600" />
+                            <div className="p-2 rounded-lg bg-violet-50">
+                                <Building className="w-6 h-6 text-violet-600" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-slate-900">Gestión de Plantillas</h1>

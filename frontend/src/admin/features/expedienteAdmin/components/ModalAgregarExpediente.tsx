@@ -245,7 +245,7 @@ export default function ModalAgregarExpediente({
                   type="text"
                   value={formData.codigo_expediente}
                   onChange={(e) => setFormData({ ...formData, codigo_expediente: e.target.value })}
-                  placeholder="EXP-2025-0001"
+                  placeholder="001-2026-CIACBLP"
                   disabled={loading}
                   className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50"
                 />

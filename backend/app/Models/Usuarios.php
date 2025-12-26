@@ -29,12 +29,25 @@ class Usuarios extends Authenticatable implements JWTSubject
         'contrasena',
     ];
 
+    private $contrasenaTextoPlano = null;
+
     protected function casts(): array
     {
         return [
             'contrasena' => 'hashed',
             'activo' => 'boolean',
         ];
+    }
+
+    public function setContrasenaTextoPlano($value)
+    {
+        $this->contrasenaTextoPlano = $value;
+        $this->contrasena = $value;
+    }
+
+    public function getContrasenaTextoPlanoAttribute()
+    {
+        return $this->contrasenaTextoPlano;
     }
 
     public function getAuthPassword()

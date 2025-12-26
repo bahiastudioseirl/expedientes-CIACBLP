@@ -10,6 +10,7 @@ use App\Repositories\UsuarioRepository;
 use App\Repositories\CorreoRepository;
 use App\Repositories\FlujoRepository;
 use App\Repositories\PlantillaRepository;
+use App\Services\MailService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -22,7 +23,8 @@ class ExpedienteService
         private readonly UsuarioRepository $usuarioRepository,
         private readonly CorreoRepository $correoRepository,
         private readonly FlujoRepository $flujoRepository,
-        private readonly PlantillaRepository $plantillaRepository
+        private readonly PlantillaRepository $plantillaRepository,
+        private readonly MailService $mailService
     ){}
 
     public function crearExpediente(CrearExpedienteDTO $data): array
@@ -71,6 +73,14 @@ class ExpedienteService
 
             // 5. Cargar expediente completo
             $expedienteCompleto = $this->expedienteRepository->obtenerPorId($expediente->id_expediente);
+
+            // 6. Enviar correos con credenciales a todos los participantes
+            $this->enviarCredencialesParticipantes($expedienteCompleto, [
+                $demandante['usuario'],
+                $demandado['usuario'],
+                $secretario['usuario'],
+                $arbitro['usuario']
+            ]);
 
             return [
                 'expediente' => $expedienteCompleto,
@@ -148,7 +158,7 @@ class ExpedienteService
      */
     private function crearNuevoUsuario(array $dataParticipante, string $rol): array
     {
-        $contrasena = $this->generarContrasenaAutomatica();
+        $contrasena = $this->mailService->generarContrasenaAleatoria();
 
         // Crear usuario
         $usuarioData = [
@@ -162,6 +172,7 @@ class ExpedienteService
         ];
 
         $usuario = $this->usuarioRepository->crear($usuarioData);
+        $usuario->setContrasenaTextoPlano($contrasena);
         $this->correoRepository->crearMultiples($usuario->id_usuario, $dataParticipante['correos']);
 
         return [
@@ -196,18 +207,6 @@ class ExpedienteService
         if (!empty($correosParaEliminar)) {
             $this->correoRepository->eliminarPorCorreos($idUsuario, $correosParaEliminar);
         }
-    }
-
-    private function generarContrasenaAutomatica(int $longitud = 8): string
-    {
-        $caracteres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        
-        $contrasena = '';
-        for ($i = 0; $i < $longitud; $i++) {
-            $contrasena .= $caracteres[rand(0, strlen($caracteres) - 1)];
-        }
-        
-        return $contrasena;
     }
 
     private function obtenerIdRolSegunTipo(string $tipoRol): int
@@ -351,12 +350,8 @@ class ExpedienteService
      */
     private function recrearFlujoInicial(int $idExpediente, int $idPlantilla): void
     {
-        // Eliminar flujos existentes del expediente
-        // Nota: Esto eliminará TODOS los flujos del expediente, lo cual puede ser drástico
-        // En una implementación real podrías querer conservar el historial y solo marcar como inactivos
         $flujoActual = $this->flujoRepository->obtenerFlujoActual($idExpediente);
         if ($flujoActual) {
-            // Solo actualizar el flujo actual para cambiar a "cancelado" y crear uno nuevo
             $this->flujoRepository->actualizar($flujoActual, [
                 'estado' => 'cancelado por cambio de plantilla'
             ]);
@@ -365,9 +360,6 @@ class ExpedienteService
         $this->crearFlujoInicial($idExpediente, $idPlantilla);
     }
 
-    /**
-     * Crea el flujo inicial del expediente con la primera etapa y subetapa de la plantilla
-     */
     private function crearFlujoInicial(int $idExpediente, int $idPlantilla): void
     {
         $plantilla = $this->plantillaRepository->obtenerPorId($idPlantilla);
@@ -398,4 +390,12 @@ class ExpedienteService
             'fecha_fin' => $fechaFin
         ]);
     }
+
+    private function enviarCredencialesParticipantes($expediente, array $usuarios): void
+    {
+        foreach ($usuarios as $usuario) {
+            $this->mailService->enviarCredencialesExpediente($usuario, $expediente->asunto);
+        }
+    }
+
 }

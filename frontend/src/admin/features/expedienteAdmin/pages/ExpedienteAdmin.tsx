@@ -207,8 +207,8 @@ export default function ExpedienteAdmin() {
         <div className="p-4 sm:p-6 border-b border-slate-200">
           <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-blue-50">
-                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-violet-50">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600" />
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Gestión de Expedientes</h1>
@@ -272,7 +272,6 @@ export default function ExpedienteAdmin() {
                     <th className="px-4 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600">Código</th>
                     <th className="px-4 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600">Asunto</th>
                     <th className="px-4 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600">Plantilla</th>
-                    <th className="px-4 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600">Demandante</th>
                     <th className="px-4 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600">Estado</th>
                     <th className="px-4 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600">Creado</th>
                     <th className="px-4 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600">Acciones</th>
@@ -307,9 +306,6 @@ export default function ExpedienteAdmin() {
                           <Building2 className="w-4 h-4" />
                           <span>{expediente.plantilla.nombre}</span>
                         </div>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-slate-600">
-                        {getRolParticipante(expediente.participantes, "demandante")}
                       </td>
                       <td className="px-4 py-4">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full inline-flex items-center ${
