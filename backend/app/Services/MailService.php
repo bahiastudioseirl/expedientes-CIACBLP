@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class MailService
 {
-    public function enviarCredencialesExpediente(Usuarios $usuario, string $asuntoExpediente): bool
+    public function enviarCredencialesExpediente(Usuarios $usuario, string $codigoExpediente): bool
     {
         try {
             $correos = $usuario->correos->pluck('direccion')->toArray();
@@ -19,12 +19,20 @@ class MailService
                 return false;
             }
 
+            $nombres = $usuario->nombre ?? '';
+            $apellidos = $usuario->apellido ?? '';
+            
+            if (empty($nombres) && empty($apellidos) && !empty($usuario->nombre_empresa)) {
+                $nombres = $usuario->nombre_empresa;
+                $apellidos = ''; 
+            }
+
             $mail = new CredencialesExpediente(
-                nombres: $usuario->nombre,
-                apellidos: $usuario->apellido,
+                nombres: $nombres,
+                apellidos: $apellidos,
                 numeroDocumento: $usuario->numero_documento,
                 contrasena: $this->obtenerContrasenaTextoPlano($usuario),
-                asuntoExpediente: $asuntoExpediente
+                codigo_expediente: $codigoExpediente
             );
 
             foreach ($correos as $correo) {

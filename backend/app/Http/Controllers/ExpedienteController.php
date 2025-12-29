@@ -197,4 +197,26 @@ class ExpedienteController extends Controller
             ], 500);
         }
     }
+
+    public function listarExpedientesAsignados(): JsonResponse
+    {
+        try {
+            $usuario = auth('api')->user();
+            if (!$usuario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado'
+                ], 401);
+            }
+            $expedientes = $this->expedienteService->listarExpedientesPorUsuario($usuario->id_usuario, $usuario->id_rol);
+            return ExpedienteResponse::expedientes($expedientes);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al listar expedientes asignados',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

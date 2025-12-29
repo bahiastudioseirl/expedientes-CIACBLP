@@ -7,6 +7,7 @@ class CrearUsuarioDTO
     public function __construct(
         public string $nombre,
         public string $apellido,
+        public ?string $nombre_empresa,
         public string $numero_documento,
         public string $contrasena,
         public ?string $telefono,
@@ -20,6 +21,7 @@ class CrearUsuarioDTO
         return new self(
             nombre: $data['nombre'],
             apellido: $data['apellido'],
+            nombre_empresa: $data['nombre_empresa'] ?? null,
             numero_documento: $data['numero_documento'],
             contrasena: $data['contrasena'],
             telefono: $data['telefono'],
@@ -33,6 +35,7 @@ class CrearUsuarioDTO
         return new self(
             nombre: $data['nombre'],
             apellido: $data['apellido'],
+            nombre_empresa: $data['nombre_empresa'] ?? null,
             numero_documento: $data['numero_documento'],
             contrasena: $data['contrasena'],
             telefono: $data['telefono'] ?? null,
@@ -46,6 +49,7 @@ class CrearUsuarioDTO
         return array_filter([
             'nombre' => $this->nombre,
             'apellido' => $this->apellido,
+            'nombre_empresa' => $this->nombre_empresa,
             'numero_documento' => $this->numero_documento,
             'contrasena' => bcrypt($this->contrasena),
             'telefono' => $this->telefono,

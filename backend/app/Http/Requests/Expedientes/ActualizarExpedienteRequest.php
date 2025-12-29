@@ -23,8 +23,7 @@ class ActualizarExpedienteRequest extends FormRequest
             // Demandante - puede ser usuario existente o nuevo
             'demandante' => 'required|array',
             'demandante.numero_documento' => 'required|string|max:50',
-            'demandante.nombre' => 'required|string|max:100',
-            'demandante.apellido' => 'required|string|max:100',
+            'demandante.nombre_empresa' => 'required|string|max:255',
             'demandante.telefono' => 'nullable|string|max:20',
             'demandante.correos' => 'required|array|min:1',
             'demandante.correos.*' => 'required|email|max:255',
@@ -32,8 +31,7 @@ class ActualizarExpedienteRequest extends FormRequest
             // Demandado - puede ser usuario existente o nuevo
             'demandado' => 'required|array',
             'demandado.numero_documento' => 'required|string|max:50',
-            'demandado.nombre' => 'required|string|max:100',
-            'demandado.apellido' => 'required|string|max:100',
+            'demandado.nombre_empresa' => 'required|string|max:255',
             'demandado.telefono' => 'nullable|string|max:20',
             'demandado.correos' => 'required|array|min:1',
             'demandado.correos.*' => 'required|email|max:255',
@@ -69,14 +67,12 @@ class ActualizarExpedienteRequest extends FormRequest
 
             'demandante.required' => 'Los datos del demandante son obligatorios.',
             'demandante.numero_documento.required' => 'El número de documento del demandante es obligatorio.',
-            'demandante.nombre.required' => 'El nombre del demandante es obligatorio.',
-            'demandante.apellido.required' => 'El apellido del demandante es obligatorio.',
+            'demandante.nombre_empresa.required' => 'El nombre de la empresa demandante es obligatorio.',
             'demandante.correos.required' => 'El demandante debe tener al menos un correo.',
             'demandante.correos.min' => 'El demandante debe tener al menos un correo.',
 
             'demandado.numero_documento.required' => 'El número de documento del demandado es obligatorio.',
-            'demandado.nombre.required' => 'El nombre del demandado es obligatorio.',
-            'demandado.apellido.required' => 'El apellido del demandado es obligatorio.',
+            'demandado.nombre_empresa.required' => 'El nombre de la empresa demandada es obligatorio.',
             'demandado.correos.required' => 'El demandado debe tener al menos un correo.',
             'demandado.correos.min' => 'El demandado debe tener al menos un correo.',
 

@@ -26,7 +26,7 @@
         <div class='email-body'>
             <p><strong>Estimado(a) {{ $nombres }} {{ $apellidos }}:</strong></p>
             
-            <p>Hemos registrado su participación en el expediente arbitral: <strong>{{ $asuntoExpediente }}</strong></p>
+            <p>Hemos registrado su participación en el caso arbitral: <strong>N° {{ $codigo_expediente }}</strong></p>
             
             <p>Se ha creado una cuenta en nuestro sistema para que pueda acceder a la información y documentos relacionados con el proceso arbitral.</p>
             

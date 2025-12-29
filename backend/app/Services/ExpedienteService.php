@@ -121,11 +121,16 @@ class ExpedienteService
      */
     private function actualizarUsuarioExistente($usuario, array $dataParticipante, string $rol): array
     {
-        $datosActualizacion = [
-            'nombre' => $dataParticipante['nombre'],
-            'apellido' => $dataParticipante['apellido'],
-            'telefono' => $dataParticipante['telefono'] ?? $usuario->telefono,
-        ];
+        $datosActualizacion = [];
+        
+        if ($rol === 'Demandante' || $rol === 'Demandado') {
+            $datosActualizacion['nombre_empresa'] = $dataParticipante['nombre_empresa'];
+        } else {
+            $datosActualizacion['nombre'] = $dataParticipante['nombre'];
+            $datosActualizacion['apellido'] = $dataParticipante['apellido'];
+        }
+        
+        $datosActualizacion['telefono'] = $dataParticipante['telefono'] ?? $usuario->telefono;
 
         $usuarioActualizado = $this->usuarioRepository->actualizar($usuario, $datosActualizacion);
 
@@ -151,12 +156,18 @@ class ExpedienteService
             return $this->actualizarUsuarioExistente($usuario, $dataParticipante, $rol);
         } else {
             $datosParticipante = [
-                'nombre' => $usuarioData['nombre'],
-                'apellido' => $usuarioData['apellido'],
                 'numero_documento' => $usuarioData['numero_documento'],
                 'telefono' => $usuarioData['telefono'] ?? $dataParticipante['telefono'],
                 'correos' => $usuarioData['correos'] ?? ($dataParticipante['correos'] ?? [])
             ];
+            
+            // Para demandantes y demandados usar nombre_empresa, para otros usar nombre/apellido
+            if ($rol === 'Demandante' || $rol === 'Demandado') {
+                $datosParticipante['nombre_empresa'] = $usuarioData['nombre_empresa'] ?? $dataParticipante['nombre_empresa'];
+            } else {
+                $datosParticipante['nombre'] = $usuarioData['nombre'];
+                $datosParticipante['apellido'] = $usuarioData['apellido'];
+            }
 
             return $this->crearNuevoUsuario($datosParticipante, $rol);
         }
@@ -171,14 +182,20 @@ class ExpedienteService
 
         // Crear usuario
         $usuarioData = [
-            'nombre' => $dataParticipante['nombre'],
-            'apellido' => $dataParticipante['apellido'],
             'numero_documento' => $dataParticipante['numero_documento'],
             'telefono' => $dataParticipante['telefono'] ?? null,
             'contrasena' => $contrasena,
             'activo' => true,
             'id_rol' => $this->obtenerIdRolSegunTipo($rol)
         ];
+        
+        // Para demandantes y demandados usar nombre_empresa, para otros usar nombre/apellido
+        if ($rol === 'Demandante' || $rol === 'Demandado') {
+            $usuarioData['nombre_empresa'] = $dataParticipante['nombre_empresa'];
+        } else {
+            $usuarioData['nombre'] = $dataParticipante['nombre'];
+            $usuarioData['apellido'] = $dataParticipante['apellido'];
+        }
 
         $usuario = $this->usuarioRepository->crear($usuarioData);
         $usuario->setContrasenaTextoPlano($contrasena);
@@ -411,13 +428,21 @@ class ExpedienteService
         if (!$expediente) {
             throw new \Exception("Expediente no encontrado para crear el asunto");
         }
-        $nombreEtapa = $flujo->etapa?->nombre ?? '';
-        $nombreSubEtapa = $flujo->subetapa?->nombre ?? '';
 
-        $titulo = $expediente->asunto;
-        if ($nombreEtapa || $nombreSubEtapa) {
-            $titulo .= ' - ' . $nombreEtapa . ' - ' . $nombreSubEtapa;
+        $demandante = null;
+        $demandado = null;
+        
+        foreach ($expediente->participantes as $participante) {
+            if ($participante->rol_en_expediente === 'Demandante') {
+                $demandante = $participante->usuario->nombre_empresa ?? 'Demandante';
+            } elseif ($participante->rol_en_expediente === 'Demandado') {
+                $demandado = $participante->usuario->nombre_empresa ?? 'Demandado';
+            }
         }
+
+        $titulo = ($demandante ?? 'Demandante') . ' - ' . ($demandado ?? 'Demandado') . 
+                  ' // Caso arbitral ' . $expediente->codigo_expediente . 
+                  ' | ' . $expediente->asunto;
 
         $this->asuntoRepository->crear([
             'titulo' => $titulo,
@@ -430,8 +455,17 @@ class ExpedienteService
     private function enviarCredencialesParticipantes($expediente, array $usuarios): void
     {
         foreach ($usuarios as $usuario) {
-            $this->mailService->enviarCredencialesExpediente($usuario, $expediente->asunto);
+            $this->mailService->enviarCredencialesExpediente($usuario, $expediente->codigo_expediente);
         }
+    }
+
+    /**
+     * Listar expedientes según asignación de usuario.
+     * Si el usuario es admin (id_rol = 1), retorna todos los expedientes.
+     */
+    public function listarExpedientesPorUsuario(int $idUsuario, int $idRol): Collection
+    {
+        return $this->expedienteRepository->listarExpedientesPorUsuario($idUsuario, $idRol);
     }
 
 }

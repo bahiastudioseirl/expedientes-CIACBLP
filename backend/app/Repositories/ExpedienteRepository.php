@@ -64,4 +64,24 @@ class ExpedienteRepository
                                    ->where('id_expediente', $idExpediente)
                                    ->get();
     }
+
+
+
+    /**
+     * Listar expedientes donde el usuario está asignado como participante.
+     * Si el usuario es admin (id_rol = 1), retorna todos los expedientes.
+     */
+    public function listarExpedientesPorUsuario(int $idUsuario, int $idRol): Collection
+    {
+        if ($idRol === 1) { // Admin
+            return $this->listarExpedientes();
+        }
+        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos'])
+            ->where('activo', true)
+            ->whereHas('participantes', function ($q) use ($idUsuario) {
+                $q->where('id_usuario', $idUsuario);
+            })
+            ->get();
+    }
+
 }

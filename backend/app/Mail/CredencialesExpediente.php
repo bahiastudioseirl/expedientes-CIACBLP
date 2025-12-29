@@ -17,13 +17,13 @@ class CredencialesExpediente extends Mailable
         public readonly string $apellidos,
         public readonly string $numeroDocumento,
         public readonly string $contrasena,
-        public readonly string $asuntoExpediente
+        public readonly string $codigo_expediente
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->asuntoExpediente,
+            subject: $this->codigo_expediente,
         );
     }
 

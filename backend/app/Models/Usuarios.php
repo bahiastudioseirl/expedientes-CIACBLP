@@ -19,6 +19,7 @@ class Usuarios extends Authenticatable implements JWTSubject
         'nombre',
         'apellido',
         'numero_documento',
+        'nombre_empresa',
         'contrasena',
         'telefono',
         'activo',
