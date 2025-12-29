@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ExpedienteController;
+use App\Http\Controllers\MensajeController;
 
 // Manejar solicitudes OPTIONS para CORS
 Route::options('{any}', function () {
@@ -58,6 +59,12 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
 
     // Rutas disponibles para todos los usuarios autenticados
     Route::get('expedientes/asignados', [ExpedienteController::class, 'listarExpedientesAsignados']);
+    
+    // Rutas de mensajes para usuarios autenticados
+    Route::prefix('mensajes')->group(function () {
+        Route::post('/', [MensajeController::class, 'crearMensaje']);
+        Route::get('/asunto/{idAsunto}', [MensajeController::class, 'listarMensajesPorAsunto']);
+    });
 
     Route::get('expedientes/{id}/asuntos', [AsuntoController::class, 'verAsuntosPorExpediente']);
 });
