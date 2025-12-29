@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTOs\Expedientes\CrearExpedienteDTO;
 use App\DTOs\Expedientes\ActualizarExpedienteDTO;
 use App\Models\Expediente;
+use App\Repositories\AsuntoRepository;
 use App\Repositories\ExpedienteRepository;
 use App\Repositories\UsuarioRepository;
 use App\Repositories\CorreoRepository;
@@ -24,7 +25,9 @@ class ExpedienteService
         private readonly CorreoRepository $correoRepository,
         private readonly FlujoRepository $flujoRepository,
         private readonly PlantillaRepository $plantillaRepository,
-        private readonly MailService $mailService
+        private readonly MailService $mailService,
+        private readonly AsuntoRepository $asuntoRepository
+
     ){}
 
     public function crearExpediente(CrearExpedienteDTO $data): array
@@ -69,7 +72,13 @@ class ExpedienteService
             ]);
 
             // 4. Crear flujo inicial del expediente
+
+            // 4. Crear flujo inicial del expediente y obtener el primer flujo creado
             $this->crearFlujoInicial($expediente->id_expediente, $data->id_plantilla);
+
+            $primerFlujo = $this->flujoRepository->obtenerFlujoActual($expediente->id_expediente);
+            
+            $this->crearPrimerAsunto($expediente->id_expediente, $primerFlujo?->id_flujo);
 
             // 5. Cargar expediente completo
             $expedienteCompleto = $this->expedienteRepository->obtenerPorId($expediente->id_expediente);
@@ -388,6 +397,33 @@ class ExpedienteService
             'estado' => 'en proceso',
             'fecha_inicio' => $fechaInicio,
             'fecha_fin' => $fechaFin
+        ]);
+    }
+
+    private function crearPrimerAsunto(int $idExpediente, int $idFlujo): void
+    {
+        $flujo = $this->flujoRepository->obtenerPorId($idFlujo);
+        if (!$flujo) {
+            throw new \Exception("Flujo no encontrado para crear el asunto");
+        }
+
+        $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
+        if (!$expediente) {
+            throw new \Exception("Expediente no encontrado para crear el asunto");
+        }
+        $nombreEtapa = $flujo->etapa?->nombre ?? '';
+        $nombreSubEtapa = $flujo->subetapa?->nombre ?? '';
+
+        $titulo = $expediente->asunto;
+        if ($nombreEtapa || $nombreSubEtapa) {
+            $titulo .= ' - ' . $nombreEtapa . ' - ' . $nombreSubEtapa;
+        }
+
+        $this->asuntoRepository->crear([
+            'titulo' => $titulo,
+            'activo' => true,
+            'id_flujo' => $flujo->id_flujo,
+            'id_expediente' => $idExpediente
         ]);
     }
 

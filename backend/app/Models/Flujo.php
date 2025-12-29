@@ -32,7 +32,7 @@ class Flujo extends Model
 
     public function subetapa()
     {
-        return $this->belongsTo(Subetapa::class, 'id_subetapa', 'id_subetapa');
+        return $this->belongsTo(SubEtapa::class, 'id_subetapa', 'id_sub_etapa');
     }
     
 }
