@@ -67,6 +67,6 @@ class MailService
 
     public function generarContrasenaAleatoria(): string
     {
-        return Str::upper(Str::random(4));
+        return Str::upper(Str::random(8));
     }
 }

@@ -30,17 +30,23 @@ class AuthService
         // Generar JWT directamente
         $token = JWTAuth::fromUser($usuario);
         
+        $rolNombre = $usuario->rol->nombre ?? null;
+        $userData = [
+            'id' => $usuario->id_usuario,
+            'numero_documento' => $usuario->numero_documento,
+            'rol' => $rolNombre
+        ];
+        if (in_array(strtolower($rolNombre), ['demandante', 'demandado'])) {
+            $userData['nombre_empresa'] = $usuario->nombre_empresa;
+        } else {
+            $userData['nombre'] = $usuario->nombre;
+            $userData['apellido'] = $usuario->apellido;
+        }
         return [
             'success' => true,
             'message' => 'Autenticación exitosa',
             'token' => $token,
-            'user' => [
-                'id' => $usuario->id_usuario,
-                'nombre' => $usuario->nombre,
-                'apellido' => $usuario->apellido,
-                'numero_documento' => $usuario->numero_documento,
-                'rol' => $usuario->rol->nombre ?? null
-            ]
+            'user' => $userData
         ];
     }
     public function cerrarSesion(): array

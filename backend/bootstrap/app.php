@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'force.json' => \App\Http\Middleware\ForceJsonResponse::class,
             'cors' => \App\Http\Middleware\Cors::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'staff' => \App\Http\Middleware\StaffMiddleware::class,
+            'participant' => \App\Http\Middleware\ParticipantMiddleware::class,
         ]);
         
         // Aplicar CORS a todas las rutas (web y api)

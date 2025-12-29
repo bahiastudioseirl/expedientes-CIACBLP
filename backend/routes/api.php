@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AsuntoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -28,23 +29,51 @@ Route::options('{any}', function () {
 |
 */
 
-// Rutas de autenticación (sin middleware)
-Route::prefix('auth')->group(function () {
+// Rutas de autenticación (con force.json)
+Route::middleware(['force.json'])->prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-// Rutas protegidas con JWT
+// Rutas con solo autenticación (cualquier usuario logueado)
 Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])->group(function () {
     
     // Cerrar sesión
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     
-    // Rutas de usuarios (requieren autenticación)
+    Route::get('/me', function (Request $request) {
+        $user = auth('api')->user();
+        return response()->json([
+            'user' => [
+                'id' => $user->id_usuario,
+                'nombre' => $user->nombre,
+                'apellido' => $user->apellido,
+                'nombre_empresa' => $user->nombre_empresa,
+                'correo' => $user->correo,
+                'rol' => $user->rol->nombre ?? null,
+                'activo' => $user->activo
+            ]
+        ]);
+    });
+    
+
+    // Rutas disponibles para todos los usuarios autenticados
+    Route::get('expedientes/asignados', [ExpedienteController::class, 'listarExpedientesAsignados']);
+
+    Route::get('expedientes/{id}/asuntos', [AsuntoController::class, 'verAsuntosPorExpediente']);
+});
+
+
+
+
+
+// Rutas solo para Admin
+Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'admin'])->group(function () {
+    
     Route::prefix('usuarios')->group(function () {
         Route::post('/', [UsuarioController::class, 'crearUsuario']);
         Route::get('/', [UsuarioController::class, 'listarUsuarios']);
         Route::get('/administradores', [UsuarioController::class, 'listarAdministradores']);
-        Route::get('/{id}', action: [UsuarioController::class, 'obtenerUsuarioPorId']);
+        Route::get('/{id}', [UsuarioController::class, 'obtenerUsuarioPorId']);
         Route::patch('/{id}', [UsuarioController::class, 'actualizarUsuario']);
         Route::put('/{id}/estado', [UsuarioController::class, 'cambiarEstadoUsuario']);
     });
@@ -57,7 +86,6 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         Route::put('/{id}/estado', [PlantillaController::class, 'cambiarEstadoPlantilla']);
     });
 
-    // Rutas de expedientes
     Route::prefix('expedientes')->group(function () {
         Route::post('/', [ExpedienteController::class, 'crearExpediente']);
         Route::get('/', [ExpedienteController::class, 'listarExpedientes']);
@@ -65,26 +93,34 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         Route::patch('/{id}', [ExpedienteController::class, 'actualizarExpediente']);
         Route::get('/codigo/{codigo}', [ExpedienteController::class, 'obtenerPorCodigoExpediente']);
         Route::put('/{id}/estado', [ExpedienteController::class, 'cambiarEstadoExpediente']);
-        
-        // Ruta para verificar usuarios por número de documento (útil para el frontend)
         Route::get('/verificar-usuario/{numeroDocumento}', [ExpedienteController::class, 'verificarUsuarioPorDocumento']);
     });
+});
 
 
+
+
+
+
+
+
+// Rutas para (Administrador, Secretario, Árbitro)
+Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'staff'])->group(function () {
+    
 
 });
 
-// Ruta de información del usuario autenticado
-Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])->get('/me', function (Request $request) {
-    $user = auth('api')->user();
-    return response()->json([
-        'user' => [
-            'id' => $user->id_usuario,
-            'nombre' => $user->nombre,
-            'apellido' => $user->apellido,
-            'correo' => $user->correo,
-            'rol' => $user->rol->nombre ?? null,
-            'activo' => $user->activo
-        ]
-    ]);
+
+
+
+
+
+
+
+
+
+
+// Rutas para Participantes (Demandante, Demandado) - id_rol 4, 5
+Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'participant'])->group(function () {
+    
 });

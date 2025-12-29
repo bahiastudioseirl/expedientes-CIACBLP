@@ -61,16 +61,23 @@ class ExpedienteResponse
                 'apellido' => $expediente->usuario->apellido ?? null
             ],
             'participantes' => $expediente->participantes?->map(function ($participante) {
+                $usuario = $participante->usuario;
+                $rol = $participante->rol_en_expediente;
+                $usuarioData = [
+                    'id_usuario' => $usuario->id_usuario,
+                    'numero_documento' => $usuario->numero_documento,
+                    'telefono' => $usuario->telefono,
+                    'correos' => $usuario->correos?->pluck('direccion')->toArray() ?? []
+                ];
+                if (in_array($rol, ['Demandante', 'Demandado'])) {
+                    $usuarioData['nombre_empresa'] = $usuario->nombre_empresa;
+                } else {
+                    $usuarioData['nombre'] = $usuario->nombre;
+                    $usuarioData['apellido'] = $usuario->apellido;
+                }
                 return [
-                    'rol' => $participante->rol_en_expediente,
-                    'usuario' => [
-                        'id_usuario' => $participante->usuario->id_usuario,
-                        'numero_documento' => $participante->usuario->numero_documento,
-                        'nombre' => $participante->usuario->nombre,
-                        'apellido' => $participante->usuario->apellido,
-                        'telefono' => $participante->usuario->telefono,
-                        'correos' => $participante->usuario->correos?->pluck('direccion')->toArray() ?? []
-                    ]
+                    'rol' => $rol,
+                    'usuario' => $usuarioData
                 ];
             }) ?? [],
             'created_at' => $expediente->created_at?->format('Y-m-d H:i:s'),

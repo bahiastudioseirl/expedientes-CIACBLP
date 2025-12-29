@@ -16,4 +16,8 @@ class AsuntoRepository
         return Asunto::find($id);
     }
 
+    public function verAsuntosPorExpediente(int $idExpediente)
+    {
+        return Asunto::where('id_expediente', $idExpediente)->get();
+    }
 }
