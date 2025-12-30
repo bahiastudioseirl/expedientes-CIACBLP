@@ -8,6 +8,7 @@ use App\Repositories\MensajeRepository;
 use App\Repositories\AdjuntoRepository;
 use App\Repositories\UsuarioMensajeRepository;
 use App\Models\Mensajes;
+use App\Repositories\AsuntoRepository;
 use Illuminate\Http\UploadedFile;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,11 +18,17 @@ class MensajeService
     public function __construct(
         private readonly MensajeRepository $mensajeRepository,
         private readonly AdjuntoRepository $adjuntoRepository,
-        private readonly UsuarioMensajeRepository $usuarioMensajeRepository
+        private readonly UsuarioMensajeRepository $usuarioMensajeRepository,
+        private readonly AsuntoRepository $asuntoRepository
     ) {}
 
     public function crearMensaje(CrearMensajeDTO $datos, array $usuariosDestinatarios, ?array $adjuntos = null): Mensajes
     {
+        $asuntoActivo = $this->asuntoRepository->saberEstadoPorId($datos->id_asunto);
+        if (!$asuntoActivo) {
+            throw new \Exception('No se puede enviar el mensaje porque el asunto está cerrado o no existe.');
+        }
+
         $mensajeData = [
             'contenido' => $datos->contenido,
             'fecha_envio' => Carbon::now('America/Lima')->format('Y-m-d H:i:s'),

@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ExpedienteController;
+use App\Http\Controllers\FlujoController;
 use App\Http\Controllers\MensajeController;
 
 // Manejar solicitudes OPTIONS para CORS
@@ -64,10 +65,19 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
     Route::prefix('mensajes')->group(function () {
         Route::post('/', [MensajeController::class, 'crearMensaje']);
         Route::get('/asunto/{idAsunto}', [MensajeController::class, 'listarMensajesPorAsunto']);
+        Route::put('/{idMensaje}/leer', [MensajeController::class, 'marcarMensajeComoLeido']);
+
     });
 
-    Route::get('expedientes/{id}/asuntos', [AsuntoController::class, 'verAsuntosPorExpediente']);
-    Route::put('mensajes/{idMensaje}/leer', [MensajeController::class, 'marcarMensajeComoLeido']);
+    Route::prefix('asuntos')->group(function () {
+        Route::get('/expediente/{idExpediente}', [AsuntoController::class, 'verAsuntosPorExpediente']);
+    });
+
+    Route::prefix('flujo')->group(function () {
+        Route::get('/expediente/{idExpediente}/actual', [FlujoController::class, 'obtenerFlujoActual']);
+    });
+    
+    
 });
 
 
@@ -114,7 +124,9 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
 
 // Rutas para (Administrador, Secretario, Árbitro)
 Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'staff'])->group(function () {
-    
+    Route::prefix('asuntos')->group(function () {
+        Route::put('/{idAsunto}/mensajear', [AsuntoController::class, 'cerrarOAbrirAsunto']);
+    });
 
 });
 

@@ -31,4 +31,23 @@ class AsuntoResponse
             'activo' => (bool) $asunto->activo,
         ];
     }
+
+    public static function asuntoEstado(array $resultado): JsonResponse
+    {
+        if ($resultado['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $resultado['message'],
+                'data' => [
+                    'asunto' => $resultado['data'] ? self::formatAsunto($resultado['data']) : null
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => $resultado['message'],
+                'data' => null
+            ], 400);
+        }
+    }
 }

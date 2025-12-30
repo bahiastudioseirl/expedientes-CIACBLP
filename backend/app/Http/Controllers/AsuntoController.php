@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Responses\AsuntoResponse;
 use App\Services\AsuntoService;
 
+use function Symfony\Component\Translation\t;
+
 class AsuntoController extends Controller
 {
     public function __construct(
@@ -34,5 +36,17 @@ class AsuntoController extends Controller
         }
     }
 
-
+    public function cerrarOAbrirAsunto(int $idAsunto)
+    {
+        try {
+            $resultado = $this->asuntoService->cerrarOAbrirAsunto($idAsunto);
+            return AsuntoResponse::asuntoEstado($resultado);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 400);
+        }
+    }
 }

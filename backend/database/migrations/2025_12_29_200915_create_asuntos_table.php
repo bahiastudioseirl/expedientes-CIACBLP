@@ -17,6 +17,7 @@ return new class extends Migration
             $table->boolean('activo')->default(true);
             $table->unsignedBigInteger('id_flujo');
             $table->unsignedBigInteger('id_expediente');
+            
 
             $table->foreign('id_flujo')->references('id_flujo')->on('flujos')->onDelete('cascade');
             $table->foreign('id_expediente')->references('id_expediente')->on('expedientes')->onDelete('cascade');
