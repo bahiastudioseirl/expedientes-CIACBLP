@@ -43,6 +43,21 @@ class MensajeResponse
         ]);
     }
 
+    public static function marcarComoLeido(bool $exito): JsonResponse
+    {
+        if ($exito) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Mensaje marcado como leído exitosamente'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo marcar el mensaje como leído'
+            ], 400);
+        }
+    }
+
     public static function formatMensaje(Mensajes $mensaje): array
     {
         return [
@@ -59,10 +74,11 @@ class MensajeResponse
                 'id_asunto' => $mensaje->asunto->id_asunto,
             ],
             'adjuntos' => $mensaje->adjuntos?->map(function ($adjunto) {
+                $baseUrl = config('app.url') ?? request()->getSchemeAndHttpHost();
                 return [
                     'id_adjunto' => $adjunto->id_adjunto,
-                    'ruta_archivo' => $adjunto->ruta_archivo,
-                    'nombre_archivo' => basename($adjunto->ruta_archivo)
+                    'ruta_archivo' => url($adjunto->ruta_archivo),
+                    'nombre_archivo' => $adjunto->ruta_archivo
                 ];
             }) ?? [],
             'created_at' => $mensaje->created_at?->format('Y-m-d H:i:s'),

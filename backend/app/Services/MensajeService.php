@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\Mensajes\CrearMensajeDTO;
+use App\Models\Asunto;
 use App\Repositories\MensajeRepository;
 use App\Repositories\AdjuntoRepository;
 use App\Repositories\UsuarioMensajeRepository;
@@ -48,6 +49,11 @@ class MensajeService
         return $this->mensajeRepository->obtenerPorAsuntoYUsuario($idAsunto, $idUsuario);
     }
 
+    public function marcarMensajeComoLeido(int $idMensaje, int $idUsuario): bool
+    {
+        return $this->mensajeRepository->marcarComoLeido($idMensaje, $idUsuario);
+    }
+
     private function crearRelacionesUsuarios(int $idMensaje, array $usuariosDestinatarios): void
     {
         $relacionesData = [];
@@ -67,8 +73,7 @@ class MensajeService
 
     private function procesarAdjuntos(int $idMensaje, array $adjuntos, int $idAsunto): void
     {
-        // Obtener código de expediente desde el asunto
-        $asunto = \App\Models\Asunto::with('expediente')->find($idAsunto);
+        $asunto = Asunto::with('expediente')->find($idAsunto);
         $codigoExpediente = $asunto->expediente->codigo_expediente ?? 'sin-codigo';
 
         foreach ($adjuntos as $archivo) {
@@ -85,18 +90,25 @@ class MensajeService
 
     private function guardarArchivo(UploadedFile $archivo, string $codigoExpediente): string
     {
+        $nombreOriginal = pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME);
         $extension = $archivo->getClientOriginalExtension();
-        $timestamp = now()->format('YmdHis');
-        $nombreUnico = $timestamp . '_' . uniqid() . '.' . $extension;
+        $timestamp = now()->format('Ymd');
+        $baseNombre = $nombreOriginal . '_' . $timestamp;
+        $nombreUnico = $baseNombre . '.' . $extension;
 
-        // Guardar en public/codigo_expediente/
         $directorio = public_path($codigoExpediente);
         if (!file_exists($directorio)) {
             mkdir($directorio, 0777, true);
         }
+
+        $contador = 1;
+        while (file_exists($directorio . DIRECTORY_SEPARATOR . $nombreUnico)) {
+            $nombreUnico = $baseNombre . '(' . $contador . ').' . $extension;
+            $contador++;
+        }
+
         $archivo->move($directorio, $nombreUnico);
 
-        // Devolver la ruta relativa desde public
         return $codigoExpediente . '/' . $nombreUnico;
     }
 }

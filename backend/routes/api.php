@@ -67,6 +67,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
     });
 
     Route::get('expedientes/{id}/asuntos', [AsuntoController::class, 'verAsuntosPorExpediente']);
+    Route::put('mensajes/{idMensaje}/leer', [MensajeController::class, 'marcarMensajeComoLeido']);
 });
 
 

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Mensajes;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class MensajeRepository
 {
@@ -66,5 +67,23 @@ class MensajeRepository
     public function eliminar(int $id): bool
     {
         return Mensajes::where('id_mensaje', $id)->delete();
+    }
+
+
+    public function marcarComoLeido(int $idMensaje, int $idUsuario): bool
+    {
+        $mensajeUsuario = DB::table('usuarios_mensajes')
+            ->where('id_mensaje', $idMensaje)
+            ->where('id_usuario', $idUsuario)
+            ->first();
+
+        if ($mensajeUsuario) {
+            return DB::table('usuarios_mensajes')
+                ->where('id_mensaje', $idMensaje)
+                ->where('id_usuario', $idUsuario)
+                ->update(['leido' => true]) > 0;
+        }
+
+        return false;
     }
 }
