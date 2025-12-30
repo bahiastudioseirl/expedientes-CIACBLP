@@ -50,4 +50,23 @@ class FlujoResponse
             ] : null,
         ];
     }
+
+    public static function cambioEtapaSubetapa(array $resultado): JsonResponse
+    {
+        if ($resultado['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $resultado['message'],
+                'data' => [
+                    'flujo' => $resultado['data'] ? self::formatFlujo($resultado['data']) : null
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => $resultado['message'],
+                'data' => null
+            ], 400);
+        }
+    }
 }

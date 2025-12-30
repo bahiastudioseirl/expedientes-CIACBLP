@@ -37,4 +37,64 @@ class FlujoRepository
                    ->where('estado', 'en proceso')
                    ->first();
     }
+
+    public function completarFlujo(Flujo $flujo): bool
+    {
+        return $flujo->update([
+            'estado' => 'completado',
+            'fecha_fin' => now()
+        ]);
+    }
+
+    public function validarEtapaEnPlantilla(int $idExpediente, int $idEtapa, ?int $idSubetapa = null): bool
+    {
+        $expediente = \App\Models\Expediente::with('plantilla.etapas.subEtapas')->find($idExpediente);
+        
+        if (!$expediente || !$expediente->plantilla) {
+            return false;
+        }
+
+        $etapaValida = $expediente->plantilla->etapas->contains('id_etapa', $idEtapa);
+        
+        if (!$etapaValida) {
+            return false;
+        }
+
+        if ($idSubetapa) {
+            $etapa = $expediente->plantilla->etapas->where('id_etapa', $idEtapa)->first();
+            return $etapa && $etapa->subEtapas->contains('id_sub_etapa', $idSubetapa);
+        }
+
+        return true;
+    }
+
+    public function crearAsuntoParaFlujo(int $idExpediente, int $idFlujo, string $asunto): void
+    {
+        $expediente = \App\Models\Expediente::with('participantes.usuario')->find($idExpediente);
+        if (!$expediente) {
+            throw new \Exception("Expediente no encontrado para crear el asunto");
+        }
+
+        $demandante = null;
+        $demandado = null;
+        
+        foreach ($expediente->participantes as $participante) {
+            if ($participante->rol_en_expediente === 'Demandante') {
+                $demandante = $participante->usuario->nombre_empresa ?? 'Demandante';
+            } elseif ($participante->rol_en_expediente === 'Demandado') {
+                $demandado = $participante->usuario->nombre_empresa ?? 'Demandado';
+            }
+        }
+
+        $titulo = ($demandante ?? 'Demandante') . ' - ' . ($demandado ?? 'Demandado') . 
+                  ' // Caso arbitral ' . $expediente->codigo_expediente . 
+                  ' | ' . $asunto;
+
+        \App\Models\Asunto::create([
+            'titulo' => $titulo,
+            'activo' => true,
+            'id_flujo' => $idFlujo,
+            'id_expediente' => $idExpediente
+        ]);
+    }
 }

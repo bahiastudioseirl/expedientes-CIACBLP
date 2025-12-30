@@ -128,6 +128,12 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::put('/{idAsunto}/mensajear', [AsuntoController::class, 'cerrarOAbrirAsunto']);
     });
 
+    Route::prefix('flujo')->group(function(){
+        Route::post('/cambiar-etapa-subetapa', [FlujoController::class, 'cambiarEtapaSubetapa']);
+        Route::patch('/{idFlujo}/actualizar-flujo-asunto', [FlujoController::class, 'actualizarFlujoYAsunto']);
+    });
+    
+
 });
 
 
