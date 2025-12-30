@@ -148,4 +148,60 @@ class UsuarioController extends Controller
             ], 500);
         }
     }
+
+    public function listarArbitros(): JsonResponse
+    {
+        try {
+            $arbitros = $this->usuarioService->listarUsuariosArbitros();
+            return UsuarioResponse::usuarios($arbitros);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al listar usuarios árbitros',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function listarSecretarios(): JsonResponse
+    {
+        try {
+            $secretarios = $this->usuarioService->listarUsuariosSecretarios();
+            return UsuarioResponse::usuarios($secretarios);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al listar usuarios secretarios',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function listarDemandantes(): JsonResponse
+    {
+        try {
+            $demandantes = $this->usuarioService->listarUsuariosDemandantes();
+            return UsuarioResponse::usuarios($demandantes);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al listar usuarios demandantes',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function listarDemandados(): JsonResponse
+    {
+        try {
+            $demandados = $this->usuarioService->listarUsuariosDemandados();
+            return UsuarioResponse::usuarios($demandados);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al listar usuarios demandados',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

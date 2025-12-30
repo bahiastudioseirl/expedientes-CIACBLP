@@ -13,22 +13,7 @@ class UsuarioResponse
             'success' => true,
             'message' => 'Usuario creado exitosamente',
             'data' => [
-                'usuario' => [
-                    'id_usuario' => $usuario->id_usuario,
-                    'nombre' => $usuario->nombre,
-                    'apellido' => $usuario->apellido,
-                    'tipo_documento' => $usuario->tipo_documento,
-                    'numero_documento' => $usuario->numero_documento,
-                    'correo' => $usuario->correo,
-                    'telefono' => $usuario->telefono,
-                    'activo' => (bool) $usuario->activo,
-                    'rol' => [
-                        'id' => $usuario->rol->id_rol ?? null,
-                        'nombre' => $usuario->rol->nombre ?? null
-                    ],
-                    'created_at' => $usuario->created_at?->format('Y-m-d H:i:s'),
-                    'updated_at' => $usuario->updated_at?->format('Y-m-d H:i:s')
-                ]
+                'usuario' => self::format($usuario)
             ]
         ], 201);
     }
@@ -39,77 +24,74 @@ class UsuarioResponse
             'success' => true,
             'message' => 'Usuario actualizado exitosamente',
             'data' => [
-                'usuario' => [
-                    'id_usuario' => $usuario->id_usuario,
-                    'nombre' => $usuario->nombre,
-                    'apellido' => $usuario->apellido,
-                    'tipo_documento' => $usuario->tipo_documento,
-                    'numero_documento' => $usuario->numero_documento,
-                    'correo' => $usuario->correo,
-                    'telefono' => $usuario->telefono,
-                    'activo' => (bool) $usuario->activo,
-                    'rol' => [
-                        'id' => $usuario->rol->id_rol ?? null,
-                        'nombre' => $usuario->rol->nombre ?? null
-                    ],
-                    'created_at' => $usuario->created_at?->format('Y-m-d H:i:s'),
-                    'updated_at' => $usuario->updated_at?->format('Y-m-d H:i:s')
-                ]
+                'usuario' => self::format($usuario)
             ]
         ]);
     }
+
 
     public static function usuario(Usuarios $usuario): JsonResponse
     {
         return response()->json([
             'success' => true,
+            'message' => 'Usuario obtenido exitosamente',
             'data' => [
-                'usuario' => [
-                    'id_usuario' => $usuario->id_usuario,
-                    'nombre' => $usuario->nombre,
-                    'apellido' => $usuario->apellido,
-                    'tipo_documento' => $usuario->tipo_documento,
-                    'numero_documento' => $usuario->numero_documento,
-                    'correo' => $usuario->correo,
-                    'telefono' => $usuario->telefono,
-                    'activo' => (bool) $usuario->activo,
-                    'rol' => [
-                        'id' => $usuario->rol->id_rol ?? null,
-                        'nombre' => $usuario->rol->nombre ?? null
-                    ],
-                    'created_at' => $usuario->created_at?->format('Y-m-d H:i:s'),
-                    'updated_at' => $usuario->updated_at?->format('Y-m-d H:i:s')
-                ]
+                'usuario' => self::format($usuario)
             ]
         ]);
     }
 
     public static function usuarios($usuarios): JsonResponse
     {
-        $usuariosData = $usuarios->map(function($usuario) {
-            return [
-                'id_usuario' => $usuario->id_usuario,
-                'nombre' => $usuario->nombre,
-                'apellido' => $usuario->apellido,
-                'tipo_documento' => $usuario->tipo_documento,
-                'numero_documento' => $usuario->numero_documento,
-                'correo' => $usuario->correo,
-                'telefono' => $usuario->telefono,
-                'activo' => (bool) $usuario->activo,
-                'rol' => [
-                    'id' => $usuario->rol->id_rol ?? null,
-                    'nombre' => $usuario->rol->nombre ?? null
-                ],
-                'created_at' => $usuario->created_at?->format('Y-m-d H:i:s'),
-                'updated_at' => $usuario->updated_at?->format('Y-m-d H:i:s')
-            ];
-        });
-
         return response()->json([
             'success' => true,
+            'message' => 'Usuarios obtenidos exitosamente',
             'data' => [
-                'usuarios' => $usuariosData
+                'usuarios' => $usuarios->map(function ($usuario) {
+                    return self::format($usuario);
+                })->values()
             ]
         ]);
+    }
+
+
+
+    public static function format(Usuarios $usuario): array
+    {
+        $rolId = $usuario->rol->id_rol ?? null;
+
+        // Campos base
+        $data = [
+            'id_usuario' => $usuario->id_usuario,
+            'numero_documento' => $usuario->numero_documento,
+        ];
+
+        // Nombre / Apellido o Empresa
+        if (in_array($rolId, [4, 5])) {
+            $data['nombre_empresa'] = $usuario->nombre_empresa ?? null;
+        } else {
+            $data['nombre'] = $usuario->nombre;
+            $data['apellido'] = $usuario->apellido;
+        }
+
+        // Resto de campos
+        $data += [
+            'telefono' => $usuario->telefono,
+            'activo' => (bool) $usuario->activo,
+            'correos' => $usuario->correos?->map(function ($correo) {
+                return [
+                    'id_correo' => $correo->id_correo,
+                    'direccion' => $correo->direccion
+                ];
+            })->values() ?? [],
+            'rol' => [
+                'id' => $rolId,
+                'nombre' => $usuario->rol->nombre ?? null
+            ],
+            'created_at' => $usuario->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $usuario->updated_at?->format('Y-m-d H:i:s'),
+        ];
+
+        return $data;
     }
 }

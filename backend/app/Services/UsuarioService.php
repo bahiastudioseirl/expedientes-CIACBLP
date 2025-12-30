@@ -65,4 +65,25 @@ class UsuarioService
         }
     }
 
+
+    public function listarUsuariosArbitros(): Collection
+    {
+        return $this->usuarioRepository->listarUsuariosArbitros();
+    }
+
+    public function listarUsuariosSecretarios(): Collection
+    {
+        return $this->usuarioRepository->listarUsuariosSecretarios();
+    }
+
+    public function listarUsuariosDemandantes(): Collection
+    {
+        return $this->usuarioRepository->listarUsuariosDemandantes();
+    }
+
+    public function listarUsuariosDemandados(): Collection
+    {
+        return $this->usuarioRepository->listarUsuariosDemandados();
+    }
+
 }

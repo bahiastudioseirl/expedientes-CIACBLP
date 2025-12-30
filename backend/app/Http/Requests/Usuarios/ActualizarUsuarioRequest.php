@@ -19,7 +19,6 @@ class ActualizarUsuarioRequest extends FormRequest
         return [
             'nombre' => 'sometimes|string|max:100',
             'apellido' => 'sometimes|string|max:100',
-            'tipo_documento' => 'sometimes|string|max:50',
             'numero_documento' => [
                 'sometimes',
                 'string',
@@ -47,8 +46,6 @@ class ActualizarUsuarioRequest extends FormRequest
             'nombre.max' => 'El nombre no debe exceder 100 caracteres.',
             'apellido.string' => 'El apellido debe ser texto.',
             'apellido.max' => 'El apellido no debe exceder 100 caracteres.',
-            'tipo_documento.string' => 'El tipo de documento debe ser texto.',
-            'tipo_documento.max' => 'El tipo de documento no debe exceder 50 caracteres.',
             'numero_documento.string' => 'El número de documento debe ser texto.',
             'numero_documento.max' => 'El número de documento no debe exceder 50 caracteres.',
             'numero_documento.unique' => 'El número de documento ya está en uso por otro usuario.',

@@ -38,7 +38,6 @@ class UsuarioRepository
                         ->whereHas('rol', function ($query) {
                             $query->where('nombre', 'Administrador');
                         })
-                      ->where('activo', true)
                       ->get();
     }
 
@@ -85,6 +84,42 @@ class UsuarioRepository
     public function contarUsuariosActivos(): int
     {
         return Usuarios::where('activo', true)->count();
+    }
+
+    public function listarUsuariosArbitros(): Collection
+    {
+        return Usuarios::with('rol')
+                        ->whereHas('rol', function ($query) {
+                            $query->where('nombre', 'Arbitro');
+                        })
+                      ->get();
+    }
+
+    public function listarUsuariosSecretarios(): Collection
+    {
+        return Usuarios::with('rol')
+                        ->whereHas('rol', function ($query) {
+                            $query->where('nombre', 'Secretario');
+                        })
+                      ->get();
+    }
+
+    public function listarUsuariosDemandantes(): Collection
+    {
+        return Usuarios::with('rol')
+                        ->whereHas('rol', function ($query) {
+                            $query->where('nombre', 'Demandante');
+                        })
+                      ->get();
+    }
+
+    public function listarUsuariosDemandados(): Collection
+    {
+        return Usuarios::with('rol')
+                        ->whereHas('rol', function ($query) {
+                            $query->where('nombre', 'Demandado');
+                        })
+                      ->get();
     }
     
 }

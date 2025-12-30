@@ -91,6 +91,10 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::post('/', [UsuarioController::class, 'crearUsuario']);
         Route::get('/', [UsuarioController::class, 'listarUsuarios']);
         Route::get('/administradores', [UsuarioController::class, 'listarAdministradores']);
+        Route::get('/arbitros', [UsuarioController::class, 'listarArbitros']);
+        Route::get('/secretarios', [UsuarioController::class, 'listarSecretarios']);
+        Route::get('/demandantes', [UsuarioController::class, 'listarDemandantes']);
+        Route::get('/demandados', [UsuarioController::class, 'listarDemandados']);
         Route::get('/{id}', [UsuarioController::class, 'obtenerUsuarioPorId']);
         Route::patch('/{id}', [UsuarioController::class, 'actualizarUsuario']);
         Route::put('/{id}/estado', [UsuarioController::class, 'cambiarEstadoUsuario']);

@@ -16,7 +16,6 @@ class CrearUsuarioRequest extends FormRequest
         return [
             'nombre' => 'required|string|max:100',
             'apellido' => 'required|string|max:100',
-            'tipo_documento' => 'required|string|max:50',
             'numero_documento' => 'required|string|max:50|unique:usuarios,numero_documento',
             'telefono' => 'nullable|string|max:20',
             'correo' => 'required|string|email|max:150|unique:usuarios,correo',
@@ -30,7 +29,6 @@ class CrearUsuarioRequest extends FormRequest
         return [
             'nombre.required' => 'El nombre es obligatorio.',
             'apellido.required' => 'El apellido es obligatorio.',
-            'tipo_documento.required' => 'El tipo de documento es obligatorio.',
             'numero_documento.required' => 'El número de documento es obligatorio.',
             'numero_documento.unique' => 'El número de documento ya está en uso.',
             'correo.required' => 'El correo es obligatorio.',
