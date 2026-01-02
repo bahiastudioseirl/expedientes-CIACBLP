@@ -35,7 +35,6 @@ class ActualizarExpedienteDTO
     {
         return [
             'codigo_expediente' => $this->codigo_expediente,
-            'asunto' => $this->asunto,
             'id_plantilla' => $this->id_plantilla,
             'id_usuario' => $this->id_usuario
         ];

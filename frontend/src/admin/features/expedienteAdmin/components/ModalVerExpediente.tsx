@@ -16,7 +16,7 @@ export default function ModalVerExpediente({
 
   const getRolParticipante = (rol: string) => {
     return expediente.participantes.find(p => 
-      p.rol.toLowerCase().includes(rol.toLowerCase())
+      p.usuario?.rol_nombre?.toLowerCase().includes(rol.toLowerCase())
     );
   };
 
@@ -87,7 +87,7 @@ export default function ModalVerExpediente({
                   </label>
                   <div className="p-3 bg-slate-50 rounded-lg border flex items-center space-x-2">
                     <Building2 className="w-4 h-4 text-slate-600" />
-                    <span className="text-slate-900">{expediente.plantilla.nombre}</span>
+                    <span className="text-slate-900">{expediente.plantilla.nombre || 'N/A'}</span>
                   </div>
                 </div>
 
@@ -98,13 +98,13 @@ export default function ModalVerExpediente({
                   <div className="p-3 bg-slate-50 rounded-lg border flex items-center space-x-2">
                     <Calendar className="w-4 h-4 text-slate-600" />
                     <span className="text-slate-900">
-                      {new Date(expediente.created_at).toLocaleDateString('es-PE', {
+                      {expediente.created_at ? new Date(expediente.created_at).toLocaleDateString('es-PE', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
-                      })}
+                      }) : 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ export default function ModalVerExpediente({
                 Asunto
               </label>
               <div className="p-3 bg-slate-50 rounded-lg border">
-                <p className="text-sm sm:text-base text-slate-900 break-words">{expediente.asunto}</p>
+                <p className="text-sm sm:text-base text-slate-900 break-words">{expediente.asunto || 'Sin asunto'}</p>
               </div>
             </div>
 
@@ -129,7 +129,7 @@ export default function ModalVerExpediente({
               <div className="p-3 bg-slate-50 rounded-lg border flex items-center space-x-2">
                 <User className="w-4 h-4 text-slate-600 flex-shrink-0" />
                 <span className="text-sm sm:text-base text-slate-900 truncate">
-                  {expediente.usuario_creador.nombre} {expediente.usuario_creador.apellido}
+                  {(expediente.usuario_creador.nombre || '') + ' ' + (expediente.usuario_creador.apellido || '')}
                 </span>
               </div>
             </div>
@@ -152,7 +152,9 @@ export default function ModalVerExpediente({
                       <div className="flex items-center space-x-2">
                         <User className="w-3 h-3 sm:w-4 sm:h-4 text-slate-500 flex-shrink-0" />
                         <span className="truncate">
-                          {demandante.usuario.nombre} {demandante.usuario.apellido}
+                          {demandante.usuario.nombre_empresa
+                            ? demandante.usuario.nombre_empresa
+                            : `${demandante.usuario.nombre || ''} ${demandante.usuario.apellido || ''}`.trim()}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -186,7 +188,9 @@ export default function ModalVerExpediente({
                       <div className="flex items-center space-x-2">
                         <User className="w-3 h-3 sm:w-4 sm:h-4 text-slate-500 flex-shrink-0" />
                         <span className="truncate">
-                          {demandado.usuario.nombre} {demandado.usuario.apellido}
+                          {demandado.usuario.nombre_empresa
+                            ? demandado.usuario.nombre_empresa
+                            : `${demandado.usuario.nombre || ''} ${demandado.usuario.apellido || ''}`.trim()}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">

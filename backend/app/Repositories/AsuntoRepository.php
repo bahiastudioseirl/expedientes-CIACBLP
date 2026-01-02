@@ -12,6 +12,11 @@ class AsuntoRepository
         return Asunto::create($data);
     }
 
+    public function actualizar(Asunto $asunto, array $data): bool
+    {
+        return $asunto->update($data);
+    }
+
     public function obtenerPorId(int $id): ?Asunto
     {
         return Asunto::find($id);

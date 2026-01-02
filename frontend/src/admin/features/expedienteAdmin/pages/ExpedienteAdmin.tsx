@@ -23,7 +23,6 @@ import type {
   CrearExpedienteRequest, 
   ActualizarExpedienteRequest,
   Expediente,
-  UsuarioInfo 
 } from '../schemas/ExpedienteSchema';
 
 export default function ExpedienteAdmin() {
@@ -51,9 +50,11 @@ export default function ExpedienteAdmin() {
     try {
       const response = await obtenerExpedientes();
       if (response.success) {
-        const expedientesOrdenados = response.data.expedientes.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+        const expedientesOrdenados = response.data.expedientes.sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA;
+        });
         setExpedientes(expedientesOrdenados);
       }
     } catch (err: any) {
@@ -68,8 +69,8 @@ export default function ExpedienteAdmin() {
   const filteredData = useMemo(() => {
     return expedientes.filter(expediente =>
       expediente.codigo_expediente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expediente.asunto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expediente.plantilla.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+      (expediente.asunto || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (expediente.plantilla.nombre || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [expedientes, searchTerm]);
 
@@ -94,11 +95,6 @@ export default function ExpedienteAdmin() {
           return nuevaLista;
         });
         setIsModalOpen(false);
-        
-        // Mostrar información de usuarios creados/actualizados
-        if (response.data.usuarios_info.length > 0) {
-          mostrarInfoUsuarios(response.data.usuarios_info);
-        }
       }
     } catch (err: any) {
       console.error("Error al crear expediente:", err);
@@ -113,21 +109,7 @@ export default function ExpedienteAdmin() {
     }
   };
 
-  const mostrarInfoUsuarios = (usuariosInfo: UsuarioInfo[]) => {
-    const usuariosCreados = usuariosInfo.filter(info => info.accion === "creado");
-    const usuariosActualizados = usuariosInfo.filter(info => info.accion === "actualizado");
 
-    let mensaje = "";
-    if (usuariosCreados.length > 0) {
-      mensaje += `Usuarios creados: ${usuariosCreados.map(info => `${info.usuario.nombre} ${info.usuario.apellido}`).join(", ")}. `;
-    }
-    if (usuariosActualizados.length > 0) {
-      mensaje += `Usuarios actualizados: ${usuariosActualizados.map(info => `${info.usuario.nombre} ${info.usuario.apellido}`).join(", ")}.`;
-    }
-
-    // Aquí podrías usar una notificación toast
-    console.log("Info usuarios:", mensaje);
-  };
 
   const handleCambiarEstado = async (id: number, estadoActual: boolean) => {
     setError("");
@@ -176,11 +158,6 @@ export default function ExpedienteAdmin() {
         );
         setIsEditModalOpen(false);
         setSelectedExpediente(null);
-        
-        // Mostrar información de usuarios actualizados
-        if (response.data.usuarios_info.length > 0) {
-          mostrarInfoUsuarios(response.data.usuarios_info);
-        }
       }
     } catch (err: any) {
       console.error("Error al actualizar expediente:", err);
@@ -196,8 +173,13 @@ export default function ExpedienteAdmin() {
   };
 
   const getRolParticipante = (participantes: any[], rol: string) => {
-    const participante = participantes.find(p => p.rol.toLowerCase().includes(rol.toLowerCase()));
-    return participante ? `${participante.usuario.nombre} ${participante.usuario.apellido}` : "N/A";
+    const participante = participantes.find(p => 
+      p.usuario?.rol_nombre?.toLowerCase().includes(rol.toLowerCase())
+    );
+    if (!participante) return "N/A";
+    return participante.usuario.nombre_empresa
+      ? participante.usuario.nombre_empresa
+      : `${participante.usuario.nombre || ''} ${participante.usuario.apellido || ''}`.trim();
   };
 
   return (
@@ -297,8 +279,8 @@ export default function ExpedienteAdmin() {
                         {expediente.codigo_expediente}
                       </td>
                       <td className="px-4 py-4 text-sm text-slate-800 max-w-xs">
-                        <div className="truncate" title={expediente.asunto}>
-                          {expediente.asunto}
+                        <div className="truncate" title={expediente.asunto || 'Sin asunto'}>
+                          {expediente.asunto || 'Sin asunto'}
                         </div>
                       </td>
                       <td className="px-4 py-4 text-sm text-slate-600">
@@ -330,11 +312,11 @@ export default function ExpedienteAdmin() {
                         <div className="flex items-center justify-center space-x-1">
                           <Calendar className="w-3 h-3" />
                           <span>
-                            {new Date(expediente.created_at).toLocaleDateString('es-PE', {
+                            {expediente.created_at ? new Date(expediente.created_at).toLocaleDateString('es-PE', {
                               year: 'numeric',
                               month: '2-digit',
                               day: '2-digit'
-                            })}
+                            }) : 'N/A'}
                           </span>
                         </div>
                       </td>
@@ -441,9 +423,9 @@ export default function ExpedienteAdmin() {
                       {expediente.codigo_expediente}
                     </p>
                     <p className="text-xs text-slate-600 mt-1">
-                      {expediente.asunto.length > 50 
+                      {(expediente.asunto && expediente.asunto.length > 50) 
                         ? `${expediente.asunto.substring(0, 50)}...` 
-                        : expediente.asunto}
+                        : (expediente.asunto || 'Sin asunto')}
                     </p>
                   </div>
                   <div className="flex-shrink-0 ml-2">
@@ -482,11 +464,11 @@ export default function ExpedienteAdmin() {
                   <div className="flex items-center space-x-1 col-span-2">
                     <Calendar className="w-3 h-3 text-slate-400" />
                     <span className="text-slate-600">
-                      Creado: {new Date(expediente.created_at).toLocaleDateString('es-PE', {
+                      Creado: {expediente.created_at ? new Date(expediente.created_at).toLocaleDateString('es-PE', {
                         year: 'numeric',
                         month: '2-digit',
                         day: '2-digit'
-                      })}
+                      }) : 'N/A'}
                     </span>
                   </div>
                 </div>

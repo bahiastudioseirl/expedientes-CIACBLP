@@ -20,19 +20,14 @@ class ExpedienteRepository
 
     public function listarExpedientes(): Collection
     {
-        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos'])
+        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos', 'asunto'])
                         ->where('activo', true)
                         ->get();
     }
 
     public function obtenerPorId(int $id): ?Expediente
     {
-        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos'])->find($id);
-    }
-
-    public function eliminar(Expediente $expediente): bool
-    {
-        return $expediente->delete();
+        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos', 'asunto'])->find($id);
     }
 
     public function cambiarEstado(Expediente $expediente, bool $activo): bool
@@ -48,7 +43,7 @@ class ExpedienteRepository
 
     public function obtenerPorCodigoExpediente(string $codigo): ?Expediente
     {
-        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos'])
+        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos', 'asunto'])
                         ->where('codigo_expediente', $codigo)
                         ->first();
     }
@@ -58,25 +53,12 @@ class ExpedienteRepository
         return ExpedienteParticipante::where('id_expediente', $idExpediente)->delete();
     }
 
-    public function obtenerParticipantes(int $idExpediente): Collection
-    {
-        return ExpedienteParticipante::with('usuario.correos')
-                                   ->where('id_expediente', $idExpediente)
-                                   ->get();
-    }
-
-
-
-    /**
-     * Listar expedientes donde el usuario está asignado como participante.
-     * Si el usuario es admin (id_rol = 1), retorna todos los expedientes.
-     */
     public function listarExpedientesPorUsuario(int $idUsuario, int $idRol): Collection
     {
         if ($idRol === 1) { // Admin
             return $this->listarExpedientes();
         }
-        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos'])
+        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos', 'asunto'])
             ->where('activo', true)
             ->whereHas('participantes', function ($q) use ($idUsuario) {
                 $q->where('id_usuario', $idUsuario);

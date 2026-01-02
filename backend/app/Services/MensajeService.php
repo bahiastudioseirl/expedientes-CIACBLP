@@ -11,6 +11,7 @@ use App\Models\Mensajes;
 use App\Repositories\AsuntoRepository;
 use Illuminate\Http\UploadedFile;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
 class MensajeService
@@ -26,7 +27,7 @@ class MensajeService
     {
         $asuntoActivo = $this->asuntoRepository->saberEstadoPorId($datos->id_asunto);
         if (!$asuntoActivo) {
-            throw new \Exception('No se puede enviar el mensaje porque el asunto está cerrado o no existe.');
+            throw new Exception('No se puede enviar el mensaje porque el asunto está cerrado o no existe.');
         }
 
         $mensajeData = [

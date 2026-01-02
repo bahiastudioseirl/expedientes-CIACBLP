@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Exception;
 
 class ExpedienteService
 {
@@ -33,8 +34,6 @@ class ExpedienteService
     public function crearExpediente(CrearExpedienteDTO $data): array
     {
         return DB::transaction(function () use ($data) {
-            $usuariosInfo = [];
-
             // 1. Crear expediente
             $expediente = $this->expedienteRepository->crear($data->toArray());
 
@@ -71,14 +70,12 @@ class ExpedienteService
                 'rol_en_expediente' => 'Árbitro a Cargo'
             ]);
 
-            // 4. Crear flujo inicial del expediente
-
             // 4. Crear flujo inicial del expediente y obtener el primer flujo creado
             $this->crearFlujoInicial($expediente->id_expediente, $data->id_plantilla);
 
             $primerFlujo = $this->flujoRepository->obtenerFlujoActual($expediente->id_expediente);
             
-            $this->crearPrimerAsunto($expediente->id_expediente, $primerFlujo?->id_flujo);
+            $this->crearPrimerAsunto($expediente->id_expediente, $primerFlujo?->id_flujo, $data->asunto);
 
             // 5. Cargar expediente completo
             $expedienteCompleto = $this->expedienteRepository->obtenerPorId($expediente->id_expediente);
@@ -93,7 +90,6 @@ class ExpedienteService
 
             return [
                 'expediente' => $expedienteCompleto,
-                'usuarios_info' => $usuariosInfo
             ];
         });
     }
@@ -290,6 +286,7 @@ class ExpedienteService
                     'id_usuario' => $usuario['id'],
                     'nombre' => $usuario['nombre'],
                     'apellido' => $usuario['apellido'],
+                    'nombre_empresa' => $usuario['nombre_empresa'],
                     'numero_documento' => $usuario['numero_documento'],
                     'telefono' => $usuario['telefono'],
                     'correos' => $usuario['correos'] ?? [], 
@@ -311,11 +308,10 @@ class ExpedienteService
             // 1. Obtener expediente actual
             $expediente = $this->expedienteRepository->obtenerPorId($data->id_expediente);
             if (!$expediente) {
-                throw new \Exception("Expediente no encontrado");
+                throw new Exception("Expediente no encontrado");
             }
 
             $plantillaAnterior = $expediente->id_plantilla;
-            $usuariosInfo = [];
 
             // 2. Actualizar datos básicos del expediente
             $this->expedienteRepository->actualizar($expediente, $data->toExpedienteArray());
@@ -325,8 +321,6 @@ class ExpedienteService
             $demandado = $this->manejarParticipante($data->demandado, 'Demandado');
             $secretario = $this->manejarParticipante($data->secretario_arbitral, 'Secretario Arbitral');
             $arbitro = $this->manejarParticipante($data->arbitro_a_cargo, 'Árbitro a Cargo');
-
-            $usuariosInfo = [$demandante, $demandado, $secretario, $arbitro];
 
             // 4. Eliminar participantes antiguos y crear los nuevos
             $this->expedienteRepository->eliminarParticipantes($expediente->id_expediente);
@@ -355,20 +349,57 @@ class ExpedienteService
                 'rol_en_expediente' => 'Árbitro a Cargo'
             ]);
 
-            // 5. Si cambió la plantilla, recrear flujo inicial
+            // 5. Actualizar el asunto si cambió
+            $this->actualizarAsuntoExpediente($expediente->id_expediente, $data->asunto);
+
+            // 5. Actualizar el asunto si cambió
+            $this->actualizarAsuntoExpediente($expediente->id_expediente, $data->asunto);
+
+            // 6. Si cambió la plantilla, recrear flujo inicial
             if ($plantillaAnterior !== $data->id_plantilla) {
                 $this->recrearFlujoInicial($expediente->id_expediente, $data->id_plantilla);
             }
 
-            // 6. Cargar expediente completo actualizado
+            // 7. Cargar expediente completo actualizado
             $expedienteCompleto = $this->expedienteRepository->obtenerPorId($expediente->id_expediente);
 
             return [
                 'expediente' => $expedienteCompleto,
-                'usuarios_info' => $usuariosInfo,
                 'plantilla_cambiada' => $plantillaAnterior !== $data->id_plantilla
             ];
         });
+    }
+
+    /**
+     * Actualiza el asunto del expediente
+     */
+    private function actualizarAsuntoExpediente(int $idExpediente, string $nuevoAsunto): void
+    {
+        $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
+        if (!$expediente || !$expediente->asunto) {
+            return; // Si no existe el expediente o no tiene asunto, no hacer nada
+        }
+
+        // Generar el nuevo título del asunto
+        $demandante = null;
+        $demandado = null;
+        
+        foreach ($expediente->participantes as $participante) {
+            if ($participante->rol_en_expediente === 'Demandante') {
+                $demandante = $participante->usuario->nombre_empresa ?? 'Demandante';
+            } elseif ($participante->rol_en_expediente === 'Demandado') {
+                $demandado = $participante->usuario->nombre_empresa ?? 'Demandado';
+            }
+        }
+
+        $nuevoTitulo = ($demandante ?? 'Demandante') . ' - ' . ($demandado ?? 'Demandado') . 
+                      ' // Caso arbitral ' . $expediente->codigo_expediente . 
+                      ' | ' . $nuevoAsunto;
+
+        // Actualizar el asunto
+        $this->asuntoRepository->actualizar($expediente->asunto, [
+            'titulo' => $nuevoTitulo
+        ]);
     }
 
     /**
@@ -391,13 +422,13 @@ class ExpedienteService
         $plantilla = $this->plantillaRepository->obtenerPorId($idPlantilla);
         
         if (!$plantilla || $plantilla->etapas->isEmpty()) {
-            throw new \Exception("La plantilla no tiene etapas definidas");
+            throw new Exception("La plantilla no tiene etapas definidas");
         }
 
         $primeraEtapa = $plantilla->etapas->first();
         
         if ($primeraEtapa->subEtapas->isEmpty()) {
-            throw new \Exception("La primera etapa no tiene subetapas definidas");
+            throw new Exception("La primera etapa no tiene subetapas definidas");
         }
 
         $primeraSubEtapa = $primeraEtapa->subEtapas->first();
@@ -417,7 +448,7 @@ class ExpedienteService
         ]);
     }
 
-    private function crearPrimerAsunto(int $idExpediente, int $idFlujo): void
+    private function crearPrimerAsunto(int $idExpediente, int $idFlujo, string $asunto): void
     {
         $flujo = $this->flujoRepository->obtenerPorId($idFlujo);
         if (!$flujo) {
@@ -442,7 +473,7 @@ class ExpedienteService
 
         $titulo = ($demandante ?? 'Demandante') . ' - ' . ($demandado ?? 'Demandado') . 
                   ' // Caso arbitral ' . $expediente->codigo_expediente . 
-                  ' | ' . $expediente->asunto;
+                  ' | ' . $asunto;
 
         $this->asuntoRepository->crear([
             'titulo' => $titulo,

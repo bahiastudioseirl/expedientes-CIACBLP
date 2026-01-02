@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Flujo;
 use App\Repositories\AsuntoRepository;
+use Exception;
 
 class AsuntoService
 {
@@ -20,13 +21,13 @@ class AsuntoService
     {
         $asunto = $this->asuntoRepository->obtenerPorId($idAsunto);
         if (!$asunto) {
-            throw new \Exception("Asunto no encontrado");
+            throw new Exception("Asunto no encontrado");
         }
 
         $cerrar = $asunto->activo;
 
         if ($cerrar && !$this->asuntoRepository->flujoCompletado($asunto)) {
-            throw new \Exception("No se puede cerrar el asunto porque el flujo no está completado");
+            throw new Exception("No se puede cerrar el asunto porque el flujo no está completado");
         }
 
         $resultado = $this->asuntoRepository->cerrarOAbrirAsunto($asunto, $cerrar);

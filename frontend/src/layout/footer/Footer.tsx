@@ -1,6 +1,4 @@
 import type { FC } from "react"
-import { Facebook, Instagram, Linkedin, Mail } from "lucide-react"
-import { Link } from "react-router-dom"
 
 export const Footer: FC = () => {
   const year = new Date().getFullYear()

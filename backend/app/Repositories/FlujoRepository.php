@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Models\Asunto;
+use App\Models\Expediente;
 use App\Models\Flujo;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
 class FlujoRepository
@@ -48,7 +51,7 @@ class FlujoRepository
 
     public function validarEtapaEnPlantilla(int $idExpediente, int $idEtapa, ?int $idSubetapa = null): bool
     {
-        $expediente = \App\Models\Expediente::with('plantilla.etapas.subEtapas')->find($idExpediente);
+        $expediente = Expediente::with('plantilla.etapas.subEtapas')->find($idExpediente);
         
         if (!$expediente || !$expediente->plantilla) {
             return false;
@@ -70,9 +73,9 @@ class FlujoRepository
 
     public function crearAsuntoParaFlujo(int $idExpediente, int $idFlujo, string $asunto): void
     {
-        $expediente = \App\Models\Expediente::with('participantes.usuario')->find($idExpediente);
+        $expediente = Expediente::with('participantes.usuario')->find($idExpediente);
         if (!$expediente) {
-            throw new \Exception("Expediente no encontrado para crear el asunto");
+            throw new Exception("Expediente no encontrado para crear el asunto");
         }
 
         $demandante = null;
@@ -90,7 +93,7 @@ class FlujoRepository
                   ' // Caso arbitral ' . $expediente->codigo_expediente . 
                   ' | ' . $asunto;
 
-        \App\Models\Asunto::create([
+        Asunto::create([
             'titulo' => $titulo,
             'activo' => true,
             'id_flujo' => $idFlujo,

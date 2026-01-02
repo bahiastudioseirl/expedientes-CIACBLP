@@ -24,6 +24,7 @@ const initialParticipante: FormParticipanteType = {
   numero_documento: "",
   nombre: "",
   apellido: "",
+  nombre_empresa: "",
   telefono: "",
   correos: [""],
   loading: false,
@@ -84,6 +85,7 @@ export default function ModalAgregarExpediente({
       numero_documento: "",
       nombre: "",
       apellido: "",
+      nombre_empresa: "",
       telefono: "",
       correos: [""],
       loading: false,
@@ -133,19 +135,22 @@ export default function ModalAgregarExpediente({
       if (!data.numero_documento.trim()) {
         newErrors[`${key}_numero_documento`] = `El número de documento del ${label} es obligatorio`;
       }
-      
-      if (!data.nombre.trim()) {
-        newErrors[`${key}_nombre`] = `El nombre del ${label} es obligatorio`;
+      // Validar nombre_empresa para demandante/demandado
+      if ((label === 'Demandante' || label === 'Demandado')) {
+        if (!data.nombre_empresa || !data.nombre_empresa.trim()) {
+          newErrors[`${key}_nombre_empresa`] = `El nombre de la empresa del ${label} es obligatorio`;
+        }
+      } else {
+        if (!data.nombre || !data.nombre.trim()) {
+          newErrors[`${key}_nombre`] = `El nombre del ${label} es obligatorio`;
+        }
+        if (!data.apellido || !data.apellido.trim()) {
+          newErrors[`${key}_apellido`] = `El apellido del ${label} es obligatorio`;
+        }
       }
-      
-      if (!data.apellido.trim()) {
-        newErrors[`${key}_apellido`] = `El apellido del ${label} es obligatorio`;
-      }
-      
       if (!data.telefono.trim()) {
         newErrors[`${key}_telefono`] = `El teléfono del ${label} es obligatorio`;
       }
-
       // Validar correos
       const correosValidos = data.correos.filter(correo => correo.trim() !== "");
       if (correosValidos.length === 0) {
@@ -173,29 +178,27 @@ export default function ModalAgregarExpediente({
       id_plantilla: formData.id_plantilla,
       demandante: {
         numero_documento: formData.demandante.numero_documento,
-        nombre: formData.demandante.nombre.trim(),
-        apellido: formData.demandante.apellido.trim(),
+        nombre_empresa: formData.demandante.nombre_empresa?.trim() || undefined,
         telefono: formData.demandante.telefono.trim(),
         correos: formData.demandante.correos.filter(correo => correo.trim() !== "")
       },
       demandado: {
         numero_documento: formData.demandado.numero_documento,
-        nombre: formData.demandado.nombre.trim(),
-        apellido: formData.demandado.apellido.trim(),
+        nombre_empresa: formData.demandado.nombre_empresa?.trim() || undefined,
         telefono: formData.demandado.telefono.trim(),
         correos: formData.demandado.correos.filter(correo => correo.trim() !== "")
       },
       secretario_arbitral: {
         numero_documento: formData.secretario_arbitral.numero_documento,
-        nombre: formData.secretario_arbitral.nombre.trim(),
-        apellido: formData.secretario_arbitral.apellido.trim(),
+        nombre: formData.secretario_arbitral.nombre?.trim() || "",
+        apellido: formData.secretario_arbitral.apellido?.trim() || "",
         telefono: formData.secretario_arbitral.telefono.trim(),
         correos: formData.secretario_arbitral.correos.filter(correo => correo.trim() !== "")
       },
       arbitro_a_cargo: {
         numero_documento: formData.arbitro_a_cargo.numero_documento,
-        nombre: formData.arbitro_a_cargo.nombre.trim(),
-        apellido: formData.arbitro_a_cargo.apellido.trim(),
+        nombre: formData.arbitro_a_cargo.nombre?.trim() || "",
+        apellido: formData.arbitro_a_cargo.apellido?.trim() || "",
         telefono: formData.arbitro_a_cargo.telefono.trim(),
         correos: formData.arbitro_a_cargo.correos.filter(correo => correo.trim() !== "")
       }
@@ -318,8 +321,8 @@ export default function ModalAgregarExpediente({
 
               {/* Demandante */}
               <FormParticipante
-                data={formData.demandante}
-                onChange={(data) => setFormData({ ...formData, demandante: data })}
+                data={{ ...formData.demandante, nombre: '', apellido: '', usuarioRol: 'Demandante' }}
+                onChange={(data) => setFormData({ ...formData, demandante: { ...data, nombre: '', apellido: '', usuarioRol: 'Demandante' } })}
                 label="Demandante"
                 placeholder="Datos del demandante"
                 disabled={loading}
@@ -327,8 +330,8 @@ export default function ModalAgregarExpediente({
 
               {/* Demandado */}
               <FormParticipante
-                data={formData.demandado}
-                onChange={(data) => setFormData({ ...formData, demandado: data })}
+                data={{ ...formData.demandado, nombre: '', apellido: '', usuarioRol: 'Demandado' }}
+                onChange={(data) => setFormData({ ...formData, demandado: { ...data, nombre: '', apellido: '', usuarioRol: 'Demandado' } })}
                 label="Demandado"
                 placeholder="Datos del demandado"
                 disabled={loading}

@@ -62,11 +62,8 @@ class PlantillaService
             if (!$plantilla) {
                 return null;
             }
-
-            // Actualizar datos básicos de la plantilla
             $this->plantillaRepository->actualizar($plantilla, $data->toArray());
 
-            // Si se proporcionaron etapas, actualizar la estructura completa
             if ($data->getEtapas() !== null) {
                 $this->actualizarEtapasCompleta($plantilla, $data->getEtapas());
             }

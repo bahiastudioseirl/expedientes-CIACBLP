@@ -10,8 +10,7 @@ class ActualizarUsuarioDTO
         public readonly ?string $numero_documento = null,
         public readonly ?string $nombre_empresa = null,
         public readonly ?string $contrasena = null,
-        public readonly ?string $telefono = null,
-        public readonly ?int $id_rol = null
+        public readonly ?string $telefono = null
     ) {}
 
     public static function fromArray(array $data): self
@@ -23,7 +22,6 @@ class ActualizarUsuarioDTO
             nombre_empresa: $data['nombre_empresa'] ?? null,
             contrasena: $data['contrasena'] ?? null,
             telefono: $data['telefono'] ?? null,
-            id_rol: $data['id_rol'] ?? null
         );
     }
 
@@ -35,8 +33,7 @@ class ActualizarUsuarioDTO
             numero_documento: $data['numero_documento'] ?? null,
             nombre_empresa: $data['nombre_empresa'] ?? null,
             contrasena: $data['contrasena'] ?? null,
-            telefono: $data['telefono'] ?? null,
-            id_rol: $data['id_rol'] ?? null
+            telefono: $data['telefono'] ?? null
         );
     }
 
@@ -60,9 +57,6 @@ class ActualizarUsuarioDTO
         }
         if ($this->telefono !== null) {
             $result['telefono'] = $this->telefono;
-        }
-        if ($this->id_rol !== null) {
-            $result['id_rol'] = $this->id_rol;
         }
         return $result;
     }

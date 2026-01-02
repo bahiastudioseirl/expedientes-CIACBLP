@@ -1,13 +1,5 @@
 import {
-    Settings,
-    Image,
-    UserCheck,
-    Book,
     Building,
-    ClipboardCheck,
-    Hand,
-    Users,
-    BookOpen,
     FileText,
     type LucideIcon
 } from 'lucide-react';

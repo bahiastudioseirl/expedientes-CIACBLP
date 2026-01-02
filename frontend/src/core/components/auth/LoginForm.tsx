@@ -78,7 +78,7 @@ export const LoginForm = () => {
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="numero_documento" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Número de documento
+                                    Número de documento (DNI O RUC)
                                 </label>
                                 <input
                                     id="numero_documento"

@@ -1,5 +1,5 @@
 import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
-import type { Plantilla, ListarPlantillasResponse } from '../schemas/PlantillaSchema';
+import type { Plantilla } from '../schemas/PlantillaSchema';
 
 export interface ObtenerPlantillasResponse {
   success: boolean;

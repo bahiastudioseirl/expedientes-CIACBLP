@@ -27,16 +27,6 @@ class CorreoRepository
         return new Collection($correosCreados);
     }
 
-    public function eliminarPorUsuario(int $idUsuario): bool
-    {
-        return Correos::where('id_usuario', $idUsuario)->delete();
-    }
-
-    public function obtenerPorUsuario(int $idUsuario): Collection
-    {
-        return Correos::where('id_usuario', $idUsuario)->get();
-    }
-
     public function obtenerCorreosPorUsuario(int $idUsuario): Collection
     {
         return Correos::where('id_usuario', $idUsuario)->get();

@@ -34,7 +34,6 @@ class ExpedienteController extends Controller
             
             return ExpedienteResponse::expedienteCreado(
                 $resultado['expediente'], 
-                $resultado['usuarios_info']
             );
             
         } catch (ValidationException $e) {
@@ -72,7 +71,6 @@ class ExpedienteController extends Controller
                 'message' => 'Expediente actualizado exitosamente',
                 'data' => [
                     'expediente' => ExpedienteResponse::formatExpediente($resultado['expediente']),
-                    'usuarios_info' => $resultado['usuarios_info'],
                     'plantilla_cambiada' => $resultado['plantilla_cambiada']
                 ]
             ]);

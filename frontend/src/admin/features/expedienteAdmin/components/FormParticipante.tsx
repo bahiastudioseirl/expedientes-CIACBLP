@@ -16,10 +16,12 @@ export default function FormParticipanteComponent({
   data, 
   onChange, 
   label, 
-  placeholder, 
+  // placeholder,
   required = true, 
   disabled = false 
 }: FormParticipanteProps) {
+  // Detectar si el rol es demandante o demandado
+  const isEmpresa = (data.usuarioRol === 'Demandante' || data.usuarioRol === 'Demandado');
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Buscar usuario cuando cambia el número de documento
@@ -37,20 +39,35 @@ export default function FormParticipanteComponent({
           
           const response = await verificarUsuario(numeroDocumento);
           
-          if (response.success && response.data.existe && response.data.usuario) {
-            const usuario = response.data.usuario;
-            onChange({
-              ...data,
-              nombre: usuario.nombre,
-              apellido: usuario.apellido,
-              telefono: usuario.telefono,
-              correos: usuario.correos && usuario.correos.length > 0 ? usuario.correos : [""], // Asegurar que siempre haya al menos un campo de correo
-              existe: true,
-              loading: false,
-              error: "",
-              usuarioTipo: usuario.tipo, // Guardar el tipo de usuario
-              usuarioRol: usuario.rol || (usuario.tipo === 'arbitro' ? 'Árbitro' : '')
-            });
+              if (response.success && response.data.existe && response.data.usuario) {
+                const usuario = response.data.usuario;
+                let usuarioRol = usuario.rol || (usuario.tipo === 'arbitro' ? 'Árbitro' : '');
+                let nombre_empresa = usuario.nombre_empresa;
+                let nombre = usuario.nombre;
+                let apellido = usuario.apellido;
+                // Proteger acceso a id_rol aunque no esté en la interfaz
+                const idRol = (usuario as any).id_rol !== undefined && (usuario as any).id_rol !== null ? Number((usuario as any).id_rol) : undefined;
+                const isDemandante = usuarioRol === 'Demandante' || idRol === 4;
+                const isDemandado = usuarioRol === 'Demandado' || idRol === 5;
+                if (isDemandante || isDemandado) {
+                  nombre_empresa = usuario.nombre_empresa || '';
+                  nombre = '';
+                  apellido = '';
+                  usuarioRol = isDemandante ? 'Demandante' : 'Demandado';
+                }
+                onChange({
+                  ...data,
+                  nombre_empresa,
+                  nombre,
+                  apellido,
+                  telefono: usuario.telefono,
+                  correos: usuario.correos && usuario.correos.length > 0 ? usuario.correos : [""],
+                  existe: true,
+                  loading: false,
+                  error: "",
+                  usuarioTipo: usuario.tipo,
+                  usuarioRol
+                });
           } else {
             onChange({
               ...data,
@@ -95,11 +112,11 @@ export default function FormParticipanteComponent({
   const handleNumeroDocumentoChange = (value: string) => {
     // Solo permitir números
     const numericValue = value.replace(/\D/g, '');
-    
     onChange({
       numero_documento: numericValue,
       nombre: "",
       apellido: "",
+      nombre_empresa: "",
       telefono: "",
       correos: [""],
       existe: false,
@@ -226,35 +243,52 @@ export default function FormParticipanteComponent({
 
       {/* Campos de datos personales */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Nombre */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Nombre {required && <span className="text-red-500">*</span>}
-          </label>
-          <input
-            type="text"
-            value={data.nombre || ""}
-            onChange={(e) => onChange({ ...data, nombre: e.target.value })}
-            placeholder="Nombre"
-            disabled={isFieldsDisabled}
-            className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100"
-          />
-        </div>
-
-        {/* Apellido */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Apellido {required && <span className="text-red-500">*</span>}
-          </label>
-          <input
-            type="text"
-            value={data.apellido || ""}
-            onChange={(e) => onChange({ ...data, apellido: e.target.value })}
-            placeholder="Apellido"
-            disabled={isFieldsDisabled}
-            className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100"
-          />
-        </div>
+        {isEmpresa ? (
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Nombre de la empresa {required && <span className="text-red-500">*</span>}
+            </label>
+            <input
+              type="text"
+              value={data.nombre_empresa || ""}
+              onChange={(e) => onChange({ ...data, nombre_empresa: e.target.value })}
+              placeholder="Nombre de la empresa"
+              disabled={isFieldsDisabled}
+              className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+            />
+          </div>
+        ) : (
+          <>
+            {/* Nombre */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Nombre {required && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                type="text"
+                value={data.nombre || ""}
+                onChange={(e) => onChange({ ...data, nombre: e.target.value })}
+                placeholder="Nombre"
+                disabled={isFieldsDisabled}
+                className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+              />
+            </div>
+            {/* Apellido */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Apellido {required && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                type="text"
+                value={data.apellido || ""}
+                onChange={(e) => onChange({ ...data, apellido: e.target.value })}
+                placeholder="Apellido"
+                disabled={isFieldsDisabled}
+                className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Teléfono */}

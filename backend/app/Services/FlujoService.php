@@ -8,6 +8,7 @@ use App\Models\Expediente;
 use App\Models\SubEtapa;
 use App\Repositories\FlujoRepository;
 use Carbon\Carbon;
+use Exception;
 
 class FlujoService
 {
@@ -26,24 +27,25 @@ class FlujoService
         return $this->flujoRepository->obtenerFlujoActual($idExpediente);
     }
 
+
     public function cambiarEtapaSubetapa(int $idExpediente, int $idEtapa, ?int $idSubetapa = null, string $asunto = ''): array
     {
         if (!$this->flujoRepository->validarEtapaEnPlantilla($idExpediente, $idEtapa, $idSubetapa)) {
-            throw new \Exception('La etapa o subetapa seleccionada no pertenece a la plantilla del expediente');
+            throw new Exception('La etapa o subetapa seleccionada no pertenece a la plantilla del expediente');
         }
 
         $flujoActual = $this->flujoRepository->obtenerFlujoActual($idExpediente);
         if (!$flujoActual) {
-            throw new \Exception('No se encontró un flujo activo para el expediente');
+            throw new Exception('No se encontró un flujo activo para el expediente');
         }
 
         if ($flujoActual->id_etapa == $idEtapa && $flujoActual->id_subetapa == $idSubetapa) {
-            throw new \Exception('La etapa y subetapa seleccionadas son las mismas que las actuales. No se realizó ningún cambio.');
+            throw new Exception('La etapa y subetapa seleccionadas son las mismas que las actuales. No se realizó ningún cambio.');
         }
 
         $flujoCompletado = $this->flujoRepository->completarFlujo($flujoActual);
         if (!$flujoCompletado) {
-            throw new \Exception('No se pudo completar el flujo actual');
+            throw new Exception('No se pudo completar el flujo actual');
         }
 
         $fechaFin = null;
@@ -78,16 +80,16 @@ class FlujoService
     {
         $flujo = $this->flujoRepository->obtenerPorId($idFlujo);
         if (!$flujo) {
-            throw new \Exception('Flujo no encontrado');
+            throw new Exception('Flujo no encontrado');
         }
 
         if ($flujo->estado !== 'en proceso') {
-            throw new \Exception('Solo se pueden actualizar flujos que estén en proceso');
+            throw new Exception('Solo se pueden actualizar flujos que estén en proceso');
         }
 
         // Validar que la etapa y subetapa pertenezcan a la plantilla del expediente
         if (!$this->flujoRepository->validarEtapaEnPlantilla($flujo->id_expediente, $idEtapa, $idSubetapa)) {
-            throw new \Exception('La etapa o subetapa seleccionada no pertenece a la plantilla del expediente');
+            throw new Exception('La etapa o subetapa seleccionada no pertenece a la plantilla del expediente');
         }
 
         $fechaFin = $flujo->fecha_fin;
@@ -108,7 +110,7 @@ class FlujoService
         
         $flujoActualizado = $this->flujoRepository->actualizar($flujo, $datosActualizacion);
         if (!$flujoActualizado) {
-            throw new \Exception('No se pudo actualizar el flujo');
+            throw new Exception('No se pudo actualizar el flujo');
         }
 
         $asuntoFlujo = Asunto::where('id_flujo', $idFlujo)->first();

@@ -48,19 +48,21 @@ class UsuarioRepository
 
     public function obtenerPorNumeroDocumento(string $numeroDocumento): ?array
     {
-        // Primer búsqueda: BD primaria (usuarios)
         $usuario = Usuarios::with(['rol', 'correos'])->where('numero_documento', $numeroDocumento)->first();
         
         if ($usuario) {
+            $rolNombre = $usuario->rol?->nombre;
+            $isEmpresa = ($rolNombre === 'Demandante' || $rolNombre === 'Demandado');
             return [
                 'id' => $usuario->id_usuario,
-                'nombre' => ucfirst(strtolower($usuario->nombre)),
-                'apellido' => ucfirst(strtolower($usuario->apellido)),
+                'nombre' => $isEmpresa ? null : ucfirst(strtolower($usuario->nombre)),
+                'apellido' => $isEmpresa ? null : ucfirst(strtolower($usuario->apellido)),
+                'nombre_empresa' => $isEmpresa ? $usuario->nombre_empresa : null,
                 'numero_documento' => $usuario->numero_documento,
                 'telefono' => $usuario->telefono,
                 'correos' => $usuario->correos->pluck('direccion')->toArray(),
                 'tipo' => 'usuario_sistema',
-                'rol' => $usuario->rol?->nombre
+                'rol' => $rolNombre
             ];
         }
 

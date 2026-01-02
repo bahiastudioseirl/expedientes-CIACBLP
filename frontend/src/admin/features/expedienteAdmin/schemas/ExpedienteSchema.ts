@@ -5,8 +5,11 @@
 export interface Usuario {
   id_usuario: number;
   numero_documento: string;
-  nombre: string;
-  apellido: string;
+  // Para Demandante y Demandado:
+  nombre_empresa?: string;
+  // Para otros roles:
+  nombre?: string;
+  apellido?: string;
   telefono: string;
   activo: boolean;
   id_rol: number;
@@ -22,35 +25,37 @@ export interface Usuario {
 
 export interface UsuarioExpediente {
   numero_documento: string;
-  nombre: string;
-  apellido: string;
+  // Para Demandante y Demandado:
+  nombre_empresa?: string;
+  // Para otros roles:
+  nombre?: string;
+  apellido?: string;
   telefono: string;
   correos: string[];
 }
 
 export interface Plantilla {
-  id_plantilla: number;
-  nombre: string;
+  id_plantilla: number | null;
+  nombre: string | null;
 }
 
 export interface Participante {
-  rol: string;
   usuario: {
     id_usuario: number;
     numero_documento: string;
-    nombre: string;
-    apellido: string;
+    // Para Demandante y Demandado:
+    nombre_empresa?: string;
+    // Para otros roles:
+    nombre?: string;
+    apellido?: string;
+    id_rol: number | null;
+    rol_nombre: string | null;
     telefono: string;
     correos: string[];
   };
 }
 
-export interface UsuarioInfo {
-  usuario: Usuario;
-  accion: "creado" | "actualizado";
-  rol: string;
-  contrasena_generada: string | null;
-}
+
 
 // =============================================
 // REQUEST INTERFACES
@@ -67,13 +72,13 @@ export interface CrearExpedienteRequest {
 }
 
 export interface ActualizarExpedienteRequest {
-  codigo_expediente?: string;
-  asunto?: string;
-  id_plantilla?: number;
-  demandante?: UsuarioExpediente;
-  demandado?: UsuarioExpediente;
-  secretario_arbitral?: UsuarioExpediente;
-  arbitro_a_cargo?: UsuarioExpediente;
+  codigo_expediente: string;
+  asunto: string;
+  id_plantilla: number;
+  demandante: UsuarioExpediente;
+  demandado: UsuarioExpediente;
+  secretario_arbitral: UsuarioExpediente;
+  arbitro_a_cargo: UsuarioExpediente;
 }
 
 // =============================================
@@ -83,17 +88,20 @@ export interface ActualizarExpedienteRequest {
 export interface Expediente {
   id_expediente: number;
   codigo_expediente: string;
-  asunto: string;
+  asunto: string | null;
   activo: boolean;
-  plantilla: Plantilla;
+  plantilla: {
+    id_plantilla: number | null;
+    nombre: string | null;
+  };
   usuario_creador: {
-    id_usuario: number;
-    nombre: string;
-    apellido: string;
+    id_usuario: number | null;
+    nombre: string | null;
+    apellido: string | null;
   };
   participantes: Participante[];
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface CrearExpedienteResponse {
@@ -101,7 +109,6 @@ export interface CrearExpedienteResponse {
   message: string;
   data: {
     expediente: Expediente;
-    usuarios_info: UsuarioInfo[];
   };
 }
 
@@ -110,7 +117,6 @@ export interface ListarExpedientesResponse {
   message: string;
   data: {
     expedientes: Expediente[];
-    total: number;
   };
 }
 
@@ -127,7 +133,6 @@ export interface ActualizarExpedienteResponse {
   message: string;
   data: {
     expediente: Expediente;
-    usuarios_info: UsuarioInfo[];
   };
 }
 
@@ -146,8 +151,11 @@ export interface VerificarUsuarioResponse {
     usuario: {
       id_usuario: number;
       numero_documento: string;
-      nombre: string;
-      apellido: string;
+      // Para Demandante y Demandado:
+      nombre_empresa?: string;
+      // Para otros roles:
+      nombre?: string;
+      apellido?: string;
       telefono: string;
       correos: string[];
       rol?: string;
@@ -163,8 +171,11 @@ export interface VerificarUsuarioResponse {
 
 export interface FormParticipante {
   numero_documento: string;
-  nombre: string;
-  apellido: string;
+  // Para Demandante y Demandado:
+  nombre_empresa?: string;
+  // Para otros roles:
+  nombre?: string;
+  apellido?: string;
   telefono: string;
   correos: string[];
   // Estados para UI

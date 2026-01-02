@@ -15,7 +15,6 @@ class Expediente extends Model
 
     protected $fillable = [
         'codigo_expediente',
-        'asunto',
         'id_plantilla',
         'id_usuario',
         'activo'
@@ -41,5 +40,10 @@ class Expediente extends Model
     public function participantes()
     {
         return $this->hasMany(ExpedienteParticipante::class, 'id_expediente', 'id_expediente');
+    }
+
+    public function asunto()
+    {
+        return $this->hasOne(Asunto::class, 'id_expediente', 'id_expediente');
     }
 }

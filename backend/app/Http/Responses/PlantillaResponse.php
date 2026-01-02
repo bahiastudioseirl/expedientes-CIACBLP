@@ -54,13 +54,6 @@ class PlantillaResponse
         ]);
     }
 
-    public static function plantillaEliminada(): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'message' => 'Plantilla eliminada exitosamente'
-        ]);
-    }
 
     public static function plantillaEstadoCambiado(Plantilla $plantilla): JsonResponse
     {
@@ -91,8 +84,6 @@ class PlantillaResponse
                             'tiene_tiempo' => (bool) $subEtapa->tiene_tiempo,
                             'duracion_dias' => $subEtapa->duracion_dias,
                             'es_opcional' => (bool) $subEtapa->es_opcional,
-                            'created_at' => $subEtapa->created_at?->format('Y-m-d H:i:s'),
-                            'updated_at' => $subEtapa->updated_at?->format('Y-m-d H:i:s')
                         ];
                     }) ?? []
                 ];
