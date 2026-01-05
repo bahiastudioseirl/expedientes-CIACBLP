@@ -5,20 +5,102 @@ namespace App\Services;
 use App\DTOs\Usuarios\ActualizarUsuarioDTO;
 use App\DTOs\Usuarios\CrearUsuarioDTO;
 use App\Models\Usuarios;
+use App\Models\Correos;
 use App\Repositories\UsuarioRepository;
+use App\Repositories\CorreoRepository;
 use App\Exceptions\UltimoUsuarioException;
 use Illuminate\Database\Eloquent\Collection;
 
 class UsuarioService
 {
     public function __construct(
-        private readonly UsuarioRepository $usuarioRepository
+        private readonly UsuarioRepository $usuarioRepository,
+        private readonly CorreoRepository $correoRepository
     ){}
 
     public function crearUsuario(CrearUsuarioDTO $data): Usuarios
     {
         $usuario = $this->usuarioRepository->crear($data->toArray());
-        return $usuario->load('rol');
+        
+        // Crear correos si se proporcionan
+        if (!empty($data->correos)) {
+            foreach ($data->correos as $correo) {
+                Correos::create([
+                    'id_usuario' => $usuario->id_usuario,
+                    'correo_electronico' => $correo
+                ]);
+            }
+        }
+        
+        return $usuario->load(['rol', 'correos']);
+    }
+
+    // Método unificado para crear usuarios personas (admin, secretario, arbitro)
+    public function crearUsuarioPersona(CrearUsuarioDTO $data, int $idRol): Usuarios
+    {
+        $datosArray = $data->toArray();
+        $datosArray['id_rol'] = $idRol;
+        
+        $usuario = $this->usuarioRepository->crear($datosArray);
+        
+        // Crear correos si se proporcionan
+        if (!empty($data->correos)) {
+            foreach ($data->correos as $correo) {
+                Correos::create([
+                    'id_usuario' => $usuario->id_usuario,
+                    'correo_electronico' => $correo
+                ]);
+            }
+        }
+        
+        return $usuario->load(['rol', 'correos']);
+    }
+
+    // Método unificado para crear usuarios empresa (demandante, demandado)
+    public function crearUsuarioEmpresa(CrearUsuarioDTO $data, int $idRol): Usuarios
+    {
+        $datosArray = $data->toArray();
+        $datosArray['id_rol'] = $idRol;
+        
+        $usuario = $this->usuarioRepository->crear($datosArray);
+        
+        // Crear correos si se proporcionan
+        if (!empty($data->correos)) {
+            foreach ($data->correos as $correo) {
+                Correos::create([
+                    'id_usuario' => $usuario->id_usuario,
+                    'correo_electronico' => $correo
+                ]);
+            }
+        }
+        
+        return $usuario->load(['rol', 'correos']);
+    }
+
+    // Métodos específicos que usan los métodos unificados
+    public function crearUsuarioAdministrador(CrearUsuarioDTO $data): Usuarios
+    {
+        return $this->crearUsuarioPersona($data, 1); // ID del rol administrador
+    }
+
+    public function crearUsuarioSecretario(CrearUsuarioDTO $data): Usuarios
+    {
+        return $this->crearUsuarioPersona($data, 3); // ID del rol secretario
+    }
+    
+    public function crearUsuarioArbitro(CrearUsuarioDTO $data): Usuarios
+    {
+        return $this->crearUsuarioPersona($data, 2); // ID del rol arbitro
+    }
+    
+    public function crearUsuarioDemandante(CrearUsuarioDTO $data): Usuarios
+    {
+        return $this->crearUsuarioEmpresa($data, 4); // ID del rol demandante
+    }
+
+    public function crearUsuarioDemandado(CrearUsuarioDTO $data): Usuarios
+    {
+        return $this->crearUsuarioEmpresa($data, 5); // ID del rol demandado
     }
 
     public function listarUsuarios(): Collection
@@ -43,8 +125,15 @@ class UsuarioService
             return null;
         }
         
+        // Actualizar datos básicos del usuario
         $this->usuarioRepository->actualizar($usuario, $data->toArray());
-        return $usuario->fresh()->load('rol');
+        
+        // Actualizar correos si se proporcionaron
+        if ($data->correos !== null) {
+            $this->correoRepository->actualizarCorreosPorUsuario($id, $data->correos);
+        }
+        
+        return $usuario->fresh()->load(['rol', 'correos']);
     }
 
     public function cambiarEstadoUsuario(int $id): bool

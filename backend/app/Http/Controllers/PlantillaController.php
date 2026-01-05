@@ -128,4 +128,30 @@ class PlantillaController extends Controller
             ], 500);
         }
     }
+
+    public function obtenerEtapasPlantilla($id): JsonResponse
+    {
+        try {
+            $etapas = $this->plantillaService->obtenerEtapasPlantilla($id);
+            
+            if ($etapas === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Plantilla no encontrada'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Etapas obtenidas exitosamente',
+                'data' => $etapas
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener etapas de la plantilla',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -186,5 +186,29 @@ class PlantillaService
         
         return $plantilla->fresh()->load(['etapas.subEtapas']);
     }
+
+    public function obtenerEtapasPlantilla($id): ?array
+    {
+        $plantilla = $this->plantillaRepository->obtenerPorId($id);
+        
+        if (!$plantilla) {
+            return null;
+        }
+
+        $etapas = $this->etapaRepository->obtenerEtapasPorPlantilla($id);
+        
+        return $etapas->map(function ($etapa) {
+            return [
+                'id_etapa' => $etapa->id_etapa,
+                'nombre' => $etapa->nombre,
+                'subetapas' => $etapa->subEtapas->map(function ($subEtapa) {
+                    return [
+                        'id_sub_etapa' => $subEtapa->id_sub_etapa,
+                        'nombre' => $subEtapa->nombre
+                    ];
+                })->values()->toArray()
+            ];
+        })->values()->toArray();
+    }
 }
 

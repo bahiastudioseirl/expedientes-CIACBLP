@@ -6,6 +6,11 @@ use App\DTOs\Usuarios\ActualizarUsuarioDTO;
 use App\DTOs\Usuarios\CrearUsuarioDTO;
 use App\Http\Requests\Usuarios\ActualizarUsuarioRequest;
 use App\Http\Requests\Usuarios\CrearUsuarioRequest;
+use App\Http\Requests\Usuarios\CrearDemandanteRequest;
+use App\Http\Requests\Usuarios\CrearDemandadoRequest;
+use App\Http\Requests\Usuarios\CrearAdministradorRequest;
+use App\Http\Requests\Usuarios\CrearSecretarioRequest;
+use App\Http\Requests\Usuarios\CrearArbitroRequest;
 use App\Services\UsuarioService;
 use App\Http\Responses\UsuarioResponse;
 use App\Exceptions\UltimoUsuarioException;
@@ -39,6 +44,32 @@ class UsuarioController extends Controller
             ], 500);
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
     public function listarUsuarios(): JsonResponse
     {
@@ -90,35 +121,7 @@ class UsuarioController extends Controller
         }
     }
 
-    public function actualizarUsuario($id, ActualizarUsuarioRequest $request): JsonResponse
-    {
-        try {
-            $dto = ActualizarUsuarioDTO::fromRequest($request->validated());
-            $usuario = $this->usuarioService->actualizarUsuario($id, $dto);
-            
-            if (!$usuario) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuario no encontrado'
-                ], 404);
-            }
-            
-            return UsuarioResponse::usuarioActualizado($usuario);
-            
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar el usuario',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+
 
     public function cambiarEstadoUsuario($id): JsonResponse
     {
@@ -190,7 +193,27 @@ class UsuarioController extends Controller
             ], 500);
         }
     }
+    public function actualizarUsuario(ActualizarUsuarioRequest $request, int $id): JsonResponse
+    {
+        try {
+            $dto = new ActualizarUsuarioDTO(
+                nombre: $request->input('nombre'),
+                apellido: $request->input('apellido'),
+                nombreEmpresa: $request->input('nombre_empresa'),
+                telefono: $request->input('telefono'),
+                correos: $request->input('correos')
+            );
 
+            $usuario = $this->usuarioService->actualizarUsuario($id, $dto);
+            return UsuarioResponse::usuario($usuario);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar usuario',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function listarDemandados(): JsonResponse
     {
         try {

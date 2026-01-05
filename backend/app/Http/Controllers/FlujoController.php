@@ -100,5 +100,20 @@ class FlujoController extends Controller
         }
     }
 
+    public function listarFlujosPorExpediente(int $idExpediente)
+    {
+        try {
+            $flujos = $this->flujoService->listarFlujosPorExpediente($idExpediente);
+            
+            return FlujoResponse::flujos($flujos);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los flujos del expediente',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 }

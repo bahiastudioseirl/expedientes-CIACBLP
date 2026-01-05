@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Etapa;
+use Illuminate\Database\Eloquent\Collection;
 
 class EtapaRepository
 {
@@ -24,5 +25,13 @@ class EtapaRepository
     public function obtenerPorId(int $id): ?Etapa
     {
         return Etapa::with('subEtapas')->find($id);
+    }
+
+    public function obtenerEtapasPorPlantilla(int $plantillaId): Collection
+    {
+        return Etapa::with(['subEtapas'])
+        ->where('id_plantilla', $plantillaId)
+        ->orderBy('id_etapa')
+        ->get();
     }
 }

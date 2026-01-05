@@ -14,51 +14,37 @@ class ActualizarUsuarioRequest extends FormRequest
 
     public function rules(): array
     {
-        $usuarioId = $this->route('id');
-        
         return [
-            'nombre' => 'sometimes|string|max:100',
-            'apellido' => 'sometimes|string|max:100',
-            'numero_documento' => [
-                'sometimes',
-                'string',
-                'max:50',
-                Rule::unique('usuarios', 'numero_documento')->ignore($usuarioId, 'id_usuario')
-            ],
-            'telefono' => 'nullable|string|max:20',
-            'correo' => [
-                'sometimes',
-                'string',
-                'email',
-                'max:150',
-                Rule::unique('usuarios', 'correo')->ignore($usuarioId, 'id_usuario')
-            ],
-            'contrasena' => 'sometimes|string|min:6',
-            'activo' => 'sometimes|boolean',
-            'id_rol' => 'sometimes|integer|exists:roles,id_rol',
+            // Para personas (administradores, secretarios, árbitros)
+            'nombre' => 'nullable|string|max:100',
+            'apellido' => 'nullable|string|max:100',
+            // Para empresas (demandantes, demandados)
+            'nombre_empresa' => 'nullable|string|max:255',
+            // Campos comunes
+            'telefono' => 'required|string|max:20',
+            'correos' => 'required|array|min:1',
+            'correos.*' => 'required|email|max:150',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'nombre.string' => 'El nombre debe ser texto.',
-            'nombre.max' => 'El nombre no debe exceder 100 caracteres.',
-            'apellido.string' => 'El apellido debe ser texto.',
-            'apellido.max' => 'El apellido no debe exceder 100 caracteres.',
-            'numero_documento.string' => 'El número de documento debe ser texto.',
-            'numero_documento.max' => 'El número de documento no debe exceder 50 caracteres.',
-            'numero_documento.unique' => 'El número de documento ya está en uso por otro usuario.',
-            'telefono.string' => 'El teléfono debe ser texto.',
-            'telefono.max' => 'El teléfono no debe exceder 20 caracteres.',
-            'correo.string' => 'El correo debe ser texto.',
-            'correo.email' => 'El correo debe ser una dirección de correo válida.',
-            'correo.max' => 'El correo no debe exceder 150 caracteres.',
-            'correo.unique' => 'El correo ya está en uso por otro usuario.',
-            'contrasena.string' => 'La contraseña debe ser texto.',
-            'contrasena.min' => 'La contraseña debe tener al menos 6 caracteres.',
-            'id_rol.integer' => 'El rol debe ser un número entero.',
-            'id_rol.exists' => 'El rol seleccionado no es válido.',
+            'nombre.string' => 'El nombre debe ser una cadena de texto.',
+            'nombre.max' => 'El nombre no puede tener más de 100 caracteres.',
+            'apellido.string' => 'El apellido debe ser una cadena de texto.',
+            'apellido.max' => 'El apellido no puede tener más de 100 caracteres.',
+            'nombre_empresa.string' => 'El nombre de la empresa debe ser una cadena de texto.',
+            'nombre_empresa.max' => 'El nombre de la empresa no puede tener más de 255 caracteres.',
+            'telefono.required' => 'El teléfono es obligatorio.',
+            'telefono.string' => 'El teléfono debe ser una cadena de texto.',
+            'telefono.max' => 'El teléfono no puede tener más de 20 caracteres.',
+            'correos.required' => 'Al menos un correo electrónico es obligatorio.',
+            'correos.array' => 'Los correos deben enviarse como un array.',
+            'correos.min' => 'Debe proporcionar al menos un correo electrónico.',
+            'correos.*.required' => 'Todos los correos son obligatorios.',
+            'correos.*.email' => 'Los correos deben tener un formato válido.',
+            'correos.*.max' => 'Los correos no pueden tener más de 150 caracteres.',
         ];
     }
 }

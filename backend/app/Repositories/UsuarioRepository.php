@@ -29,12 +29,12 @@ class UsuarioRepository
     
     public function listarUsuarios(): Collection
     {
-        return Usuarios::with('rol')->where('activo', true)->get();
+        return Usuarios::with(['rol', 'correos'])->where('activo', true)->get();
     }
 
     public function listarAdministradores(): Collection
     {
-        return Usuarios::with('rol')
+        return Usuarios::with(['rol', 'correos'])
                         ->whereHas('rol', function ($query) {
                             $query->where('nombre', 'Administrador');
                         })
@@ -43,7 +43,7 @@ class UsuarioRepository
 
     public function obtenerPorId(int $id): ?Usuarios
     {
-        return Usuarios::with('rol')->find($id);
+        return Usuarios::with(['rol', 'correos'])->find($id);
     }
 
     public function obtenerPorNumeroDocumento(string $numeroDocumento): ?array
@@ -90,7 +90,7 @@ class UsuarioRepository
 
     public function listarUsuariosArbitros(): Collection
     {
-        return Usuarios::with('rol')
+        return Usuarios::with(['rol', 'correos'])
                         ->whereHas('rol', function ($query) {
                             $query->where('nombre', 'Arbitro');
                         })
@@ -99,7 +99,7 @@ class UsuarioRepository
 
     public function listarUsuariosSecretarios(): Collection
     {
-        return Usuarios::with('rol')
+        return Usuarios::with(['rol', 'correos'])
                         ->whereHas('rol', function ($query) {
                             $query->where('nombre', 'Secretario');
                         })
@@ -108,7 +108,7 @@ class UsuarioRepository
 
     public function listarUsuariosDemandantes(): Collection
     {
-        return Usuarios::with('rol')
+        return Usuarios::with(['rol', 'correos'])
                         ->whereHas('rol', function ($query) {
                             $query->where('nombre', 'Demandante');
                         })
@@ -117,7 +117,7 @@ class UsuarioRepository
 
     public function listarUsuariosDemandados(): Collection
     {
-        return Usuarios::with('rol')
+        return Usuarios::with(['rol', 'correos'])
                         ->whereHas('rol', function ($query) {
                             $query->where('nombre', 'Demandado');
                         })

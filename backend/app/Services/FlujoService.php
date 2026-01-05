@@ -137,5 +137,10 @@ class FlujoService
             'data' => $this->flujoRepository->obtenerPorId($flujo->id_flujo)
         ];
     }
+
+    public function listarFlujosPorExpediente(int $idExpediente)
+    {
+        return $this->flujoRepository->listarFlujosPorExpediente($idExpediente);
+    }
     
 }

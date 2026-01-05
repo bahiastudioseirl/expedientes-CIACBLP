@@ -11,12 +11,41 @@ const LoginForm = lazy(() =>
 
 
 //ADMINISTRADOR
+const BandejaEntradaPage = lazy(() =>
+    import('../../admin/features/bandejaEntrada/BandejaEntradaPage').then((module) => ({ default: module.default }))
+);
+
+const ChatAsuntoPage = lazy(() =>
+    import('../../admin/features/bandejaEntrada/pages/ChatAsuntoPage').then((module) => ({ default: module.default }))
+);
+
 const ExpedienteAdmin = lazy(() =>
     import('../../admin/features/expedienteAdmin/pages/ExpedienteAdmin').then((module) => ({ default: module.default }))
 );
 
 const PlantillaAdmin = lazy(() =>
     import('../../admin/features/plantillaAdmin/pages/PlantillaAdmin').then((module) => ({ default: module.default }))
+);
+
+// Usuarios Admin
+const AdministradoresPage = lazy(() =>
+    import('../../admin/features/usuariosAdmin/pages/AdministradoresPage').then((module) => ({ default: module.default }))
+);
+
+const SecretariosPage = lazy(() =>
+    import('../../admin/features/usuariosAdmin/pages/SecretariosPage').then((module) => ({ default: module.default }))
+);
+
+const DemandantesPage = lazy(() =>
+    import('../../admin/features/usuariosAdmin/pages/DemandantesPage').then((module) => ({ default: module.default }))
+);
+
+const DemandadosPage = lazy(() =>
+    import('../../admin/features/usuariosAdmin/pages/DemandadosPage').then((module) => ({ default: module.default }))
+);
+
+const ArbitrosPage = lazy(() =>
+    import('../../admin/features/usuariosAdmin/pages/ArbitrosPage').then((module) => ({ default: module.default }))
 );
 
 
@@ -54,7 +83,25 @@ export const routes = [
     children: [
       {
         index: true,
-        element: <Navigate to="/administrator/expediente" replace />,
+        element: <Navigate to="/administrator/bandeja-entrada" replace />,
+      },
+      // Bandeja de Entrada
+      {
+        path: 'bandeja-entrada',
+        element: (
+          <LazyWrapper>
+            <BandejaEntradaPage />
+          </LazyWrapper>
+        ),
+      },
+      // Chat de Asunto
+      {
+        path: 'chat/asunto/:asuntoId',
+        element: (
+          <LazyWrapper>
+            <ChatAsuntoPage />
+          </LazyWrapper>
+        ),
       },
       // Gestión de Expedientes
       {
@@ -71,6 +118,47 @@ export const routes = [
         element: (
           <LazyWrapper>
             <PlantillaAdmin />
+          </LazyWrapper>
+        ),
+      },
+      // Gestión de Usuarios
+      {
+        path: 'usuarios/administradores',
+        element: (
+          <LazyWrapper>
+            <AdministradoresPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'usuarios/secretarios',
+        element: (
+          <LazyWrapper>
+            <SecretariosPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'usuarios/demandantes',
+        element: (
+          <LazyWrapper>
+            <DemandantesPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'usuarios/demandados',
+        element: (
+          <LazyWrapper>
+            <DemandadosPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'usuarios/arbitros',
+        element: (
+          <LazyWrapper>
+            <ArbitrosPage />
           </LazyWrapper>
         ),
       },

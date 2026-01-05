@@ -75,6 +75,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
 
     Route::prefix('flujo')->group(function () {
         Route::get('/expediente/{idExpediente}/actual', [FlujoController::class, 'obtenerFlujoActual']);
+        Route::get('/expediente/{idExpediente}/listar', [FlujoController::class, 'listarFlujosPorExpediente']);
     });
     
     
@@ -89,6 +90,11 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     
     Route::prefix('usuarios')->group(function () {
         Route::post('/', [UsuarioController::class, 'crearUsuario']);
+        Route::post('/administradores', [UsuarioController::class, 'crearAdministrador']);
+        Route::post('/secretarios', [UsuarioController::class, 'crearSecretario']);
+        Route::post('/demandantes', [UsuarioController::class, 'crearDemandante']);
+        Route::post('/demandados', [UsuarioController::class, 'crearDemandado']);
+        Route::post('/arbitros', [UsuarioController::class, 'crearArbitro']);
         Route::get('/', [UsuarioController::class, 'listarUsuarios']);
         Route::get('/administradores', [UsuarioController::class, 'listarAdministradores']);
         Route::get('/arbitros', [UsuarioController::class, 'listarArbitros']);
@@ -104,6 +110,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::post('/', [PlantillaController::class, 'crearPlantilla']);
         Route::get('/', [PlantillaController::class, 'listarPlantillas']);
         Route::get('/{id}', [PlantillaController::class, 'obtenerPlantillaPorId']);
+        Route::get('/{id}/etapas', [PlantillaController::class, 'obtenerEtapasPlantilla']);
         Route::patch('/{id}', [PlantillaController::class, 'actualizarPlantilla']);
         Route::put('/{id}/estado', [PlantillaController::class, 'cambiarEstadoPlantilla']);
     });

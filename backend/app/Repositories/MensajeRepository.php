@@ -23,7 +23,7 @@ class MensajeRepository
     {
         return Mensajes::with(['usuario', 'asunto', 'adjuntos'])
             ->where('id_asunto', $idAsunto)
-            ->orderBy('fecha_envio', 'desc')
+            ->orderBy('fecha_envio', 'asc')
             ->get();
     }
 

@@ -7,10 +7,11 @@ class ActualizarUsuarioDTO
     public function __construct(
         public readonly ?string $nombre = null,
         public readonly ?string $apellido = null,
-        public readonly ?string $numero_documento = null,
-        public readonly ?string $nombre_empresa = null,
+        public readonly ?string $numeroDocumento = null,
+        public readonly ?string $nombreEmpresa = null,
         public readonly ?string $contrasena = null,
-        public readonly ?string $telefono = null
+        public readonly ?string $telefono = null,
+        public readonly ?array $correos = null
     ) {}
 
     public static function fromArray(array $data): self
@@ -18,10 +19,11 @@ class ActualizarUsuarioDTO
         return new self(
             nombre: $data['nombre'] ?? null,
             apellido: $data['apellido'] ?? null,
-            numero_documento: $data['numero_documento'] ?? null,
-            nombre_empresa: $data['nombre_empresa'] ?? null,
+            numeroDocumento: $data['numero_documento'] ?? null,
+            nombreEmpresa: $data['nombre_empresa'] ?? null,
             contrasena: $data['contrasena'] ?? null,
             telefono: $data['telefono'] ?? null,
+            correos: $data['correos'] ?? null,
         );
     }
 
@@ -30,10 +32,11 @@ class ActualizarUsuarioDTO
         return new self(
             nombre: $data['nombre'] ?? null,
             apellido: $data['apellido'] ?? null,
-            numero_documento: $data['numero_documento'] ?? null,
-            nombre_empresa: $data['nombre_empresa'] ?? null,
+            numeroDocumento: $data['numero_documento'] ?? null,
+            nombreEmpresa: $data['nombre_empresa'] ?? null,
             contrasena: $data['contrasena'] ?? null,
-            telefono: $data['telefono'] ?? null
+            telefono: $data['telefono'] ?? null,
+            correos: $data['correos'] ?? null
         );
     }
 
@@ -46,11 +49,11 @@ class ActualizarUsuarioDTO
         if ($this->apellido !== null) {
             $result['apellido'] = $this->apellido;
         }
-        if ($this->numero_documento !== null) {
-            $result['numero_documento'] = $this->numero_documento;
+        if ($this->numeroDocumento !== null) {
+            $result['numero_documento'] = $this->numeroDocumento;
         }
-        if ($this->nombre_empresa !== null) {
-            $result['nombre_empresa'] = $this->nombre_empresa;
+        if ($this->nombreEmpresa !== null) {
+            $result['nombre_empresa'] = $this->nombreEmpresa;
         }
         if ($this->contrasena !== null) {
             $result['contrasena'] = bcrypt($this->contrasena);

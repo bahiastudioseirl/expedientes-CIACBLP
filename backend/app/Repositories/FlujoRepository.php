@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Asunto;
 use App\Models\Expediente;
 use App\Models\Flujo;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -99,5 +100,30 @@ class FlujoRepository
             'id_flujo' => $idFlujo,
             'id_expediente' => $idExpediente
         ]);
+    }
+
+    public function listarFlujosPorExpediente(int $idExpediente): Collection
+    {
+        return Flujo::with(['expediente', 'etapa', 'subetapa'])
+                   ->where('id_expediente', $idExpediente)
+                   ->orderBy('fecha_inicio', 'desc')
+                   ->get()
+                   ->map(function ($flujo) {
+                       $estado = $flujo->estado;
+                       
+                       if ($estado === 'en proceso' && $flujo->fecha_fin_estimada) {
+                           $fechaFin = Carbon::parse($flujo->fecha_fin_estimada);
+                           $ahora = Carbon::now();
+                           
+                           if ($ahora->gt($fechaFin)) {
+                               $estado = 'vencido';
+                           } elseif ($ahora->diffInDays($fechaFin) <= 3) {
+                               $estado = 'por vencer';
+                           }
+                       }
+                       
+                       $flujo->estado_calculado = $estado;
+                       return $flujo;
+                   });
     }
 }

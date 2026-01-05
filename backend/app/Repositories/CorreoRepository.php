@@ -38,4 +38,28 @@ class CorreoRepository
                      ->whereIn('direccion', $correosAEliminar)
                      ->delete();
     }
+
+    public function actualizarCorreosPorUsuario(int $idUsuario, array $nuevosCorreos): void
+    {
+        $correosActuales = $this->obtenerCorreosPorUsuario($idUsuario)
+                                ->pluck('direccion')
+                                ->toArray();
+
+        $correosAEliminar = array_diff($correosActuales, $nuevosCorreos);
+        
+        $correosAAgregar = array_diff($nuevosCorreos, $correosActuales);
+
+        if (!empty($correosAEliminar)) {
+            Correos::where('id_usuario', $idUsuario)
+                   ->whereIn('direccion', $correosAEliminar)
+                   ->delete();
+        }
+
+        foreach ($correosAAgregar as $correo) {
+            Correos::create([
+                'id_usuario' => $idUsuario,
+                'direccion' => $correo
+            ]);
+        }
+    }
 }
