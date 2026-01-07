@@ -62,6 +62,50 @@ class MensajeService
         return $this->mensajeRepository->marcarComoLeido($idMensaje, $idUsuario);
     }
 
+    public function responderMensaje(int $idMensajePadre, CrearMensajeDTO $datos, array $usuariosDestinatarios, ?array $adjuntos = null): Mensajes
+    {
+        // Obtener el mensaje padre para validar y obtener el asunto
+        $mensajePadre = $this->mensajeRepository->obtenerPorId($idMensajePadre);
+        if (!$mensajePadre) {
+            throw new Exception('El mensaje al que intenta responder no existe.');
+        }
+
+        $asuntoActivo = $this->asuntoRepository->saberEstadoPorId($mensajePadre->id_asunto);
+        if (!$asuntoActivo) {
+            throw new Exception('No se puede responder porque el asunto está cerrado.');
+        }
+
+        $respuestaData = [
+            'contenido' => $datos->contenido,
+            'fecha_envio' => Carbon::now('America/Lima')->format('Y-m-d H:i:s'),
+            'id_usuario' => $datos->id_usuario,
+            'id_asunto' => $mensajePadre->id_asunto, // Heredar el asunto del mensaje padre
+            'mensaje_padre_id' => $idMensajePadre
+        ];
+
+        $respuesta = $this->mensajeRepository->crear($respuestaData);
+        $this->crearRelacionesUsuarios($respuesta->id_mensaje, $usuariosDestinatarios);
+
+        if ($adjuntos && count($adjuntos) > 0) {
+            $this->procesarAdjuntos($respuesta->id_mensaje, $adjuntos, $mensajePadre->id_asunto);
+        }
+
+        return $this->mensajeRepository->obtenerPorId($respuesta->id_mensaje);
+    }
+
+    public function obtenerHiloCompleto(int $idMensaje): Collection
+    {
+        $mensaje = $this->mensajeRepository->obtenerPorId($idMensaje);
+        if (!$mensaje) {
+            throw new Exception('El mensaje no existe.');
+        }
+
+        // Si es una respuesta, obtener el mensaje principal
+        $idMensajePrincipal = $mensaje->esMensajePrincipal() ? $idMensaje : $mensaje->mensaje_padre_id;
+        
+        return $this->mensajeRepository->obtenerHiloCompleto($idMensajePrincipal);
+    }
+
     private function crearRelacionesUsuarios(int $idMensaje, array $usuariosDestinatarios): void
     {
         $relacionesData = [];
@@ -90,6 +134,7 @@ class MensajeService
                 
                 $this->adjuntoRepository->crear([
                     'id_mensaje' => $idMensaje,
+                    'nombre_archivo' => $archivo->getClientOriginalName(),
                     'ruta_archivo' => $rutaArchivo
                 ]);
             }

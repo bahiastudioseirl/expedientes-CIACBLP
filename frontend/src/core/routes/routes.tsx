@@ -12,11 +12,11 @@ const LoginForm = lazy(() =>
 
 //ADMINISTRADOR
 const BandejaEntradaPage = lazy(() =>
-    import('../../admin/features/bandejaEntrada/BandejaEntradaPage').then((module) => ({ default: module.default }))
+    import('../../features/bandejaEntrada/BandejaEntradaPage').then((module) => ({ default: module.default }))
 );
 
 const ChatAsuntoPage = lazy(() =>
-    import('../../admin/features/bandejaEntrada/pages/ChatAsuntoPage').then((module) => ({ default: module.default }))
+    import('../../features/bandejaEntrada/pages/ChatAsuntoPage').then((module) => ({ default: module.default }))
 );
 
 const ExpedienteAdmin = lazy(() =>
@@ -72,6 +72,34 @@ export const routes = [
         ),
     },
 
+    // RUTAS GENERALES (para todos los usuarios autenticados)
+    {
+        path: '/bandeja-entrada',
+        element: (
+            <ProtectedRoute>
+                <AdminLayout />
+            </ProtectedRoute>
+        ),
+        children: [
+            {
+                index: true,
+                element: (
+                    <LazyWrapper>
+                        <BandejaEntradaPage />
+                    </LazyWrapper>
+                ),
+            },
+            {
+                path: 'chat/asunto/:asuntoId',
+                element: (
+                    <LazyWrapper>
+                        <ChatAsuntoPage />
+                    </LazyWrapper>
+                ),
+            },
+        ],
+    },
+
     // RUTAS ADMINISTRATIVAS
  {
     path: '/administrator',
@@ -83,25 +111,7 @@ export const routes = [
     children: [
       {
         index: true,
-        element: <Navigate to="/administrator/bandeja-entrada" replace />,
-      },
-      // Bandeja de Entrada
-      {
-        path: 'bandeja-entrada',
-        element: (
-          <LazyWrapper>
-            <BandejaEntradaPage />
-          </LazyWrapper>
-        ),
-      },
-      // Chat de Asunto
-      {
-        path: 'chat/asunto/:asuntoId',
-        element: (
-          <LazyWrapper>
-            <ChatAsuntoPage />
-          </LazyWrapper>
-        ),
+        element: <Navigate to="/bandeja-entrada" replace />,
       },
       // Gestión de Expedientes
       {

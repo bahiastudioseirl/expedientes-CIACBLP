@@ -28,7 +28,7 @@ export const menuItems: MenuItem[] = [
     {
         titulo: 'Bandeja de Entrada',
         icon: Inbox,
-        link: '/administrator/bandeja-entrada'
+        link: '/bandeja-entrada'
     },
     {
         titulo: 'Expedientes',

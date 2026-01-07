@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('adjuntos', function (Blueprint $table) {
             $table->id('id_adjunto');
+            $table->string('nombre_archivo');
             $table->string('ruta_archivo');
             $table->unsignedBigInteger('id_mensaje');
 

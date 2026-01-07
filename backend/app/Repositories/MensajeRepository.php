@@ -21,23 +21,48 @@ class MensajeRepository
 
     public function obtenerPorAsunto(int $idAsunto): Collection
     {
-        return Mensajes::with(['usuario', 'asunto', 'adjuntos'])
+        return Mensajes::with(['usuario', 'asunto', 'adjuntos', 'respuestas.usuario'])
             ->where('id_asunto', $idAsunto)
+            ->mensajesPrincipales()
             ->orderBy('fecha_envio', 'asc')
             ->get();
     }
 
     public function obtenerPorAsuntoYUsuario(int $idAsunto, int $idUsuario): Collection
     {
-        return Mensajes::with(['usuario', 'asunto', 'adjuntos'])
+        return Mensajes::with(['usuario', 'asunto', 'adjuntos', 'respuestas.usuario'])
             ->where('id_asunto', $idAsunto)
+            ->mensajesPrincipales()
             ->where(function($query) use ($idUsuario) {
-                $query->where('id_usuario', $idUsuario) // Mensajes enviados por el usuario
+                $query->where('id_usuario', $idUsuario) 
                       ->orWhereHas('usuariosMensajes', function($subQuery) use ($idUsuario) {
-                          $subQuery->where('id_usuario', $idUsuario); // Mensajes recibidos por el usuario
+                          $subQuery->where('id_usuario', $idUsuario);
                       });
             })
             ->orderBy('fecha_envio', 'desc')
+            ->get();
+    }
+
+    public function crearRespuesta(int $idMensajePadre, array $datos): Mensajes
+    {
+        $datos['mensaje_padre_id'] = $idMensajePadre;
+        return $this->crear($datos);
+    }
+
+    public function obtenerHiloCompleto(int $idMensajePrincipal): Collection
+    {
+        return Mensajes::with(['usuario', 'adjuntos', 'respuestas.usuario'])
+            ->where('id_mensaje', $idMensajePrincipal)
+            ->orWhere('mensaje_padre_id', $idMensajePrincipal)
+            ->orderBy('fecha_envio', 'asc')
+            ->get();
+    }
+
+    public function obtenerRespuestas(int $idMensajePadre): Collection
+    {
+        return Mensajes::with(['usuario', 'adjuntos'])
+            ->where('mensaje_padre_id', $idMensajePadre)
+            ->orderBy('fecha_envio', 'asc')
             ->get();
     }
 

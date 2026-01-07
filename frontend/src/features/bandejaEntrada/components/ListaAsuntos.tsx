@@ -7,9 +7,12 @@ import {
     XCircle,
     Lock,
     Eye,
-    Settings
+    Settings,
+    ToggleLeft,
+    ToggleRight
 } from 'lucide-react';
 import { obtenerAsuntosPorExpediente } from '../services/obtenerAsuntos';
+import { cambiarEstadoAsunto } from '../services/mensajesService';
 import type { ExpedienteAsignado, Asunto } from '../schemas/BandejaEntradaSchema';
 
 interface ListaAsuntosProps {
@@ -22,7 +25,7 @@ interface ListaAsuntosProps {
         nombre: string;
         apellido?: string;
     };
-    userRole?: number; // Para verificar permisos
+    userRole?: number; 
 }
 
 export default function ListaAsuntos({
@@ -33,6 +36,7 @@ export default function ListaAsuntos({
     const [asuntos, setAsuntos] = useState<Asunto[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [toggling, setToggling] = useState<number | null>(null);
 
     useEffect(() => {
         cargarAsuntos();
@@ -52,6 +56,31 @@ export default function ListaAsuntos({
             setError(msg);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleToggleAsunto = async (asunto: Asunto, e: React.MouseEvent) => {
+        e.stopPropagation(); // Evitar que se active el click del asunto
+        
+        setToggling(asunto.id_asunto);
+        try {
+            const response = await cambiarEstadoAsunto(asunto.id_asunto);
+            if (response.success) {
+                // Actualizar el estado local del asunto
+                setAsuntos(prevAsuntos => 
+                    prevAsuntos.map(a => 
+                        a.id_asunto === asunto.id_asunto 
+                            ? { ...a, activo: !a.activo }
+                            : a
+                    )
+                );
+            }
+        } catch (err: any) {
+            console.error('Error al cambiar estado del asunto:', err);
+            const msg = err?.response?.data?.message || 'Error al cambiar el estado del asunto';
+            setError(msg);
+        } finally {
+            setToggling(null);
         }
     };
 
@@ -172,6 +201,24 @@ export default function ListaAsuntos({
                                         </span>
 
                                         <div className="flex items-center space-x-2">
+                                            <button
+                                                onClick={(e) => handleToggleAsunto(asunto, e)}
+                                                disabled={toggling === asunto.id_asunto}
+                                                className={`p-2 rounded-lg transition-colors ${
+                                                    asunto.activo 
+                                                        ? 'bg-red-50 text-red-600 hover:bg-red-100' 
+                                                        : 'bg-green-50 text-green-600 hover:bg-green-100'
+                                                } ${toggling === asunto.id_asunto ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                title={asunto.activo ? 'Cerrar asunto' : 'Abrir asunto'}
+                                            >
+                                                {toggling === asunto.id_asunto ? (
+                                                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                                                ) : asunto.activo ? (
+                                                    <ToggleRight className="w-4 h-4" />
+                                                ) : (
+                                                    <ToggleLeft className="w-4 h-4" />
+                                                )}
+                                            </button>
                                             <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
                                                 <Eye className="w-4 h-4" />
                                             </div>

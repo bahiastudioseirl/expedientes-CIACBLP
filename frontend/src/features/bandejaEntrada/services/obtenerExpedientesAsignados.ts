@@ -1,4 +1,4 @@
-import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
+import { axiosWithoutMultipart } from '../../../api/axiosInstance';
 import type { ExpedientesAsignadosResponse } from '../schemas/BandejaEntradaSchema';
 
 export const obtenerExpedientesAsignados = async (): Promise<ExpedientesAsignadosResponse> => {

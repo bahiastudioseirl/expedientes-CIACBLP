@@ -62,11 +62,12 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
     Route::get('expedientes/asignados', [ExpedienteController::class, 'listarExpedientesAsignados']);
     
     // Rutas de mensajes para usuarios autenticados
-    Route::prefix('mensajes')->group(function () {
+    Route::prefix('mensajes')->middleware(\App\Http\Middleware\HandlePostTooLarge::class)->group(function () {
         Route::post('/', [MensajeController::class, 'crearMensaje']);
         Route::get('/asunto/{idAsunto}', [MensajeController::class, 'listarMensajesPorAsunto']);
         Route::put('/{idMensaje}/leer', [MensajeController::class, 'marcarMensajeComoLeido']);
-
+        Route::post('/{idMensajePadre}/responder', [MensajeController::class, 'responderMensaje']);
+        Route::get('/{idMensaje}/hilo', [MensajeController::class, 'obtenerHiloMensaje']);
     });
 
     Route::prefix('asuntos')->group(function () {

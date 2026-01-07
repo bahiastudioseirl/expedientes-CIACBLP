@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { AuthStore } from '../../../core/components/auth/services/AuthStore';
+import { AuthStore } from '../../core/components/auth/services/AuthStore';
 import BandejaEntradaMain from './BandejaEntradaMain';
-import type { User } from '../../../core/components/auth/schemas/LoginSchema';
+import type { User } from '../../core/components/auth/schemas/LoginSchema';
 
 interface BandejaUser {
   id_usuario: number;
@@ -11,7 +11,6 @@ interface BandejaUser {
 }
 
 const mapUserToBandejaUser = (user: User): BandejaUser => {
-  // Mapear los roles de string a números según tu sistema
   const roleMap: Record<string, number> = {
     'Administrador': 1,
     'Árbitro a Cargo': 2, 

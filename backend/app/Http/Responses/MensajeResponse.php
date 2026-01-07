@@ -74,12 +74,14 @@ class MensajeResponse
                 'id_asunto' => $mensaje->asunto->id_asunto,
             ],
             'adjuntos' => $mensaje->adjuntos?->map(function ($adjunto) {
-                $baseUrl = config('app.url') ?? request()->getSchemeAndHttpHost();
                 return [
                     'id_adjunto' => $adjunto->id_adjunto,
                     'ruta_archivo' => url($adjunto->ruta_archivo),
-                    'nombre_archivo' => $adjunto->ruta_archivo
+                    'nombre_archivo' => $adjunto->nombre_archivo ?? basename($adjunto->ruta_archivo)
                 ];
+            }) ?? [],
+            'respuestas' => $mensaje->respuestas?->map(function ($respuesta) {
+                return self::formatMensaje($respuesta);
             }) ?? [],
             'created_at' => $mensaje->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $mensaje->updated_at?->format('Y-m-d H:i:s')

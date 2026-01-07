@@ -1,4 +1,4 @@
-import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
+import { axiosWithoutMultipart } from '../../../api/axiosInstance';
 import type { AsuntosResponse } from '../schemas/BandejaEntradaSchema';
 
 export const obtenerAsuntosPorExpediente = async (idExpediente: number): Promise<AsuntosResponse> => {

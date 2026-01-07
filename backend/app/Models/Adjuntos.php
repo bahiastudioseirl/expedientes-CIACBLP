@@ -12,6 +12,7 @@ class Adjuntos extends Model
     protected $primaryKey = 'id_adjunto';
 
     protected $fillable = [
+        'nombre_archivo',
         'ruta_archivo',
         'id_mensaje',
     ];

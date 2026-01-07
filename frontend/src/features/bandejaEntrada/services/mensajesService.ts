@@ -1,4 +1,4 @@
-import { axiosWithoutMultipart, axiosInstance } from '../../../../api/axiosInstance';
+import { axiosWithoutMultipart, axiosInstance } from '../../../api/axiosInstance';
 import type { 
   MensajesResponse, 
   CrearMensajeRequest, 
@@ -16,12 +16,10 @@ export const crearMensaje = async (data: CrearMensajeRequest): Promise<CrearMens
   formData.append('id_asunto', data.id_asunto.toString());
   formData.append('contenido', data.contenido);
   
-  // Agregar usuarios destinatarios como array
   data.usuarios_destinatarios.forEach((id, index) => {
     formData.append(`usuarios_destinatarios[${index}]`, id.toString());
   });
   
-  // Agregar adjuntos si existen
   if (data.adjuntos && data.adjuntos.length > 0) {
     data.adjuntos.forEach((file, index) => {
       formData.append(`adjuntos[${index}]`, file);
@@ -29,6 +27,30 @@ export const crearMensaje = async (data: CrearMensajeRequest): Promise<CrearMens
   }
   
   const response = await axiosInstance.post<CrearMensajeResponse>('/mensajes', formData);
+  return response.data;
+};
+
+export const responderMensaje = async (idMensajePadre: number, data: CrearMensajeRequest): Promise<CrearMensajeResponse> => {
+  const formData = new FormData();
+  formData.append('id_asunto', data.id_asunto.toString()); 
+  formData.append('contenido', data.contenido);
+  
+  data.usuarios_destinatarios.forEach((id, index) => {
+    formData.append(`usuarios_destinatarios[${index}]`, id.toString());
+  });
+  
+  if (data.adjuntos && data.adjuntos.length > 0) {
+    data.adjuntos.forEach((file, index) => {
+      formData.append(`adjuntos[${index}]`, file);
+    });
+  }
+  
+  const response = await axiosInstance.post<CrearMensajeResponse>(`/mensajes/${idMensajePadre}/responder`, formData);
+  return response.data;
+};
+
+export const obtenerHiloMensaje = async (idMensaje: number): Promise<any> => {
+  const response = await axiosWithoutMultipart.get<any>(`/mensajes/${idMensaje}/hilo`);
   return response.data;
 };
 

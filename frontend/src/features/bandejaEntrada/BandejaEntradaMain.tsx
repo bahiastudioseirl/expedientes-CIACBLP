@@ -50,7 +50,7 @@ export default function BandejaEntradaMain({ currentUser }: BandejaEntradaMainPr
 
     const handleSelectAsunto = (asunto: Asunto) => {
         // Navegar a la página de chat con los datos necesarios
-        navigate(`/administrator/chat/asunto/${asunto.id_asunto}`, {
+        navigate(`/bandeja-entrada/chat/asunto/${asunto.id_asunto}`, {
             state: {
                 asunto,
                 expediente: selectedExpediente,
