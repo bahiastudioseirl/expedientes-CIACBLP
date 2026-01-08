@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'staff' => \App\Http\Middleware\StaffMiddleware::class,
             'participant' => \App\Http\Middleware\ParticipantMiddleware::class,
+            'solicitante.auth' => \App\Http\Middleware\UsuarioSolicitanteAuthMiddleware::class,
         ]);
         
         // Aplicar CORS a todas las rutas (web y api)

@@ -40,6 +40,10 @@ return [
             'driver' => 'jwt',
             'provider' => 'users',
         ],
+        'solicitante' => [
+            'driver' => 'jwt',
+            'provider' => 'usuarios_solicitantes',
+        ],
     ],
 
     /*
@@ -63,6 +67,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\Usuarios::class,
+        ],
+        'usuarios_solicitantes' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\UsuarioSolicitante::class,
         ],
     ],
 

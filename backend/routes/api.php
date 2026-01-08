@@ -9,6 +9,8 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ExpedienteController;
 use App\Http\Controllers\FlujoController;
 use App\Http\Controllers\MensajeController;
+use App\Http\Controllers\UsuarioSolicitanteController;
+use App\Http\Controllers\SolicitudController;
 
 // Manejar solicitudes OPTIONS para CORS
 Route::options('{any}', function () {
@@ -34,6 +36,18 @@ Route::options('{any}', function () {
 // Rutas de autenticación (con force.json)
 Route::middleware(['force.json'])->prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
+});
+
+// Rutas públicas para usuarios solicitantes (sin autenticación)
+Route::middleware(['force.json'])->prefix('usuario-solicitante')->group(function () {
+    Route::post('/registrar', [UsuarioSolicitanteController::class, 'registrar']);
+    Route::post('/verificar-codigo', [UsuarioSolicitanteController::class, 'verificarCodigo']);
+    Route::post('/reenviar-codigo', [UsuarioSolicitanteController::class, 'reenviarCodigo']);
+});
+
+// Rutas protegidas para usuarios solicitantes autenticados
+Route::middleware(['force.json', 'solicitante.auth'])->prefix('solicitudes')->group(function () {
+    Route::post('/', [SolicitudController::class, 'crear']);
 });
 
 // Rutas con solo autenticación (cualquier usuario logueado)
