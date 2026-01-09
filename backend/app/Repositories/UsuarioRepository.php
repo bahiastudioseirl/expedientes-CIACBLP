@@ -124,4 +124,12 @@ class UsuarioRepository
                       ->get();
     }
     
+
+    public function obtenerUsuarioPorRolYEstado(int $rolId, bool $activo): ?Usuarios
+    {
+        return Usuarios::where('id_rol', $rolId)
+            ->where('activo', $activo)
+            ->first();
+    }
+
 }

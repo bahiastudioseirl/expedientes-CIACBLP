@@ -8,6 +8,13 @@ use App\Services\Solicitud\SolicitudParteService;
 use App\Services\Solicitud\SolicitudPretensionService;
 use App\Services\Solicitud\SolicitudDesignacionService;
 use App\Models\Solicitud;
+use App\Models\UsuarioSolicitante;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SolicitudCreada;
+use App\Mail\NotificarAdminSolicitud;
+use App\Models\Usuarios;
+use App\Repositories\UsuarioRepository;
+use App\Repositories\UsuarioSolicitanteRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +25,8 @@ class SolicitudService
         private SolicitudParteService $parteService,
         private SolicitudPretensionService $pretensionService,
         private SolicitudDesignacionService $designacionService,
+        private UsuarioSolicitanteRepository $usuarioSolicitanteRepository,
+        private UsuarioRepository $usuarioRepository,
     ) {}
 
     public function crear(CrearSolicitudDTO $dto, int $id_usuario_solicitante): Solicitud
@@ -54,6 +63,20 @@ class SolicitudService
             );
             
             $solicitudCompleta = $this->solicitudRepository->obtenerPorId($solicitud->id_solicitud);
+
+            // Enviar correo de notificación al usuario solicitante
+            $usuario = $this->usuarioSolicitanteRepository->buscarPorId($id_usuario_solicitante);
+            if ($usuario && $usuario->correo) {
+                Mail::to($usuario->correo)->send(new SolicitudCreada($usuario));
+            }
+
+            // Enviar correo al administrador
+            $admin = $this->usuarioRepository->obtenerUsuarioPorRolYEstado(1, true);
+            if ($admin && $admin->correos && $admin->correos->count() > 0) {
+                $correoAdmin = $admin->correos->first()->direccion;
+                Mail::to($correoAdmin)->send(new NotificarAdminSolicitud());
+            }
+
             return $solicitudCompleta->load(['partes.correos', 'partes.representante', 'partes.demandadoExtra', 'pretensiones', 'designacion.arbitro']);
         });
     }

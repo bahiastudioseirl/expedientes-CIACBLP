@@ -1,0 +1,252 @@
+import { useState } from 'react';
+import { RegistroSolicitudRequest } from '../schemas/RegistroSolicitudSchema';
+import { DemandanteForm } from './DemandanteForm';
+import { DemandadoForm } from './DemandadoForm';
+import { ResumenControversia } from './ResumenControversia';
+import { PretensionesForm } from './PretensionesForm';
+import { MedidaCautelar } from './MedidaCautelar';
+import { DesignacionArbitral } from './DesignacionArbitral';
+import { LinkAnexo } from './LinkAnexo';
+
+interface Props {
+    onSubmit: (data: RegistroSolicitudRequest) => void;
+    loading?: boolean;
+    error?: string;
+    successMsg?: string;
+    setError?: (msg: string) => void;
+}
+
+export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', successMsg = '', setError }: Props) => {
+    const [form, setForm] = useState<RegistroSolicitudRequest>({
+        demandante: { nombre_razon: '', numero_documento: '', telefono: '' },
+        correos_demandante: [{ correo: '', es_principal: true }],
+        representante_demandante: { nombre_completo: '', numero_documento: '', telefono: '' },
+        demandado: { nombre_razon: '', numero_documento: '', telefono: '' },
+        correos_demandado: [{ correo: '', es_principal: true }],
+        representante_demandado: { nombre_completo: '', numero_documento: '', telefono: '' },
+        demandado_extra: { mesa_partes_virtual: false, direccion_fisica: '' },
+        resumen_controversia: '',
+        pretensiones: [{ descripcion: '', determinada: true, cuantia: null }],
+        medida_cautelar: '',
+        designacion: { arbitro_unico: false, propone_arbitro: false, encarga_ciacblp: false },
+        arbitros: [{ nombre_completo: '', correo: '', telefono: '' }],
+        link_anexo: ''
+    });
+
+    // Estados para opciones del resumen
+    const [tipoResumen, setTipoResumen] = useState<'textarea' | 'archivo'>('textarea');
+    
+    // Estados para designación de árbitro
+    const [tipoDesignacion, setTipoDesignacion] = useState<'unico' | 'colegiado'>('unico');
+    const [opcionArbitroUnico, setOpcionArbitroUnico] = useState<'propone' | 'encarga'>('encarga');
+
+    // Handlers para campos simples
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value, type } = e.target;
+        let checked = false;
+        if (type === 'checkbox' && 'checked' in e.target) {
+            checked = (e.target as HTMLInputElement).checked;
+        }
+        if (name.includes('.')) {
+            const [group, field] = name.split('.');
+            setForm(prev => {
+                const groupValue = typeof prev[group as keyof RegistroSolicitudRequest] === 'object' && prev[group as keyof RegistroSolicitudRequest] !== null
+                    ? prev[group as keyof RegistroSolicitudRequest] as Record<string, any>
+                    : {};
+                return {
+                    ...prev,
+                    [group]: { ...groupValue, [field]: type === 'checkbox' ? checked : value }
+                };
+            });
+        } else {
+            setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        }
+        if (error && setError) setError('');
+    };
+
+    // Handlers para arrays con lógica automática de correo principal
+    const handleArrayChange = (arrName: keyof RegistroSolicitudRequest, idx: number, field: string, value: any) => {
+        setForm(prev => {
+            const newArray = Array.isArray(prev[arrName]) ? prev[arrName].map((item: any, i: number) => {
+                if (i === idx) {
+                    return { ...item, [field]: value };
+                }
+                return item;
+            }) : prev[arrName];
+
+            return { ...prev, [arrName]: newArray };
+        });
+        if (error && setError) setError('');
+    };
+
+    const addArrayItem = (arrName: keyof RegistroSolicitudRequest, item: any) => {
+        setForm(prev => ({
+            ...prev,
+            [arrName]: Array.isArray(prev[arrName]) ? [...prev[arrName], item] : [item]
+        }));
+    };
+
+    const removeArrayItem = (arrName: keyof RegistroSolicitudRequest, idx: number) => {
+        setForm(prev => ({
+            ...prev,
+            [arrName]: Array.isArray(prev[arrName]) ? prev[arrName].filter((_: any, i: number) => i !== idx) : []
+        }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Marcar automáticamente el primer correo como principal
+        const formWithCorreos = {
+            ...form,
+            correos_demandante: form.correos_demandante.map((correo, idx) => ({
+                ...correo,
+                es_principal: idx === 0
+            })),
+            correos_demandado: form.correos_demandado.map((correo, idx) => ({
+                ...correo,
+                es_principal: idx === 0
+            }))
+        };
+        onSubmit(formWithCorreos);
+    };
+
+    return (
+        <div className="max-w-5xl mx-auto bg-white">
+            <div className="p-6">
+                {/* Título Principal */}
+                <div className="text-center mb-8">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Solicitud de Arbitraje</h1>
+                    <p className="text-sm text-gray-600">Complete el siguiente formulario con la información requerida</p>
+                    <div className="w-24 h-1 bg-gradient-to-r from-[#733AEA] to-purple-600 mx-auto mt-3 rounded-full"></div>
+                </div>
+
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                    {/* Datos del Demandante */}
+                    <DemandanteForm
+                        demandante={form.demandante}
+                        correos={form.correos_demandante}
+                        representante={form.representante_demandante}
+                        onChange={(field, value) => {
+                            if (field.startsWith('correos_demandante.')) {
+                                const [, index, property] = field.split('.');
+                                handleArrayChange('correos_demandante', parseInt(index), property, value);
+                            } else {
+                                const e = { target: { name: field, value } } as React.ChangeEvent<HTMLInputElement>;
+                                handleChange(e);
+                            }
+                        }}
+                        onAddCorreo={() => addArrayItem('correos_demandante', { correo: '', es_principal: false })}
+                        onRemoveCorreo={(index) => removeArrayItem('correos_demandante', index)}
+                    />
+
+                    {/* Datos del Demandado */}
+                    <DemandadoForm
+                        demandado={form.demandado}
+                        correos={form.correos_demandado}
+                        representante={form.representante_demandado}
+                        demandadoExtra={form.demandado_extra}
+                        onChange={(field, value) => {
+                            if (field.startsWith('correos_demandado.')) {
+                                const [, index, property] = field.split('.');
+                                handleArrayChange('correos_demandado', parseInt(index), property, value);
+                            } else {
+                                const e = { target: { name: field, value, type: typeof value === 'boolean' ? 'checkbox' : 'text', checked: value } } as React.ChangeEvent<HTMLInputElement>;
+                                handleChange(e);
+                            }
+                        }}
+                        onAddCorreo={() => addArrayItem('correos_demandado', { correo: '', es_principal: false })}
+                        onRemoveCorreo={(index) => removeArrayItem('correos_demandado', index)}
+                    />
+
+                    {/* Resumen de la controversia */}
+                    <ResumenControversia
+                        tipoResumen={tipoResumen}
+                        setTipoResumen={setTipoResumen}
+                        resumen={form.resumen_controversia}
+                        onResumenChange={e => {
+                            setForm(prev => ({ ...prev, resumen_controversia: e.target.value }));
+                            if (error && setError) setError('');
+                        }}
+                        onArchivoChange={e => {
+                            // Aquí puedes manejar el archivo si lo necesitas
+                            if (error && setError) setError('');
+                        }}
+                        error={error}
+                    />
+
+                    {/* Pretensiones */}
+                    <PretensionesForm
+                        pretensiones={form.pretensiones}
+                        onChange={(index, field, value) => handleArrayChange('pretensiones', index, field, value)}
+                        onAdd={() => addArrayItem('pretensiones', { descripcion: '', determinada: true, cuantia: null })}
+                        onRemove={(index) => removeArrayItem('pretensiones', index)}
+                    />
+
+                    <MedidaCautelar
+                        medida_cautelar={form.medida_cautelar}
+                        onChange={handleChange}
+                    />
+
+                    <DesignacionArbitral
+                        tipoDesignacion={tipoDesignacion}
+                        setTipoDesignacion={setTipoDesignacion}
+                        opcionArbitroUnico={opcionArbitroUnico}
+                        setOpcionArbitroUnico={setOpcionArbitroUnico}
+                        arbitros={form.arbitros}
+                        onChangeArbitro={(index, field, value) => handleArrayChange('arbitros', index, field, value)}
+                    />
+
+                    {/* Link de anexo */}
+                    <LinkAnexo
+                        link_anexo={form.link_anexo}
+                        onChange={handleChange}
+                    />
+
+                    {/* Mensajes de error/éxito */}
+                    {error && (
+                        <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                            <div className="flex">
+                                <div className="ml-3">
+                                    <p className="text-red-700">{error}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {successMsg && (
+                        <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                            <div className="flex">
+                                <div className="ml-3">
+                                    <p className="text-green-700">{successMsg}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Botón de envío */}
+                    <div className="text-center pt-6">
+                        <button 
+                            type="submit" 
+                            disabled={loading} 
+                            className="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-[#733AEA] to-purple-600 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-[#733AEA] transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-w-[240px]"
+                        >
+                            {loading ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                    <span>Enviando solicitud...</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                    <span>Enviar Solicitud de Arbitraje</span>
+                                </div>
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};

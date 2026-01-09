@@ -48,6 +48,14 @@ const ArbitrosPage = lazy(() =>
     import('../../admin/features/usuariosAdmin/pages/ArbitrosPage').then((module) => ({ default: module.default }))
 );
 
+const RegistroSolicitantePage = lazy(() =>
+    import('../../features/public/registroSolicitante/pages/RegistroSolicitantePage').then((module) => ({ default: module.RegistroSolicitantePage }))
+);
+
+const RegistroSolicitudPage = lazy(() =>
+    import('../../features/public/registroSolicitud/pages/RegistroSolicitudPage').then((module) => ({ default: module.RegistroSolicitudPage }))
+);
+
 
 export const routes = [
     // RUTAS PÚBLICAS - PÁGINAS DE USUARIO
@@ -68,6 +76,26 @@ export const routes = [
         element: (
             <LazyWrapper>
                 <LoginForm />
+            </LazyWrapper>
+        ),
+    },
+
+    // RUTA PÚBLICA: Registro de solicitante
+    {
+        path: '/registro-solicitante',
+        element: (
+            <LazyWrapper>
+                <RegistroSolicitantePage />
+            </LazyWrapper>
+        ),
+    },
+
+    // RUTA PROTEGIDA: Registro de solicitud (requiere JWT de solicitante)
+    {
+        path: '/registro-solicitud',
+        element: (
+            <LazyWrapper>
+                <RegistroSolicitudPage />
             </LazyWrapper>
         ),
     },

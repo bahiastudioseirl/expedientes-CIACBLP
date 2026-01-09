@@ -12,7 +12,7 @@ class SolicitudResponse
     {
         return response()->json([
             'success' => true,
-            'message' => 'Solicitud creada exitosamente',
+            'message' => '¡Solicitud enviada corretamente! Se evaluará dentro de los próximos 10 días hábiles.',
             'data' => [
                 'solicitud' => self::formatSolicitudDetallada($solicitud)
             ]
