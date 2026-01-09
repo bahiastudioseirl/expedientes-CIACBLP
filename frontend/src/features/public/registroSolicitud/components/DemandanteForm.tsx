@@ -86,13 +86,13 @@ export const DemandanteForm = ({
                 </label>
                 <div className="space-y-4">
                     {correos.map((correo, idx) => (
-                        <div key={idx} className="flex items-center gap-4 p-4 bg-white/80 border-2 border-gray-100 rounded-xl hover:border-purple-200 transition-all duration-200 shadow-sm">
+                        <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:gap-4 p-3 sm:p-4 bg-white/80 border-2 border-gray-100 rounded-lg sm:rounded-xl hover:border-purple-200 transition-all duration-200 shadow-sm">
                             <div className="flex-1">
                                 <input
                                     type="email"
                                     value={correo.correo}
                                     onChange={handleCorreoChange(idx)}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#733AEA] focus:ring-4 focus:ring-purple-100 transition-all duration-200 placeholder-gray-400 text-gray-800 font-medium"
+                                    className="w-full px-2 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-[#733AEA] focus:ring-2 sm:focus:ring-4 focus:ring-purple-100 transition-all duration-200 placeholder-gray-400 text-gray-800 font-medium text-sm"
                                     placeholder={idx === 0 ? "Correo principal *" : "Correo secundario"}
                                     required={idx === 0}
                                 />
@@ -109,7 +109,7 @@ export const DemandanteForm = ({
                                 <button
                                     type="button"
                                     onClick={() => onRemoveCorreo(idx)}
-                                    className="px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 font-medium text-sm flex items-center gap-2"
+                                    className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 font-medium text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-2"
                                     title="Eliminar correo secundario"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,9 +124,9 @@ export const DemandanteForm = ({
                 <button
                     type="button"
                     onClick={onAddCorreo}
-                    className="mt-4 px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-purple-50 hover:to-purple-100 hover:text-purple-700 transition-all duration-200 font-semibold text-sm border-2 border-gray-200 hover:border-purple-300 flex items-center gap-2"
+                    className="w-full sm:w-auto mt-3 sm:mt-4 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-lg sm:rounded-xl hover:from-purple-50 hover:to-purple-100 hover:text-purple-700 transition-all duration-200 font-semibold text-xs sm:text-sm border-2 border-gray-200 hover:border-purple-300 flex items-center justify-center gap-2"
                 >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     Agregar correos secundarios

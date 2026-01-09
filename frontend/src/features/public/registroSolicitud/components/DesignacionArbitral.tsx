@@ -29,7 +29,7 @@ export const DesignacionArbitral: React.FC<DesignacionArbitralProps> = ({
         <FormSection title="Designación del órgano arbitral" number={6}>
             <div className="mb-4">
                 <label className="block text-xs font-semibold text-gray-700 mb-3">Seleccione el tipo de designación:</label>
-                <div className="flex gap-6 mt-3">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 mt-3">
                     <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors">
                         <input
                             type="radio"
@@ -60,8 +60,8 @@ export const DesignacionArbitral: React.FC<DesignacionArbitralProps> = ({
                         Opciones para Árbitro Único
                     </h4>
 
-                    <div className="space-y-3 mb-4">
-                        <label className="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-white/50 transition-all duration-200 border border-transparent hover:border-blue-200">
+                    <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
+                        <label className="flex items-start gap-3 cursor-pointer p-2 sm:p-3 rounded-lg hover:bg-white/50 transition-all duration-200 border border-transparent hover:border-blue-200">
                             <input
                                 type="radio"
                                 name="opcion_arbitro_unico"
@@ -69,9 +69,9 @@ export const DesignacionArbitral: React.FC<DesignacionArbitralProps> = ({
                                 onChange={() => setOpcionArbitroUnico('propone')}
                                 className="w-4 h-4 text-blue-600 border-2 border-gray-300 focus:ring-2 focus:ring-blue-100 mt-0.5"
                             />
-                            <span className="text-sm text-gray-700 leading-relaxed">El solicitante propone el árbitro</span>
+                            <span className="text-xs sm:text-sm text-gray-700 leading-relaxed">El solicitante propone el árbitro</span>
                         </label>
-                        <label className="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-white/50 transition-all duration-200 border border-transparent hover:border-blue-200">
+                        <label className="flex items-start gap-3 cursor-pointer p-2 sm:p-3 rounded-lg hover:bg-white/50 transition-all duration-200 border border-transparent hover:border-blue-200">
                             <input
                                 type="radio"
                                 name="opcion_arbitro_unico"
@@ -79,7 +79,7 @@ export const DesignacionArbitral: React.FC<DesignacionArbitralProps> = ({
                                 onChange={() => setOpcionArbitroUnico('encarga')}
                                 className="w-4 h-4 text-blue-600 border-2 border-gray-300 focus:ring-2 focus:ring-blue-100 mt-0.5"
                             />
-                            <span className="text-sm text-gray-700 leading-relaxed">El solicitante encarga al CIACBLP la designación del árbitro único, conforme a su Reglamento</span>
+                            <span className="text-xs sm:text-sm text-gray-700 leading-relaxed">El solicitante encarga al CIACBLP la designación del árbitro único, conforme a su Reglamento</span>
                         </label>
                     </div>
 
@@ -89,7 +89,7 @@ export const DesignacionArbitral: React.FC<DesignacionArbitralProps> = ({
                                 <span className="w-1 h-1 bg-blue-400 rounded-full mr-2"></span>
                                 Datos del Árbitro Propuesto
                             </h5>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                                 <FormField
                                     label="Nombre completo"
                                     name="arbitro_unico_nombre"

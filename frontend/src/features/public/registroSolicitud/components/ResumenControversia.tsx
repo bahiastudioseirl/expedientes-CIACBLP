@@ -23,7 +23,7 @@ export const ResumenControversia = ({
         <FormSection title="Resumen de la controversia" number={3}>
             <div className="mb-3">
                 <label className="block text-xs font-semibold text-gray-700 mb-2">Seleccione una opción</label>
-                <div className="flex gap-4 items-center">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input
                             type="radio"

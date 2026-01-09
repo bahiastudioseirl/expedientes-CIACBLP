@@ -111,16 +111,16 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
     };
 
     return (
-        <div className="max-w-5xl mx-auto bg-white">
-            <div className="p-6">
+        <div className="w-full max-w-5xl mx-auto bg-white px-4 sm:px-6 lg:px-8">
+            <div className="py-4 sm:py-6">
                 {/* Título Principal */}
-                <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Solicitud de Arbitraje</h1>
-                    <p className="text-sm text-gray-600">Complete el siguiente formulario con la información requerida</p>
-                    <div className="w-24 h-1 bg-gradient-to-r from-[#733AEA] to-purple-600 mx-auto mt-3 rounded-full"></div>
+                <div className="text-center mb-6 sm:mb-8">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Solicitud de Arbitraje</h1>
+                    <p className="text-xs sm:text-sm text-gray-600">Complete el siguiente formulario con la información requerida</p>
+                    <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-[#733AEA] to-purple-600 mx-auto mt-3 rounded-full"></div>
                 </div>
 
-                <form className="space-y-6" onSubmit={handleSubmit}>
+                <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
                     {/* Datos del Demandante */}
                     <DemandanteForm
                         demandante={form.demandante}
@@ -224,11 +224,11 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
                     )}
 
                     {/* Botón de envío */}
-                    <div className="text-center pt-6">
+                    <div className="text-center pt-4 sm:pt-6">
                         <button 
                             type="submit" 
                             disabled={loading} 
-                            className="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-[#733AEA] to-purple-600 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-[#733AEA] transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-w-[240px]"
+                            className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-[#733AEA] to-purple-600 text-white font-bold text-sm sm:text-base rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-[#733AEA] transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-w-0 sm:min-w-[240px]"
                         >
                             {loading ? (
                                 <div className="flex items-center gap-2">
@@ -237,9 +237,6 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
                                     <span>Enviar Solicitud de Arbitraje</span>
                                 </div>
                             )}
