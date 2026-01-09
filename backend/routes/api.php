@@ -11,6 +11,7 @@ use App\Http\Controllers\FlujoController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioSolicitanteController;
 use App\Http\Controllers\SolicitudController;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 // Manejar solicitudes OPTIONS para CORS
 Route::options('{any}', function () {
@@ -48,6 +49,35 @@ Route::middleware(['force.json'])->prefix('usuario-solicitante')->group(function
 // Rutas protegidas para usuarios solicitantes autenticados
 Route::middleware(['force.json', 'solicitante.auth'])->prefix('solicitudes')->group(function () {
     Route::post('/', [SolicitudController::class, 'crear']);
+    
+    // Obtener información del usuario solicitante autenticado
+    Route::get('/me', function (Request $request) {
+        $usuario = $request->attributes->get('usuario_solicitante');
+        return response()->json([
+            'usuario' => [
+                'id' => $usuario->id_usuario_solicitante,
+                'numero_documento' => $usuario->numero_documento,
+                'nombre_completo' => $usuario->nombre_completo,
+                'correo' => $usuario->correo
+            ]
+        ]);
+    });
+    
+    // Logout para usuarios solicitantes
+    Route::post('/logout', function (Request $request) {
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+            return response()->json([
+                'success' => true,
+                'message' => 'Sesión cerrada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cerrar sesión'
+            ], 500);
+        }
+    });
 });
 
 // Rutas con solo autenticación (cualquier usuario logueado)

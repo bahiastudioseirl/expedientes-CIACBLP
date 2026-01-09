@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RegistroSolicitudRequest } from '../schemas/RegistroSolicitudSchema';
 import { DemandanteForm } from './DemandanteForm';
 import { DemandadoForm } from './DemandadoForm';
@@ -7,16 +7,27 @@ import { PretensionesForm } from './PretensionesForm';
 import { MedidaCautelar } from './MedidaCautelar';
 import { DesignacionArbitral } from './DesignacionArbitral';
 import { LinkAnexo } from './LinkAnexo';
+import { SuccessModal } from '../../../../components/common/SuccessModal';
 
 interface Props {
     onSubmit: (data: RegistroSolicitudRequest) => void;
     loading?: boolean;
     error?: string;
-    successMsg?: string;
+    showSuccessModal?: boolean;
+    successMessage?: string;
+    onCloseSuccessModal?: () => void;
     setError?: (msg: string) => void;
 }
 
-export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', successMsg = '', setError }: Props) => {
+export const RegistroSolicitudForm = ({ 
+    onSubmit, 
+    loading = false, 
+    error = '', 
+    showSuccessModal = false,
+    successMessage = '',
+    onCloseSuccessModal,
+    setError 
+}: Props) => {
     const [form, setForm] = useState<RegistroSolicitudRequest>({
         demandante: { nombre_razon: '', numero_documento: '', telefono: '' },
         correos_demandante: [{ correo: '', es_principal: true }],
@@ -24,8 +35,10 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
         demandado: { nombre_razon: '', numero_documento: '', telefono: '' },
         correos_demandado: [{ correo: '', es_principal: true }],
         representante_demandado: { nombre_completo: '', numero_documento: '', telefono: '' },
-        demandado_extra: { mesa_partes_virtual: false, direccion_fisica: '' },
+        demandado_extra: { mesa_partes_virtual: false, direccion_fiscal: '' },
         resumen_controversia: '',
+        resumen_controversia_tipo: 'texto',
+        resumen_controversia_archivo: null,
         pretensiones: [{ descripcion: '', determinada: true, cuantia: null }],
         medida_cautelar: '',
         designacion: { arbitro_unico: false, propone_arbitro: false, encarga_ciacblp: false },
@@ -34,11 +47,25 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
     });
 
     // Estados para opciones del resumen
-    const [tipoResumen, setTipoResumen] = useState<'textarea' | 'archivo'>('textarea');
+    const [tipoResumen, setTipoResumen] = useState<'texto' | 'archivo'>('texto');
     
     // Estados para designación de árbitro
     const [tipoDesignacion, setTipoDesignacion] = useState<'unico' | 'colegiado'>('unico');
     const [opcionArbitroUnico, setOpcionArbitroUnico] = useState<'propone' | 'encarga'>('encarga');
+
+    // Sincronizar designación con el formulario
+    useEffect(() => {
+        setForm(prev => ({
+            ...prev,
+            designacion: {
+                arbitro_unico: tipoDesignacion === 'unico',
+                propone_arbitro: tipoDesignacion === 'unico' && opcionArbitroUnico === 'propone',
+                encarga_ciacblp: tipoDesignacion === 'unico' && opcionArbitroUnico === 'encarga'
+            },
+            // No enviar árbitros cuando se encarga al CIACBLP
+            arbitros: opcionArbitroUnico === 'encarga' ? [] : (prev.arbitros.length === 0 ? [{ nombre_completo: '', correo: '', telefono: '' }] : prev.arbitros)
+        }));
+    }, [tipoDesignacion, opcionArbitroUnico]);
 
     // Handlers para campos simples
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -114,7 +141,7 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
         <div className="w-full max-w-5xl mx-auto bg-white px-4 sm:px-6 lg:px-8">
             <div className="py-4 sm:py-6">
                 {/* Título Principal */}
-                <div className="text-center mb-6 sm:mb-8">
+                <div className="text-center mb-6 sm:mb-12">
                     <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Solicitud de Arbitraje</h1>
                     <p className="text-xs sm:text-sm text-gray-600">Complete el siguiente formulario con la información requerida</p>
                     <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-[#733AEA] to-purple-600 mx-auto mt-3 rounded-full"></div>
@@ -161,14 +188,23 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
                     {/* Resumen de la controversia */}
                     <ResumenControversia
                         tipoResumen={tipoResumen}
-                        setTipoResumen={setTipoResumen}
+                        setTipoResumen={(tipo) => {
+                            setTipoResumen(tipo);
+                            setForm(prev => ({
+                                ...prev,
+                                resumen_controversia_tipo: tipo,
+                                resumen_controversia: tipo === 'archivo' ? '' : prev.resumen_controversia,
+                                resumen_controversia_archivo: tipo === 'texto' ? null : prev.resumen_controversia_archivo
+                            }));
+                        }}
                         resumen={form.resumen_controversia}
+                        archivo={form.resumen_controversia_archivo}
                         onResumenChange={e => {
                             setForm(prev => ({ ...prev, resumen_controversia: e.target.value }));
                             if (error && setError) setError('');
                         }}
-                        onArchivoChange={e => {
-                            // Aquí puedes manejar el archivo si lo necesitas
+                        onArchivoChange={(file) => {
+                            setForm(prev => ({ ...prev, resumen_controversia_archivo: file }));
                             if (error && setError) setError('');
                         }}
                         error={error}
@@ -202,7 +238,7 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
                         onChange={handleChange}
                     />
 
-                    {/* Mensajes de error/éxito */}
+                    {/* Mensajes de error */}
                     {error && (
                         <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
                             <div className="flex">
@@ -213,15 +249,13 @@ export const RegistroSolicitudForm = ({ onSubmit, loading = false, error = '', s
                         </div>
                     )}
 
-                    {successMsg && (
-                        <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                            <div className="flex">
-                                <div className="ml-3">
-                                    <p className="text-green-700">{successMsg}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/* Modal de éxito */}
+                    <SuccessModal
+                        isOpen={showSuccessModal}
+                        onClose={onCloseSuccessModal || (() => {})}
+                        message={successMessage || "Su solicitud ha sido procesada correctamente."}
+                        countdown={10}
+                    />
 
                     {/* Botón de envío */}
                     <div className="text-center pt-4 sm:pt-6">

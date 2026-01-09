@@ -21,7 +21,7 @@ class SolicitudDesignacionService
         $dataDesignacion['id_solicitud'] = $id_solicitud;
         $designacion = $this->designacionRepository->crear($dataDesignacion);
 
-        // Solo tomar el primer árbitro ya que es hasOne
+        // Solo crear árbitro si hay datos en el array
         if (!empty($arbitrosDTO)) {
             $arbitroDTO = $arbitrosDTO[0]; // Solo el primer árbitro
             $data = $arbitroDTO->toArray();

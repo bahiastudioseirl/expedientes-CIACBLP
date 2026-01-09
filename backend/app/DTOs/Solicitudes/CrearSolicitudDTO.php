@@ -26,6 +26,8 @@ class CrearSolicitudDTO
 
         //Resumen de la controversia
         public string $resumen_controversia,
+        public ?string $resumen_controversia_tipo = 'texto', // 'texto' o 'archivo'
+        public ?string $resumen_controversia_archivo = null, // path del archivo si es tipo archivo
 
         //Pretensiones
         public array $pretensiones,
@@ -37,15 +39,27 @@ class CrearSolicitudDTO
         public CrearSolicitudDesignacionDTO $designacion,
         public array $arbitros,
 
-        public int $id_usuario_solicitante,
         public ?string $link_anexo = null,
         public string $estado = 'pendiente',
+        public int $id_usuario_solicitante = 0,
 
 
     ){}
 
     public static function fromRequest(array $data): self
     {
+        // Manejar el tipo de resumen de controversia
+        $resumenTipo = $data['resumen_controversia_tipo'] ?? 'texto';
+        $resumenTexto = '';
+        $resumenArchivo = null;
+        
+        if ($resumenTipo === 'texto') {
+            $resumenTexto = $data['resumen_controversia'] ?? '';
+        } else if ($resumenTipo === 'archivo') {
+            // El archivo se procesará en el servicio
+            $resumenArchivo = 'temp'; // Placeholder, se procesa en el servicio
+        }
+
         return new self(
             demandante: CrearSolicitudParteDTO::fromArray($data['demandante'] + ['tipo' => 'demandante', 'id_solicitud' => 0]),
             correos_demandante: array_map(
@@ -68,7 +82,9 @@ class CrearSolicitudDTO
                 ? CrearSolicitudDemandadoExtraDTO::fromArray($data['demandado_extra'] + ['id_solicitud_parte' => 0])
                 : null,
             
-            resumen_controversia: $data['resumen_controversia'],
+            resumen_controversia: $resumenTexto,
+            resumen_controversia_tipo: $resumenTipo,
+            resumen_controversia_archivo: $resumenArchivo,
             pretensiones: array_map(
                 fn($pretension) => CrearSolicitudPretensionDTO::fromArray($pretension + ['id_solicitud' => 0]),
                 $data['pretensiones']
@@ -80,8 +96,9 @@ class CrearSolicitudDTO
                 fn($arbitro) => CrearSolicitudArbitroDTO::fromArray($arbitro + ['id_solicitud_designacion' => 0]),
                 $data['arbitros']
             ),
-            id_usuario_solicitante: $data['id_usuario_solicitante'],
             link_anexo: $data['link_anexo'] ?? null,
+            estado: 'pendiente',
+            id_usuario_solicitante: (int) ($data['id_usuario_solicitante'] ?? 0),
         );
     }
     public function getSolicitudData(): array
@@ -89,6 +106,8 @@ class CrearSolicitudDTO
         return [
             'estado' => $this->estado,
             'resumen_controversia' => $this->resumen_controversia,
+            'resumen_controversia_tipo' => $this->resumen_controversia_tipo,
+            'resumen_controversia_archivo' => $this->resumen_controversia_archivo,
             'medida_cautelar' => $this->medida_cautelar,
             'link_anexo' => $this->link_anexo,
             'id_usuario_solicitante' => $this->id_usuario_solicitante

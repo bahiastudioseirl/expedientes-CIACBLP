@@ -6,7 +6,7 @@ class CrearSolicitudDemandadoExtraDTO
 {
     public function __construct(
         public bool $mesa_partes_virtual,
-        public ?string $direccion_fisica,
+        public ?string $direccion_fiscal,
         public int $id_solicitud_parte
     ){}
 
@@ -14,16 +14,22 @@ class CrearSolicitudDemandadoExtraDTO
     {
         return new self(
             mesa_partes_virtual: $data['mesa_partes_virtual'],
-            direccion_fisica: $data['direccion_fisica'] ?? null,
+            direccion_fiscal: $data['direccion_fiscal'] ?? null,
             id_solicitud_parte: $id_solicitud_parte
         );
     }
 
     public static function fromArray(array $data): self
     {
+        
+        $mesaPartesVirtual = $data['mesa_partes_virtual'];
+        if (is_string($mesaPartesVirtual)) {
+            $mesaPartesVirtual = in_array(strtolower($mesaPartesVirtual), ['1', 'true']);
+        }
+        $direccionFiscal = $mesaPartesVirtual ? null : ($data['direccion_fiscal'] ?? null);
         return new self(
-            mesa_partes_virtual: $data['mesa_partes_virtual'],
-            direccion_fisica: $data['direccion_fisica'] ?? null,
+            mesa_partes_virtual: (bool) $mesaPartesVirtual,
+            direccion_fiscal: $direccionFiscal,
             id_solicitud_parte: $data['id_solicitud_parte']
         );
     }
@@ -32,7 +38,7 @@ class CrearSolicitudDemandadoExtraDTO
     {
         return [
             'mesa_partes_virtual' => $this->mesa_partes_virtual,
-            'direccion_fisica' => $this->direccion_fisica,
+            'direccion_fiscal' => $this->direccion_fiscal,
             'id_solicitud_parte' => $this->id_solicitud_parte
         ];
     }

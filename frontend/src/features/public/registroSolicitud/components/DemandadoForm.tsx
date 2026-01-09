@@ -20,7 +20,7 @@ interface RepresentanteDemandado {
 
 interface DemandadoExtra {
     mesa_partes_virtual: boolean;
-    direccion_fisica: string;
+    direccion_fiscal: string;
 }
 
 interface DemandadoFormProps {
@@ -203,9 +203,9 @@ export const DemandadoForm = ({
                     <div className="mt-6 p-6 bg-blue-50 border-2 border-blue-200 rounded-xl">
                         <FormField
                             label="Dirección física para notificación *"
-                            name="demandado_extra.direccion_fisica"
-                            value={demandadoExtra.direccion_fisica}
-                            onChange={handleFieldChange('demandado_extra.direccion_fisica')}
+                            name="demandado_extra.direccion_fiscal"
+                            value={demandadoExtra.direccion_fiscal}
+                            onChange={handleFieldChange('demandado_extra.direccion_fiscal')}
                             placeholder="Ej. Calle los Pinos 123, Lima, Perú"
                             required={demandadoExtra.mesa_partes_virtual === false}
                         />

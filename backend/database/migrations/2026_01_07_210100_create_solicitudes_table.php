@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id('id_solicitud');
             $table->enum('estado', ['pendiente', 'admitida', 'rechazada', 'observada'])->default('pendiente');
             $table->text('resumen_controversia');
+            $table->enum('resumen_controversia_tipo', ['texto', 'archivo'])->default('texto');
+            $table->string('resumen_controversia_archivo', 500)->nullable();
             $table->text('medida_cautelar')->nullable();
             $table->text('link_anexo');
             $table->unsignedBigInteger('id_usuario_solicitante');

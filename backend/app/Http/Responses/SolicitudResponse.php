@@ -79,7 +79,7 @@ class SolicitudResponse
                     $parteData['demandado_extra'] = $parte->demandadoExtra ? [
                         'id' => $parte->demandadoExtra->id_solicitud_demandado_extra,
                         'mesa_partes_virtual' => $parte->demandadoExtra->mesa_partes_virtual,
-                        'direccion_fisica' => $parte->demandadoExtra->direccion_fisica,
+                        'direccion_fiscal' => $parte->demandadoExtra->direccion_fiscal,
                     ] : null;
                 }
 
@@ -87,6 +87,8 @@ class SolicitudResponse
             }),
 
             'resumen_controversia' => $solicitud->resumen_controversia,
+            'resumen_controversia_tipo' => $solicitud->resumen_controversia_tipo ?? 'texto',
+            'resumen_controversia_archivo' => $solicitud->resumen_controversia_archivo ? url($solicitud->resumen_controversia_archivo) : null,
 
             'pretensiones' => $solicitud->pretensiones->map(function ($pretension) {
                 return [

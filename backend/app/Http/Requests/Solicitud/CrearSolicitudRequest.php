@@ -44,10 +44,12 @@ class CrearSolicitudRequest extends FormRequest
             'representante_demandado.telefono' => 'nullable|string|max:15',
             
             'demandado_extra.mesa_partes_virtual' => 'nullable|boolean',
-            'demandado_extra.direccion_fisica' => 'nullable|string|max:255',
+            'demandado_extra.direccion_fiscal' => 'nullable|string|max:255',
 
             // Resumen de la controversia
-            'resumen_controversia' => 'required|string|max:1000',
+            'resumen_controversia' => 'required_if:resumen_controversia_tipo,texto|nullable|string|max:1000',
+            'resumen_controversia_tipo' => 'required|string|in:texto,archivo',
+            'resumen_controversia_archivo' => 'required_if:resumen_controversia_tipo,archivo|nullable|file|mimes:pdf,doc,docx,txt|max:10240', // 10MB
 
             // Pretensiones
             'pretensiones' => 'required|array|min:1',
@@ -63,8 +65,8 @@ class CrearSolicitudRequest extends FormRequest
             'designacion.propone_arbitro' => 'nullable|boolean',
             'designacion.encarga_ciacblp' => 'nullable|boolean',
 
-            'arbitros' => 'required|array|min:1',
-            'arbitros.*.nombre_completo' => 'required|string|max:255',
+            'arbitros' => 'required_if:designacion.propone_arbitro,true|array',
+            'arbitros.*.nombre_completo' => 'required_if:designacion.propone_arbitro,true|nullable|string|max:255',
             'arbitros.*.correo' => 'nullable|email|max:255',
             'arbitros.*.telefono' => 'nullable|string|max:15',
 
@@ -78,7 +80,11 @@ class CrearSolicitudRequest extends FormRequest
     {
         return [
             // Mensajes personalizados
-            'resumen_controversia.required' => 'El resumen de la controversia es obligatorio.',
+            'resumen_controversia.required_if' => 'El resumen de la controversia es obligatorio cuando el tipo es texto.',
+            'resumen_controversia_tipo.required' => 'Debe especificar el tipo de resumen (texto o archivo).',
+            'resumen_controversia_archivo.required_if' => 'Debe subir un archivo cuando el tipo es archivo.',
+            'resumen_controversia_archivo.mimes' => 'El archivo debe ser PDF, DOC, DOCX o TXT.',
+            'resumen_controversia_archivo.max' => 'El archivo no debe superar 10MB.',
             'correos_demandante.required' => 'Debe proporcionar al menos un correo del demandante.',
             'correos_demandado.required' => 'Debe proporcionar al menos un correo del demandado.',
             'pretensiones.required' => 'Debe especificar al menos una pretensión.',
@@ -122,7 +128,14 @@ class CrearSolicitudRequest extends FormRequest
         if (!$this->has($field)) return;
 
         $correos = $this->input($field, []);
-        $principales = array_filter($correos, fn($c) => ($c['es_principal'] ?? false) === true);
+        
+        $principales = array_filter($correos, function($c) {
+            $esPrincipal = $c['es_principal'] ?? false;
+            if (is_string($esPrincipal)) {
+                return in_array(strtolower($esPrincipal), ['1', 'true']);
+            }
+            return (bool) $esPrincipal;
+        });
         
         if (count($principales) === 0) {
             $validator->errors()->add($field, "Debe marcar un correo como principal para el {$parte}.");

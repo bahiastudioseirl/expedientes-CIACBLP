@@ -17,7 +17,7 @@ export interface Representante {
 
 export interface DemandadoExtra {
   mesa_partes_virtual: boolean;
-  direccion_fisica: string;
+  direccion_fiscal: string;
 }
 
 export interface Pretension {
@@ -47,6 +47,8 @@ export interface RegistroSolicitudRequest {
   representante_demandado: Representante;
   demandado_extra: DemandadoExtra;
   resumen_controversia: string;
+  resumen_controversia_tipo: 'texto' | 'archivo';
+  resumen_controversia_archivo: File | null;
   pretensiones: Pretension[];
   medida_cautelar: string;
   designacion: Designacion;

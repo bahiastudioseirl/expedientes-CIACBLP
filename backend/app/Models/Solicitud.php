@@ -15,6 +15,8 @@ class Solicitud extends Model
     protected $fillable = [
         'estado',
         'resumen_controversia',
+        'resumen_controversia_tipo',
+        'resumen_controversia_archivo',
         'medida_cautelar',
         'link_anexo',
         'id_usuario_solicitante'

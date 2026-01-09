@@ -30,10 +30,10 @@ class SolicitudController extends Controller
                 ], 401);
             }
             
-            $validated['id_usuario_solicitante'] = $usuario->id_usuario_solicitante;
+            $validated['id_usuario_solicitante'] = (int) $usuario->id_usuario_solicitante;
             
             $dto = CrearSolicitudDTO::fromRequest($validated);
-            $solicitud = $this->solicitudService->crear($dto, $usuario->id_usuario_solicitante);
+            $solicitud = $this->solicitudService->crear($dto, (int) $usuario->id_usuario_solicitante);
             
             return SolicitudResponse::crear($solicitud);
         } catch (ValidationException $e) {
