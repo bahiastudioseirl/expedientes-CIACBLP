@@ -26,4 +26,14 @@ class SolicitudRepository
     {
         return Solicitud::where('id_solicitud', $id)->update($data);
     }
+
+    public function listarTodas(): Collection
+    {
+        return Solicitud::all();
+    }
+
+    public function admitirSolicitud(int $id): bool
+    {
+        return Solicitud::where('id_solicitud', $id)->update(['estado' => 'admitida']);
+    }
 }

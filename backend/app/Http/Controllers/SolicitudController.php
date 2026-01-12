@@ -52,4 +52,50 @@ class SolicitudController extends Controller
         }
     }
 
+    public function listarTodas(): JsonResponse
+    {
+        try {
+            $solicitudes = $this->solicitudService->listarTodas();
+            if($solicitudes->isEmpty()){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay solicitudes registradas'
+                ], 404);
+            }
+            return SolicitudResponse::solicitudes($solicitudes);
+        } catch (\Exception $e) {
+            Log::error('Error al listar las solicitudes: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al listar las solicitudes',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function admitirSolicitud(int $id): JsonResponse
+    {
+        try {
+            $exito = $this->solicitudService->admitirSolicitud($id);
+            if ($exito) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Solicitud admitida exitosamente'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pudo admitir la solicitud'
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al admitir la solicitud: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al admitir la solicitud',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

@@ -148,6 +148,21 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::put('/{id}/estado', [UsuarioController::class, 'cambiarEstadoUsuario']);
     });
 
+    Route::prefix('solicitudes')->group(function () {
+        Route::get('/', [SolicitudController::class, 'listarTodas']);
+        Route::put('/{id}/admitir', [SolicitudController::class, 'admitirSolicitud']);
+    });
+
+
+
+
+
+
+
+
+
+
+
     Route::prefix('plantillas')->group(function () {
         Route::post('/', [PlantillaController::class, 'crearPlantilla']);
         Route::get('/', [PlantillaController::class, 'listarPlantillas']);

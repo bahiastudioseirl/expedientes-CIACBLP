@@ -134,6 +134,21 @@ class SolicitudService
         return $this->solicitudRepository->crear($data);
     }
 
+    public function listarTodas(): Collection
+    {
+        return $this->solicitudRepository->listarTodas();
+    }
+
+    public function admitirSolicitud(int $id): bool
+    {
+        return $this->solicitudRepository->admitirSolicitud($id);
+    }
+
+
+
+
+
+
     /**
      * Procesar y almacenar archivo de resumen de controversia
      */
