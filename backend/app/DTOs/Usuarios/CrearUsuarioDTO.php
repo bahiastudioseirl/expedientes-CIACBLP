@@ -5,45 +5,39 @@ namespace App\DTOs\Usuarios;
 class CrearUsuarioDTO
 {
     public function __construct(
-        public ?string $nombre,
-        public ?string $apellido,
-        public ?string $nombre_empresa,
+        public ?string $nombre_completo,
         public string $numero_documento,
+        public string $correo,
         public ?string $contrasena = null,
         public ?string $telefono,
         public bool $activo = true,
         public int $id_rol,
-        public array $correos = [],
     )
     {}
 
     public static function fromRequest(array $data): self
     {
         return new self(
-            nombre: $data['nombre'] ?? null,
-            apellido: $data['apellido'] ?? null,
-            nombre_empresa: $data['nombre_empresa'] ?? null,
+            nombre_completo: $data['nombre_completo'] ?? null,
             numero_documento: $data['numero_documento'],
+            correo: $data['correo'],
             contrasena: $data['contrasena'] ?? null,
             telefono: $data['telefono'],
             activo: $data['activo'] ?? true,
             id_rol: $data['id_rol'] ?? 0,
-            correos: $data['correos'] ?? []
         );
     }
 
     public static function fromArray(array $data): self
     {
         return new self(
-            nombre: $data['nombre'] ?? null,
-            apellido: $data['apellido'] ?? null,
-            nombre_empresa: $data['nombre_empresa'] ?? null,
+            nombre_completo: $data['nombre_completo'] ?? null,
             numero_documento: $data['numero_documento'],
+            correo: $data['correo'],
             contrasena: $data['contrasena'] ?? null,
             telefono: $data['telefono'] ?? null,
             activo: $data['activo'] ?? true,
             id_rol: $data['id_rol'],
-            correos: $data['correos'] ?? []
         );
     }
 
@@ -53,15 +47,13 @@ class CrearUsuarioDTO
         $contrasena = $this->contrasena ?: $this->numero_documento;
         
         return array_filter([
-            'nombre' => $this->nombre,
-            'apellido' => $this->apellido,
-            'nombre_empresa' => $this->nombre_empresa,
+            'nombre_completo' => $this->nombre_completo,
             'numero_documento' => $this->numero_documento,
+            'correo' => $this->correo,
             'contrasena' => bcrypt($contrasena),
             'telefono' => $this->telefono,
             'activo' => $this->activo,
             'id_rol' => $this->id_rol
-            // No incluimos 'correos' aquí ya que se manejan separadamente
         ], function ($value) {
             return $value !== null && $value !== '';
         });

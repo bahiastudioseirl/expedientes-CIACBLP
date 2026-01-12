@@ -13,38 +13,18 @@ class MailService
     public function enviarCredencialesExpediente(Usuarios $usuario, string $codigoExpediente): bool
     {
         try {
-            $correos = $usuario->correos->pluck('direccion')->toArray();
-            
-            if (empty($correos)) {
-                return false;
-            }
+            $contrasenaPlano = $this->obtenerContrasenaTextoPlano($usuario);
 
-            $nombres = $usuario->nombre ?? '';
-            $apellidos = $usuario->apellido ?? '';
-            
-            if (empty($nombres) && empty($apellidos) && !empty($usuario->nombre_empresa)) {
-                $nombres = $usuario->nombre_empresa;
-                $apellidos = ''; 
-            }
-
-            $mail = new CredencialesExpediente(
-                nombres: $nombres,
-                apellidos: $apellidos,
-                numeroDocumento: $usuario->numero_documento,
-                contrasena: $this->obtenerContrasenaTextoPlano($usuario),
+            Mail::to($usuario->correo)->send(new CredencialesExpediente(
+                nombres_completos: $usuario->nombre_completo,
+                correo: $usuario->correo,
+                contrasena: $contrasenaPlano,
                 codigo_expediente: $codigoExpediente
-            );
-
-            foreach ($correos as $correo) {
-                Mail::to($correo)->send($mail);
-            }
+            ));
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Error enviando correo de credenciales', [
-                'usuario_id' => $usuario->id_usuario,
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Error al enviar correo a {$usuario->correo}: " . $e->getMessage());
             return false;
         }
     }

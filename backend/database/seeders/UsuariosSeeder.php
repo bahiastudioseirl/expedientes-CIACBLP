@@ -11,9 +11,9 @@ class UsuariosSeeder extends Seeder
     {
         $usuarios = [
             [
-                'nombre' => 'Admin',
-                'apellido' => 'Principal',
+                'nombre_completo' => 'Victor Chavez',
                 'numero_documento' => '77777777',
+                'correo' => 'admindev@bahia.pe',
                 'contrasena' => 'admindev@bahia.pe',
                 'telefono' => '123456789',
                 'activo' => true,

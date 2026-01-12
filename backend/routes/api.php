@@ -91,12 +91,9 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         return response()->json([
             'user' => [
                 'id' => $user->id_usuario,
-                'nombre' => $user->nombre,
-                'apellido' => $user->apellido,
-                'nombre_empresa' => $user->nombre_empresa,
+                'nombre_completo' => $user->nombre_completo,
                 'correo' => $user->correo,
-                'rol' => $user->rol->nombre ?? null,
-                'activo' => $user->activo
+                'rol' => $user->rol->nombre ?? null
             ]
         ]);
     });

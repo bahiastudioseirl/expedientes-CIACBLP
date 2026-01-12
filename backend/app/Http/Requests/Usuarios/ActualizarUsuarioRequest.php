@@ -15,36 +15,31 @@ class ActualizarUsuarioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Para personas (administradores, secretarios, árbitros)
-            'nombre' => 'nullable|string|max:100',
-            'apellido' => 'nullable|string|max:100',
-            // Para empresas (demandantes, demandados)
-            'nombre_empresa' => 'nullable|string|max:255',
-            // Campos comunes
-            'telefono' => 'required|string|max:20',
-            'correos' => 'required|array|min:1',
-            'correos.*' => 'required|email|max:150',
+            'nombre_completo' => 'nullable|string',
+            'numero_documento' => 'nullable|string|max:50|' . Rule::unique('usuarios', 'numero_documento')->ignore($this->route('usuario')->id_usuario),
+            'correo' => 'nullable|string|email|max:150|' . Rule::unique('usuarios', 'correo')->ignore($this->route('usuario')->id_usuario),
+            'contrasena' => 'sometimes|string|min:6',
+            'telefono' => 'nullable|string|max:20',
+            'activo' => 'sometimes|boolean',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'nombre.string' => 'El nombre debe ser una cadena de texto.',
-            'nombre.max' => 'El nombre no puede tener más de 100 caracteres.',
-            'apellido.string' => 'El apellido debe ser una cadena de texto.',
-            'apellido.max' => 'El apellido no puede tener más de 100 caracteres.',
-            'nombre_empresa.string' => 'El nombre de la empresa debe ser una cadena de texto.',
-            'nombre_empresa.max' => 'El nombre de la empresa no puede tener más de 255 caracteres.',
-            'telefono.required' => 'El teléfono es obligatorio.',
-            'telefono.string' => 'El teléfono debe ser una cadena de texto.',
-            'telefono.max' => 'El teléfono no puede tener más de 20 caracteres.',
-            'correos.required' => 'Al menos un correo electrónico es obligatorio.',
-            'correos.array' => 'Los correos deben enviarse como un array.',
-            'correos.min' => 'Debe proporcionar al menos un correo electrónico.',
-            'correos.*.required' => 'Todos los correos son obligatorios.',
-            'correos.*.email' => 'Los correos deben tener un formato válido.',
-            'correos.*.max' => 'Los correos no pueden tener más de 150 caracteres.',
+            'nombre_completo.string' => 'El nombre completo debe ser una cadena de texto',
+            'numero_documento.string' => 'El número de documento debe ser una cadena de texto',
+            'numero_documento.max' => 'El número de documento no puede exceder 50 caracteres',
+            'numero_documento.unique' => 'El número de documento ya está en uso',
+            'correo.string' => 'El correo debe ser una cadena de texto',
+            'correo.email' => 'El correo debe ser una dirección de correo válida',
+            'correo.max' => 'El correo no puede exceder 150 caracteres',
+            'correo.unique' => 'El correo ya está en uso',
+            'contrasena.string' => 'La contraseña debe ser una cadena de texto',
+            'contrasena.min' => 'La contraseña debe tener al menos 6 caracteres',
+            'telefono.string' => 'El teléfono debe ser una cadena de texto',
+            'telefono.max' => 'El teléfono no puede exceder 20 caracteres',
+            'activo.boolean' => 'El campo activo debe ser verdadero o falso',
         ];
     }
 }

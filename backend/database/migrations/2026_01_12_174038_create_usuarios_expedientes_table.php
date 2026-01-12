@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('expedientes', function (Blueprint $table) {
-            $table->id('id_expediente');
-            $table->string('codigo_expediente')->unique();
-            $table->unsignedBigInteger('id_plantilla');
+        Schema::create('usuarios_expedientes', function (Blueprint $table) {
+            $table->id('id_usuario_expediente');
             $table->unsignedBigInteger('id_usuario');
-            $table->boolean('activo')->default(true);
+            $table->unsignedBigInteger('id_expediente');
 
-            $table->foreign('id_plantilla')->references('id_plantilla')->on('plantillas')->onDelete('cascade');
             $table->foreign('id_usuario')->references('id_usuario')->on('usuarios')->onDelete('cascade');
-
+            $table->foreign('id_expediente')->references('id_expediente')->on('expedientes')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('expedientes');
+        Schema::dropIfExists('usuarios_expedientes');
     }
 };

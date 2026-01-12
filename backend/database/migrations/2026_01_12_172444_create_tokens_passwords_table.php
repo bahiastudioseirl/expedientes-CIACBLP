@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('expediente_participantes', function (Blueprint $table) {
-            $table->id('id_expediente_participante');
-            $table->unsignedBigInteger('id_expediente');
+        Schema::create('tokens_passwords', function (Blueprint $table) {
+            $table->id('id_token');
+            $table->string('token');
+            $table->dateTime('fecha_expiracion');
+            $table->boolean('usado')->default(false);
             $table->unsignedBigInteger('id_usuario');
-            $table->string('rol_en_expediente');
+
+            $table->foreign('id_usuario')->references('id_usuario')->on('usuarios')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('expediente_participantes');
+        Schema::dropIfExists('tokens_passwords');
     }
 };

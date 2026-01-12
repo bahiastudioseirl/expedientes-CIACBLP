@@ -14,12 +14,11 @@ class CrearUsuarioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre' => 'required|string|max:100',
-            'apellido' => 'required|string|max:100',
-            'numero_documento' => 'required|string|max:50|unique:usuarios,numero_documento',
-            'telefono' => 'nullable|string|max:20',
+            'nombre_completo' => 'required|string|max:100',
+            'numero_documento' => 'nullable|string|max:50|unique:usuarios,numero_documento',
             'correo' => 'required|string|email|max:150|unique:usuarios,correo',
-            'contrasena' => 'required|string|min:6',
+            'contrasena' => 'sometimes|string|min:6',
+            'telefono' => 'nullable|string|max:20',
             'activo' => 'sometimes|boolean',
             'id_rol' => 'required|integer|exists:roles,id_rol',
         ];
@@ -27,17 +26,25 @@ class CrearUsuarioRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nombre.required' => 'El nombre es obligatorio.',
-            'apellido.required' => 'El apellido es obligatorio.',
-            'numero_documento.required' => 'El número de documento es obligatorio.',
-            'numero_documento.unique' => 'El número de documento ya está en uso.',
-            'correo.required' => 'El correo es obligatorio.',
-            'correo.email' => 'El correo debe ser una dirección de correo válida.',
-            'correo.unique' => 'El correo ya está en uso.',
-            'contrasena.required' => 'La contraseña es obligatoria.',
-            'contrasena.min' => 'La contraseña debe tener al menos 6 caracteres.',
-            'id_rol.required' => 'El rol es obligatorio.',
-            'id_rol.exists' => 'El rol seleccionado no es válido.',
+            'nombre_completo.required' => 'El nombre completo es requerido',
+            'nombre_completo.string' => 'El nombre completo debe ser una cadena de texto',
+            'nombre_completo.max' => 'El nombre completo no puede exceder 100 caracteres',
+            'numero_documento.string' => 'El número de documento debe ser una cadena de texto',
+            'numero_documento.max' => 'El número de documento no puede exceder 50 caracteres',
+            'numero_documento.unique' => 'El número de documento ya está en uso',
+            'correo.required' => 'El correo es requerido',
+            'correo.string' => 'El correo debe ser una cadena de texto',
+            'correo.email' => 'El correo debe ser una dirección de correo válida',
+            'correo.max' => 'El correo no puede exceder 150 caracteres',
+            'correo.unique' => 'El correo ya está en uso',
+            'contrasena.string' => 'La contraseña debe ser una cadena de texto',
+            'contrasena.min' => 'La contraseña debe tener al menos 6 caracteres',
+            'telefono.string' => 'El teléfono debe ser una cadena de texto',
+            'telefono.max' => 'El teléfono no puede exceder 20 caracteres',
+            'activo.boolean' => 'El campo activo debe ser verdadero o falso',
+            'id_rol.required' => 'El rol es requerido',
+            'id_rol.integer' => 'El rol debe ser un número entero',
+            'id_rol.exists' => 'El rol seleccionado no es válido',  
         ];
     }
 

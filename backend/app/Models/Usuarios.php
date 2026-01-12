@@ -16,10 +16,9 @@ class Usuarios extends Authenticatable implements JWTSubject
     protected $primaryKey = 'id_usuario';
 
     protected $fillable = [
-        'nombre',
-        'apellido',
+        'nombre_completo',
         'numero_documento',
-        'nombre_empresa',
+        'correo',
         'contrasena',
         'telefono',
         'activo',
@@ -58,7 +57,7 @@ class Usuarios extends Authenticatable implements JWTSubject
 
     public function getAuthIdentifierName()
     {
-        return 'numero_documento';
+        return 'correo';
     }
         public function getJWTIdentifier()
     {
@@ -68,9 +67,8 @@ class Usuarios extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [
-            'nombre' => $this->nombre,
-            'apellido' => $this->apellido,
-            'numero_documento' => $this->numero_documento,
+            'nombre_completo' => $this->nombre_completo,
+            'correo' => $this->correo,
         ];
     }
 
@@ -79,9 +77,4 @@ class Usuarios extends Authenticatable implements JWTSubject
         return $this->belongsTo(Roles::class, 'id_rol', 'id_rol');
     }
 
-    public function correos()
-    {
-        return $this->hasMany(Correos::class, 'id_usuario', 'id_usuario');
-    }
-    
 }

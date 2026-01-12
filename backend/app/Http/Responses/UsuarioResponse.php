@@ -60,38 +60,18 @@ class UsuarioResponse
     {
         $rolId = $usuario->rol->id_rol ?? null;
 
-        // Campos base
         $data = [
             'id_usuario' => $usuario->id_usuario,
+            'nombre_completo' => $usuario->nombre_completo,
             'numero_documento' => $usuario->numero_documento,
-        ];
-
-        // Nombre / Apellido o Empresa
-        if (in_array($rolId, [4, 5])) {
-            $data['nombre_empresa'] = $usuario->nombre_empresa ?? null;
-        } else {
-            $data['nombre'] = $usuario->nombre;
-            $data['apellido'] = $usuario->apellido;
-        }
-
-        // Resto de campos
-        $data += [
+            'correo' => $usuario->correo,
             'telefono' => $usuario->telefono,
             'activo' => (bool) $usuario->activo,
-            'correos' => $usuario->correos?->map(function ($correo) {
-                return [
-                    'id_correo' => $correo->id_correo,
-                    'direccion' => $correo->direccion
-                ];
-            })->values() ?? [],
             'rol' => [
-                'id' => $rolId,
+                'id_rol' => $rolId,
                 'nombre' => $usuario->rol->nombre ?? null
-            ],
-            'created_at' => $usuario->created_at?->format('Y-m-d H:i:s'),
-            'updated_at' => $usuario->updated_at?->format('Y-m-d H:i:s'),
+            ]
         ];
-
         return $data;
     }
 }

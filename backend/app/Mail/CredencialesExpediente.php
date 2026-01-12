@@ -13,9 +13,8 @@ class CredencialesExpediente extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public readonly string $nombres,
-        public readonly string $apellidos,
-        public readonly string $numeroDocumento,
+        public readonly string $nombres_completos,
+        public readonly string $correo,
         public readonly string $contrasena,
         public readonly string $codigo_expediente
     ) {}

@@ -66,8 +66,7 @@ class MensajeResponse
             'fecha_envio' => $mensaje->fecha_envio,
             'usuario_remitente' => [
                 'id_usuario' => $mensaje->usuario->id_usuario,
-                'nombre' => $mensaje->usuario->nombre ?? $mensaje->usuario->nombre_empresa,
-                'apellido' => $mensaje->usuario->apellido,
+                'nombre_completo' => $mensaje->usuario->nombre_completo,
                 'numero_documento' => $mensaje->usuario->numero_documento
             ],
             'asunto' => [

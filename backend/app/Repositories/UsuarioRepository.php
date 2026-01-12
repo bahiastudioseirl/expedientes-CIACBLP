@@ -46,36 +46,6 @@ class UsuarioRepository
         return Usuarios::with(['rol', 'correos'])->find($id);
     }
 
-    public function obtenerPorNumeroDocumento(string $numeroDocumento): ?array
-    {
-        $usuario = Usuarios::with(['rol', 'correos'])->where('numero_documento', $numeroDocumento)->first();
-        
-        if ($usuario) {
-            $rolNombre = $usuario->rol?->nombre;
-            $isEmpresa = ($rolNombre === 'Demandante' || $rolNombre === 'Demandado');
-            return [
-                'id' => $usuario->id_usuario,
-                'nombre' => $isEmpresa ? null : ucfirst(strtolower($usuario->nombre)),
-                'apellido' => $isEmpresa ? null : ucfirst(strtolower($usuario->apellido)),
-                'nombre_empresa' => $isEmpresa ? $usuario->nombre_empresa : null,
-                'numero_documento' => $usuario->numero_documento,
-                'telefono' => $usuario->telefono,
-                'correos' => $usuario->correos->pluck('direccion')->toArray(),
-                'tipo' => 'usuario_sistema',
-                'rol' => $rolNombre
-            ];
-        }
-
-        $arbitro = $this->arbitroRepository->obtenerPorNumeroDocumento($numeroDocumento);
-        
-        return $arbitro;
-    }
-
-
-    public function obtenerPorNumeroDocumentoLegacy(string $numeroDocumento): ?Usuarios
-    {
-        return Usuarios::with(['rol', 'correos'])->where('numero_documento', $numeroDocumento)->first();
-    }
 
     public function cambiarEstadoUsuario(Usuarios $usuario, bool $activo): bool
     {
@@ -96,6 +66,9 @@ class UsuarioRepository
                         })
                       ->get();
     }
+
+
+
 
     public function listarUsuariosSecretarios(): Collection
     {

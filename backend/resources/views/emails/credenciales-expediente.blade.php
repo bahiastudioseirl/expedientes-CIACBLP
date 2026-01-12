@@ -24,7 +24,7 @@
             <p style="margin: 10px 0 0 0; color: #6c757d;">Centro de Arbitraje</p>
         </div>
         <div class='email-body'>
-            <p><strong>Estimado(a) {{ $nombres }} {{ $apellidos }}:</strong></p>
+            <p><strong>Estimado(a) {{ $nombre_completo }}:</strong></p>
             
             <p>Hemos registrado su participación en el caso arbitral: <strong>N° {{ $codigo_expediente }}</strong></p>
             

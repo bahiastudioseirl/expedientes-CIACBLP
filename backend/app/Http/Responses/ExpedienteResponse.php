@@ -54,11 +54,6 @@ class ExpedienteResponse
                 'id_plantilla' => $expediente->plantilla->id_plantilla ?? null,
                 'nombre' => $expediente->plantilla->nombre ?? null
             ],
-            'usuario_creador' => [
-                'id_usuario' => $expediente->usuario->id_usuario ?? null,
-                'nombre' => $expediente->usuario->nombre ?? null,
-                'apellido' => $expediente->usuario->apellido ?? null
-            ],
             'participantes' => $expediente->participantes?->map(function ($participante) {
                 $usuario = $participante->usuario;
                 $rol = $participante->rol_en_expediente;

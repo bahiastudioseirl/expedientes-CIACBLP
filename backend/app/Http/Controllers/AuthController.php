@@ -18,7 +18,7 @@ class AuthController extends Controller
     {
         try {
             $result = $this->authService->iniciarSesion(
-                $request->validated()['numero_documento'],
+                $request->validated()['correo'],
                 $request->validated()['contrasena']
             );
 
@@ -70,9 +70,8 @@ class AuthController extends Controller
                 'success' => true,
                 'user' => [
                     'id' => $user->id_usuario,
-                    'nombre' => $user->nombre,
-                    'apellido' => $user->apellido,
-                    'numero_documento' => $user->numero_documento,
+                    'nombre_completo' => $user->nombre_completo,
+                    'correo' => $user->correo,
                     'rol' => $user->rol->nombre ?? null
                 ]
             ]);

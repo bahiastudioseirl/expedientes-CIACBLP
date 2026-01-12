@@ -15,7 +15,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero_documento' => 'required|string|max:50',
+            'correo' => 'required|string',
             'contrasena' => 'required|string|min:6|max:255'
         ];
     }
@@ -23,8 +23,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'numero_documento.required' => 'El número de documento es requerido',
-            'numero_documento.max' => 'El número de documento no puede exceder 50 caracteres',
+            'correo.required' => 'El correo es requerido',
+            'correo.string' => 'El correo debe ser una cadena de texto',
             'contrasena.required' => 'La contraseña es requerida',
             'contrasena.min' => 'La contraseña debe tener al menos 6 caracteres',
             'contrasena.max' => 'La contraseña no puede exceder 255 caracteres'

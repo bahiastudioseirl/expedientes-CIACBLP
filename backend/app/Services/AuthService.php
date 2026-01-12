@@ -8,10 +8,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
 {
-    public function iniciarSesion(string $numero_documento, string $contrasena): array
+    public function iniciarSesion(string $correo, string $contrasena): array
     {
-        // Verificar credenciales
-        $usuario = Usuarios::where('numero_documento', $numero_documento)->first();
+        $usuario = Usuarios::where('correo', $correo)->first();
         
         if (!$usuario || !Hash::check($contrasena, $usuario->contrasena)) {
             return [
@@ -31,22 +30,18 @@ class AuthService
         $token = JWTAuth::fromUser($usuario);
         
         $rolNombre = $usuario->rol->nombre ?? null;
-        $userData = [
-            'id' => $usuario->id_usuario,
-            'numero_documento' => $usuario->numero_documento,
-            'rol' => $rolNombre
-        ];
-        if (in_array(strtolower($rolNombre), ['demandante', 'demandado'])) {
-            $userData['nombre_empresa'] = $usuario->nombre_empresa;
-        } else {
-            $userData['nombre'] = $usuario->nombre;
-            $userData['apellido'] = $usuario->apellido;
-        }
         return [
             'success' => true,
-            'message' => 'Autenticación exitosa',
-            'token' => $token,
-            'user' => $userData
+            'message' => 'Inicio de sesión exitoso',
+            'data' => [
+                'token' => $token,
+                'usuario' => [
+                    'id_usuario' => $usuario->id_usuario,
+                    'nombre_completo' => $usuario->nombre_completo,
+                    'correo' => $usuario->correo,
+                    'rol' => $rolNombre
+                ]
+            ]
         ];
     }
     public function cerrarSesion(): array

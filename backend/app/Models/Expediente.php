@@ -16,7 +16,7 @@ class Expediente extends Model
     protected $fillable = [
         'codigo_expediente',
         'id_plantilla',
-        'id_usuario',
+        'id_solicitud',
         'activo'
     ];
 
@@ -30,16 +30,6 @@ class Expediente extends Model
     public function plantilla()
     {
         return $this->belongsTo(Plantilla::class, 'id_plantilla', 'id_plantilla');
-    }
-
-    public function usuario()
-    {
-        return $this->belongsTo(Usuarios::class, 'id_usuario', 'id_usuario');
-    }
-
-    public function participantes()
-    {
-        return $this->hasMany(ExpedienteParticipante::class, 'id_expediente', 'id_expediente');
     }
 
     public function asunto()

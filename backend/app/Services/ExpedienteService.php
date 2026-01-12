@@ -99,110 +99,33 @@ class ExpedienteService
      * Maneja un participante: verifica si existe por numero_documento,
      * actualiza sus datos si existe, o lo crea si no existe
      */
-    private function manejarParticipante(array $dataParticipante, string $rol): array
+    private function manejarParticipante(array $dataParticipante, string $rol)
     {
-        $numeroDocumento = $dataParticipante['numero_documento'];
-        $usuarioExistente = $this->usuarioRepository->obtenerPorNumeroDocumento($numeroDocumento);
-        
-        if ($usuarioExistente) {
-            return $this->actualizarUsuarioExistenteDual($usuarioExistente, $dataParticipante, $rol);
-        } else {
-            return $this->crearNuevoUsuario($dataParticipante, $rol);
-        }
+
     }
 
 
     /**
      * Actualiza un usuario existente con los nuevos datos y maneja sus correos
      */
-    private function actualizarUsuarioExistente($usuario, array $dataParticipante, string $rol): array
+    private function actualizarUsuarioExistente($usuario, array $dataParticipante, string $rol)
     {
-        $datosActualizacion = [];
-        
-        if ($rol === 'Demandante' || $rol === 'Demandado') {
-            $datosActualizacion['nombre_empresa'] = $dataParticipante['nombre_empresa'];
-        } else {
-            $datosActualizacion['nombre'] = $dataParticipante['nombre'];
-            $datosActualizacion['apellido'] = $dataParticipante['apellido'];
-        }
-        
-        $datosActualizacion['telefono'] = $dataParticipante['telefono'] ?? $usuario->telefono;
 
-        $usuarioActualizado = $this->usuarioRepository->actualizar($usuario, $datosActualizacion);
-
-        $this->sincronizarCorreosUsuario($usuario->id_usuario, $dataParticipante['correos']);
-        $usuarioCompleto = $this->usuarioRepository->obtenerPorId($usuario->id_usuario);
-
-        return [
-            'usuario' => $usuarioCompleto,
-            'accion' => 'actualizado',
-            'rol' => $rol,
-            'contrasena_generada' => null
-        ];
     }
 
     /**
      * Maneja usuarios existentes que pueden venir del sistema o de árbitros
      * Para árbitros, crea un nuevo usuario en el sistema basado en sus datos
      */
-    private function actualizarUsuarioExistenteDual(array $usuarioData, array $dataParticipante, string $rol): array
-    {
-        if ($usuarioData['tipo'] === 'usuario_sistema') {
-            $usuario = $this->usuarioRepository->obtenerPorNumeroDocumentoLegacy($usuarioData['numero_documento']);
-            return $this->actualizarUsuarioExistente($usuario, $dataParticipante, $rol);
-        } else {
-            $datosParticipante = [
-                'numero_documento' => $usuarioData['numero_documento'],
-                'telefono' => $usuarioData['telefono'] ?? $dataParticipante['telefono'],
-                'correos' => $usuarioData['correos'] ?? ($dataParticipante['correos'] ?? [])
-            ];
-            
-            // Para demandantes y demandados usar nombre_empresa, para otros usar nombre/apellido
-            if ($rol === 'Demandante' || $rol === 'Demandado') {
-                $datosParticipante['nombre_empresa'] = $usuarioData['nombre_empresa'] ?? $dataParticipante['nombre_empresa'];
-            } else {
-                $datosParticipante['nombre'] = $usuarioData['nombre'];
-                $datosParticipante['apellido'] = $usuarioData['apellido'];
-            }
-
-            return $this->crearNuevoUsuario($datosParticipante, $rol);
-        }
-    }
+    private function actualizarUsuarioExistenteDual(array $usuarioData, array $dataParticipante, string $rol)
+    { }
 
     /**
      * Crea un nuevo usuario con contraseña automática
      */
-    private function crearNuevoUsuario(array $dataParticipante, string $rol): array
+    private function crearNuevoUsuario(array $dataParticipante, string $rol)
     {
-        $contrasena = $this->mailService->generarContrasenaAleatoria();
 
-        // Crear usuario
-        $usuarioData = [
-            'numero_documento' => $dataParticipante['numero_documento'],
-            'telefono' => $dataParticipante['telefono'] ?? null,
-            'contrasena' => $contrasena,
-            'activo' => true,
-            'id_rol' => $this->obtenerIdRolSegunTipo($rol)
-        ];
-        
-        // Para demandantes y demandados usar nombre_empresa, para otros usar nombre/apellido
-        if ($rol === 'Demandante' || $rol === 'Demandado') {
-            $usuarioData['nombre_empresa'] = $dataParticipante['nombre_empresa'];
-        } else {
-            $usuarioData['nombre'] = $dataParticipante['nombre'];
-            $usuarioData['apellido'] = $dataParticipante['apellido'];
-        }
-
-        $usuario = $this->usuarioRepository->crear($usuarioData);
-        $usuario->setContrasenaTextoPlano($contrasena);
-        $this->correoRepository->crearMultiples($usuario->id_usuario, $dataParticipante['correos']);
-
-        return [
-            'usuario' => $usuario->load('correos'),
-            'accion' => 'creado',
-            'rol' => $rol,
-            'contrasena_generada' => $contrasena
-        ];
     }
 
 
@@ -275,31 +198,9 @@ class ExpedienteService
      * Verifica si un usuario existe por número de documento
      * Útil para validaciones desde el frontend
      */
-    public function verificarUsuarioPorDocumento(string $numeroDocumento): array
+    public function verificarUsuarioPorDocumento(string $numeroDocumento)
     {
-        $usuario = $this->usuarioRepository->obtenerPorNumeroDocumento($numeroDocumento);
-        
-        if ($usuario) {
-            return [
-                'existe' => true,
-                'usuario' => [
-                    'id_usuario' => $usuario['id'],
-                    'nombre' => $usuario['nombre'],
-                    'apellido' => $usuario['apellido'],
-                    'nombre_empresa' => $usuario['nombre_empresa'],
-                    'numero_documento' => $usuario['numero_documento'],
-                    'telefono' => $usuario['telefono'],
-                    'correos' => $usuario['correos'] ?? [], 
-                    'rol' => $usuario['rol'] ?? 'Árbitro',
-                    'tipo' => $usuario['tipo'] 
-                ]
-            ];
-        }
-        
-        return [
-            'existe' => false,
-            'usuario' => null
-        ];
+
     }
 
     public function actualizarExpediente(ActualizarExpedienteDTO $data): array
