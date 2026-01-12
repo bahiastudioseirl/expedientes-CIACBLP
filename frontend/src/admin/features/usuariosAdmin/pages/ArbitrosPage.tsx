@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { User } from 'lucide-react';
 import ListaUsuarios from '../components/ListaUsuarios';
 import ModalUsuarioPersona from '../components/ModalUsuarioPersona';
@@ -10,7 +10,6 @@ export default function ArbitrosPage() {
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [saving, setSaving] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleCrear = () => {
     setIsCrearModalOpen(true);
@@ -28,7 +27,6 @@ export default function ArbitrosPage() {
       
       if (response.success) {
         setIsCrearModalOpen(false);
-        setRefreshKey(prev => prev + 1); // Trigger refresh
       }
     } catch (err: any) {
       console.error('Error al crear árbitro:', err);
@@ -46,7 +44,6 @@ export default function ArbitrosPage() {
       await actualizarUsuarioPersona(selectedUsuario.id_usuario, data);
       setIsEditarModalOpen(false);
       setSelectedUsuario(null);
-      setRefreshKey(prev => prev + 1);
     } catch (err: any) {
       console.error('Error al actualizar árbitro:', err);
       throw err;

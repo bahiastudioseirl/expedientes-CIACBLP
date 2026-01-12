@@ -28,15 +28,19 @@ export const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) {
-                navigate('/registro-solicitante');
+                setLoading(false);
                 return;
             }
 
-            const response = await axiosWithoutMultipart.get('solicitudes/me');
+            const response = await axiosWithoutMultipart.get('/solicitudes/me');
             setUser(response.data.usuario);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching user info:', error);
-            handleLogout();
+            // Si hay error 401 o 403, limpiar token
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                localStorage.removeItem('authToken');
+                setUser(null);
+            }
         } finally {
             setLoading(false);
         }

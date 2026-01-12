@@ -21,6 +21,7 @@ class CrearSolicitudRequest extends FormRequest
             'demandante.nombre_razon' => 'required|string|max:255',
             'demandante.numero_documento' => 'required|string|max:20',
             'demandante.telefono' => 'nullable|string|max:15',
+            'demandante.direccion_fiscal' => 'nullable|string|max:255',
             
             'correos_demandante' => 'required|array|min:1',
             'correos_demandante.*.correo' => 'required|email|max:255',

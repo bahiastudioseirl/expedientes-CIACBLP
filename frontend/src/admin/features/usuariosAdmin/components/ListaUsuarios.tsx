@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Shield, 
-  UserCog, 
-  UserCheck, 
-  UserX, 
-  Mail, 
-  Phone, 
-  FileText, 
-  Calendar,
   CheckCircle,
   XCircle,
   Plus,
@@ -15,7 +7,6 @@ import {
   Edit,
   ToggleLeft,
   ToggleRight,
-  User
 } from 'lucide-react';
 import type { Usuario, ListarUsuariosResponse } from '../schemas/UsuarioSchema';
 import { cambiarEstadoUsuario } from '../services/usuariosService';
@@ -34,7 +25,6 @@ interface ListaUsuariosProps {
 
 export default function ListaUsuarios({ 
   titulo, 
-  tipoUsuario, 
   icono: IconoTipo, 
   obtenerUsuarios,
   onCrear,
@@ -119,27 +109,6 @@ export default function ListaUsuarios({
     }
   };
 
-  const getRoleIcon = (tipoUsuario: string) => {
-    switch (tipoUsuario) {
-      case 'administradores': return Shield;
-      case 'secretarios': return UserCog;
-      case 'demandantes': return UserCheck;
-      case 'demandados': return UserX;
-      case 'arbitros': return User;
-      default: return Shield;
-    }
-  };
-
-  const getRoleColor = (tipoUsuario: string) => {
-    switch (tipoUsuario) {
-      case 'administradores': return 'bg-red-100 text-red-800';
-      case 'secretarios': return 'bg-blue-100 text-blue-800';
-      case 'demandantes': return 'bg-green-100 text-green-800';
-      case 'demandados': return 'bg-orange-100 text-orange-800';
-      case 'arbitros': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   if (loading) {
     return (

@@ -94,10 +94,10 @@ export const registrarSolicitud = async (data: RegistroSolicitudRequest) => {
     appendToFormData(dataToSend);
     
     // Usar axiosInstance para FormData (multipart/form-data)
-    const res = await axiosInstance.post('solicitudes/', formData);
+    const res = await axiosInstance.post('solicitudes', formData);
     return res.data;
   } else {
-    const res = await axiosWithoutMultipart.post('solicitudes/', dataToSend);
+    const res = await axiosWithoutMultipart.post('solicitudes', dataToSend);
     return res.data;
   }
 };

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Reply, MessageCircle } from 'lucide-react';
-import { obtenerNombreCompleto, formatTime, extraerTituloCorto } from '../utils/chatUtils';
+import { Reply } from 'lucide-react';
+import { obtenerNombreCompleto, formatTime } from '../utils/chatUtils';
 import { MensajeEnHilo } from './MensajeEnHilo';
 import { FormularioRespuesta } from './FormularioRespuesta';
 import type { Mensaje, Asunto, ExpedienteAsignado } from '../schemas/BandejaEntradaSchema';
@@ -73,8 +73,6 @@ export const PanelDetalleMensaje: React.FC<PanelDetalleMensajeProps> = ({
                     key={msg.id_mensaje}
                     mensaje={msg}
                     isOriginal={index === 0}
-                    asuntoActivo={asunto.activo}
-                    onResponder={() => onResponderMensaje(msg.id_mensaje)}
                   />
                 ))}
               </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { registrarSolicitante, verificarCodigo } from '../services/registroSolicitanteService';
-import { RegistroSolicitanteRequest, RegistroSolicitanteResponse, VerificarCodigoRequest, VerificarCodigoResponse } from '../schemas/RegistroSolicitanteSchema';
+import { RegistroSolicitanteRequest, RegistroSolicitanteResponse, VerificarCodigoRequest } from '../schemas/RegistroSolicitanteSchema';
 
 export function useRegistroSolicitante() {
   const [usuario, setUsuario] = useState<RegistroSolicitanteResponse["data"]["usuario"] | null>(null);

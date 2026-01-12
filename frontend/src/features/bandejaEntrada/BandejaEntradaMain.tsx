@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { User, Shield } from 'lucide-react';
 import BandejaEntrada from './components/BandejaEntrada';
 import ListaAsuntos from './components/ListaAsuntos';
 import type {
@@ -65,26 +64,6 @@ export default function BandejaEntradaMain({ currentUser }: BandejaEntradaMainPr
         setViewMode('inbox');
     };
 
-    const getRoleName = (idRol: number) => {
-        const roles: Record<number, string> = {
-            1: 'Administrador',
-            2: 'Árbitro',
-            3: 'Secretario',
-            4: 'Participante'
-        };
-        return roles[idRol] || 'Usuario';
-    };
-
-    const getRoleColor = (idRol: number) => {
-        const colors: Record<number, string> = {
-            1: 'bg-red-100 text-red-800',
-            2: 'bg-blue-100 text-blue-800',
-            3: 'bg-green-100 text-green-800',
-            4: 'bg-gray-100 text-gray-800'
-        };
-        return colors[idRol] || 'bg-gray-100 text-gray-800';
-    };
-
     return (
         <div className="min-h-screen bg-slate-50">
            
@@ -93,8 +72,6 @@ export default function BandejaEntradaMain({ currentUser }: BandejaEntradaMainPr
                 {viewMode === 'inbox' && (
                     <BandejaEntrada
                         onSelectExpediente={handleSelectExpediente}
-                        currentUser={user}
-                        userRole={user.id_rol}
                     />
                 )}
 

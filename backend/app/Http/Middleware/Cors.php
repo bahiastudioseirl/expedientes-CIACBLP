@@ -16,7 +16,7 @@ class Cors
         // Manejar solicitudes OPTIONS (preflight)
         if ($request->getMethod() == "OPTIONS") {
             return response('', 200)
-                ->header('Access-Control-Allow-Origin', 'http://localhost:5173/')
+                ->header('Access-Control-Allow-Origin', 'http://expedientes.ciacblp.com, https://expedientes.ciacblp.com, http://localhost:3000, http://localhost:5173')
                 ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
                 ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-TOKEN')
                 ->header('Access-Control-Allow-Credentials', 'true')
@@ -27,7 +27,7 @@ class Cors
 
         // Aplicar headers CORS a la respuesta
         return $response
-            ->header('Access-Control-Allow-Origin', 'http://localhost:5173/')
+            ->header('Access-Control-Allow-Origin', 'http://expedientes.ciacblp.com, https://expedientes.ciacblp.com, http://localhost:3000, http://localhost:5173')
             ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
             ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-TOKEN')
             ->header('Access-Control-Allow-Credentials', 'true');

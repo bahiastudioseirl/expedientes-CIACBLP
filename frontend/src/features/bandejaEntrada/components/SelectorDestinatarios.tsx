@@ -96,7 +96,7 @@ export const SelectorDestinatarios: React.FC<SelectorDestinatariosProps> = ({
           </div>
         )}
         <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl border ${
-          variant === 'response' ? 'bg-white border-blue-300' : 'bg-slate-50 border-slate-200'
+          (variant as string) === 'response' ? 'bg-white border-blue-300' : 'bg-slate-50 border-slate-200'
         }`}>
           {participantesValidos.map((participante: any) => (
             <label

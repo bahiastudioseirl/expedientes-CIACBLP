@@ -9,6 +9,7 @@ class CrearSolicitudParteDTO
         private string $nombre_razon,
         private string $numero_documento,
         private ?string $telefono = null,
+        private ?string $direccion_fiscal = null,
         private int $id_solicitud
     )
     {}
@@ -20,6 +21,7 @@ class CrearSolicitudParteDTO
             nombre_razon: $data['nombre_razon'],
             numero_documento: $data['numero_documento'],
             telefono: $data['telefono'] ?? null,
+            direccion_fiscal: $data['direccion_fiscal'] ?? null,
             id_solicitud: $id_solicitud
         );
     }
@@ -31,6 +33,7 @@ class CrearSolicitudParteDTO
             nombre_razon: $data['nombre_razon'],
             numero_documento: $data['numero_documento'],
             telefono: $data['telefono'] ?? null,
+            direccion_fiscal: $data['direccion_fiscal'] ?? null,
             id_solicitud: $data['id_solicitud']
         );
     }
@@ -42,6 +45,7 @@ class CrearSolicitudParteDTO
             'nombre_razon' => $this->nombre_razon,
             'numero_documento' => $this->numero_documento,
             'telefono' => $this->telefono,
+            'direccion_fiscal' => $this->direccion_fiscal,
             'id_solicitud' => $this->id_solicitud
         ];
     }

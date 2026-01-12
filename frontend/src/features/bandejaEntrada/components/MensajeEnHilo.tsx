@@ -1,23 +1,19 @@
 import React from 'react';
-import { User, Reply, Download, Paperclip } from 'lucide-react';
+import { User, Download, Paperclip } from 'lucide-react';
 import { obtenerNombreCompleto, formatTime } from '../utils/chatUtils';
 import type { Mensaje } from '../schemas/BandejaEntradaSchema';
 
 interface MensajeEnHiloProps {
   mensaje: Mensaje;
   isOriginal: boolean;
-  asuntoActivo: boolean;
-  onResponder?: () => void;
 }
 
 export const MensajeEnHilo: React.FC<MensajeEnHiloProps> = ({
   mensaje,
-  isOriginal,
-  asuntoActivo,
-  onResponder
+  isOriginal
 }) => {
-  // Fix temporal: usar usuario_remitente o usuario como fallback
-  const usuarioParaMostrar = mensaje.usuario_remitente || mensaje.usuario;
+  // Usar usuario_remitente
+  const usuarioParaMostrar = mensaje.usuario_remitente;
   
   const handleDownload = (url: string) => {
     window.open(url, '_blank');

@@ -2,10 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import {
     Search,
     FileText,
-    Eye,
-    Calendar,
-    Building2,
-    Users,
     ChevronRight
 } from 'lucide-react';
 import { obtenerExpedientesAsignados } from '../services/obtenerExpedientesAsignados';
@@ -13,19 +9,10 @@ import type { ExpedienteAsignado } from '../schemas/BandejaEntradaSchema';
 
 interface BandejaEntradaProps {
     onSelectExpediente: (expediente: ExpedienteAsignado) => void;
-    currentUser?: {
-        id_usuario: number;
-        id_rol: number;
-        nombre: string;
-        apellido?: string;
-    };
-    userRole?: number;
 }
 
 export default function BandejaEntrada({
-    onSelectExpediente,
-    currentUser,
-    userRole
+    onSelectExpediente
 }: BandejaEntradaProps) {
     const [expedientes, setExpedientes] = useState<ExpedienteAsignado[]>([]);
     const [loading, setLoading] = useState(true);

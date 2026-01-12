@@ -10,7 +10,6 @@ export default function SecretariosPage() {
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [saving, setSaving] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleCrear = () => {
     setIsCrearModalOpen(true);
@@ -28,7 +27,6 @@ export default function SecretariosPage() {
       
       if (response.success) {
         setIsCrearModalOpen(false);
-        setRefreshKey(prev => prev + 1);
       }
     } catch (err: any) {
       console.error('Error al crear secretario:', err);
@@ -45,7 +43,6 @@ export default function SecretariosPage() {
       await actualizarUsuarioPersona(selectedUsuario.id_usuario, data);
       setIsEditarModalOpen(false);
       setSelectedUsuario(null);
-      setRefreshKey(prev => prev + 1);
     } catch (err: any) {
       console.error('Error al actualizar secretario:', err);
       throw err;

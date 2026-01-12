@@ -2,6 +2,7 @@ export interface Parte {
   nombre_razon: string;
   numero_documento: string;
   telefono: string;
+  direccion_fiscal: string;
 }
 
 export interface Correo {

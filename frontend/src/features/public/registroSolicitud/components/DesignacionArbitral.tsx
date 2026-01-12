@@ -125,7 +125,7 @@ export const DesignacionArbitral: React.FC<DesignacionArbitralProps> = ({
                 <div className="border border-green-200 rounded-xl p-4 bg-gradient-to-br from-green-50/80 to-green-100/80 shadow-md">
                     <h4 className="text-sm font-semibold text-gray-800 mb-4 flex items-center">
                         <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-                        Árbitro del Tribunal Colegiado
+                        El solicitante propone como miembro del tribunal arbitral a:
                     </h4>
 
                     <div className="bg-white/80 rounded-lg p-4 border border-green-100 shadow-sm">

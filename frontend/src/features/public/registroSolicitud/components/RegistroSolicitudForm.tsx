@@ -147,7 +147,7 @@ export const RegistroSolicitudForm = ({
                     <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-[#733AEA] to-purple-600 mx-auto mt-3 rounded-full"></div>
                 </div>
 
-                <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
+                <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit} action="#" method="post">
                     {/* Datos del Demandante */}
                     <DemandanteForm
                         demandante={form.demandante}

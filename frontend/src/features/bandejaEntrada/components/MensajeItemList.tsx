@@ -14,8 +14,9 @@ export const MensajeItemList: React.FC<MensajeItemListProps> = ({
   isSelected,
   onClick
 }) => {
-  const totalRespuestas = mensaje.respuestas ? mensaje.respuestas.length : 0;
+  const totalRespuestas = 0; // No respuestas property available
   const totalMensajes = totalRespuestas + 1; // +1 por el mensaje principal
+  const respuestasText = 'respuestas'; // Always plural since totalRespuestas is always 0
 
   return (
     <div
@@ -62,7 +63,7 @@ export const MensajeItemList: React.FC<MensajeItemListProps> = ({
             {totalRespuestas > 0 && (
               <div className="flex items-center space-x-1">
                 <span className="text-xs text-slate-500">
-                  {totalRespuestas} respuesta{totalRespuestas !== 1 ? 's' : ''}
+                  {totalRespuestas} {respuestasText}
                 </span>
               </div>
             )}

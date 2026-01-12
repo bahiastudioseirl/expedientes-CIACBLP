@@ -10,7 +10,6 @@ export default function DemandadosPage() {
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [saving, setSaving] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleCrear = () => {
     setIsCrearModalOpen(true);
@@ -28,7 +27,6 @@ export default function DemandadosPage() {
       
       if (response.success) {
         setIsCrearModalOpen(false);
-        setRefreshKey(prev => prev + 1);
       }
     } catch (err: any) {
       console.error('Error al crear demandado:', err);
@@ -45,7 +43,7 @@ export default function DemandadosPage() {
       await actualizarUsuarioEmpresa(selectedUsuario.id_usuario, data);
       setIsEditarModalOpen(false);
       setSelectedUsuario(null);
-      setRefreshKey(prev => prev + 1);
+
     } catch (err: any) {
       console.error('Error al actualizar demandado:', err);
       throw err;

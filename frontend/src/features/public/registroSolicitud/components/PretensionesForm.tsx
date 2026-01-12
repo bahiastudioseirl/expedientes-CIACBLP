@@ -1,4 +1,3 @@
-import React from 'react';
 import { FormField } from './FormField';
 import { FormSection } from './FormSection';
 

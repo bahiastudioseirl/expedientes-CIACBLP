@@ -1,14 +1,17 @@
 import axios from 'axios';
 
+const API_BASE_URL = 'http://localhost:8000';         /*URL DEL BACKEND*/
+
+
 export const axiosInstance = axios.create({
-	baseURL: 'http://localhost:8000/api/',
+	baseURL: `${API_BASE_URL}/api/`,
 	headers: {
 		'Content-Type': 'multipart/form-data',
 	},
 });
 
 export const axiosWithoutMultipart = axios.create({
-	baseURL: 'http://localhost:8000/api/',
+	baseURL: `${API_BASE_URL}/api/`,
 	headers: {
 		'Content-Type': 'application/json',
 	},
@@ -45,11 +48,7 @@ const handleUnauthorized = (error: any) => {
 	if (error.response?.status === 401) {
 		// Token expirado o inválido - solo limpiar el token
 		localStorage.removeItem('authToken');
-		
-		// Redirigir al login si no estamos ya ahí
-		if (!window.location.pathname.includes('/login')) {
-			window.location.href = '/login';
-		}
+		// No forzar navegación aquí - dejar que cada componente maneje su lógica
 	}
 	return Promise.reject(error);
 };

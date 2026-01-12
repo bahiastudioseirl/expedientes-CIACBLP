@@ -2,12 +2,10 @@ import { useState, useEffect } from 'react';
 import {
     ArrowLeft,
     MessageSquare,
-    Calendar,
     CheckCircle,
     XCircle,
     Lock,
     Eye,
-    Settings,
     ToggleLeft,
     ToggleRight
 } from 'lucide-react';

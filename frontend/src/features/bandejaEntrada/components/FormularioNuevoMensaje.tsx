@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Send, Paperclip, X, User } from 'lucide-react';
-import { obtenerNombreCompleto, getAllParticipanteIds } from '../utils/chatUtils';
+import { Send, Paperclip, X } from 'lucide-react';
+import { getAllParticipanteIds } from '../utils/chatUtils';
 import { SelectorDestinatarios } from './SelectorDestinatarios';
 import type { ExpedienteAsignado } from '../schemas/BandejaEntradaSchema';
 

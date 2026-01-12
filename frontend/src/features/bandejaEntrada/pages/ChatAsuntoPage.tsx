@@ -1,24 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useChatMensajes } from '../hooks/useChatMensajes';
-import { getAllParticipanteIds, getValidParticipantes } from '../utils/chatUtils';
+import { getValidParticipantes } from '../utils/chatUtils';
 import { PanelListaMensajes } from '../components/PanelListaMensajes';
 import { PanelDetalleMensaje } from '../components/PanelDetalleMensaje';
 import { FormularioNuevoMensaje } from '../components/FormularioNuevoMensaje';
 import type { 
-  Mensaje, 
-  Asunto, 
-  ExpedienteAsignado,
-  CrearMensajeRequest 
+  Mensaje
 } from '../schemas/BandejaEntradaSchema';
 
 export default function ChatAsuntoPage() {
   const navigate = useNavigate();
-  const { asuntoId } = useParams();
   const location = useLocation();
   
   // Obtener datos del state de navegación
-  const { asunto, expediente, currentUser, userRole } = location.state || {};
+  const { asunto, expediente, currentUser } = location.state || {};
 
   // Estados locales para UI - mostrar formulario por defecto
   const [mostrandoFormularioNuevo, setMostrandoFormularioNuevo] = useState(true);
@@ -31,15 +27,11 @@ export default function ChatAsuntoPage() {
     hiloMensajes,
     loading,
     loadingHilo,
-    sending,
     error,
     asuntoActual,
-    togglingAsunto,
     cargarMensajes,
     seleccionarMensaje,
     enviarMensaje,
-    cambiarEstadoAsuntoActual,
-    limpiarError,
     setMensajeSeleccionado,
     setHiloMensajes
   } = useChatMensajes({ asunto, currentUser, expediente });
@@ -140,17 +132,19 @@ export default function ChatAsuntoPage() {
   return (
     <div className="fixed inset-y-0 left-64 right-0 flex bg-gradient-to-b from-slate-50 to-slate-100">
       {/* Panel izquierdo - Lista de mensajes */}
-      <PanelListaMensajes
-        asunto={asuntoActual}
-        expediente={expediente}
-        mensajes={mensajes}
-        mensajeSeleccionado={mensajeSeleccionado}
-        loading={loading}
-        error={error}
-        onGoBack={handleGoBack}
-        onNuevoMensaje={handleNuevoMensaje}
-        onSeleccionarMensaje={handleSeleccionarMensaje}
-      />
+      {asuntoActual && (
+        <PanelListaMensajes
+          asunto={asuntoActual}
+          expediente={expediente}
+          mensajes={mensajes}
+          mensajeSeleccionado={mensajeSeleccionado}
+          loading={loading}
+          error={error}
+          onGoBack={handleGoBack}
+          onNuevoMensaje={handleNuevoMensaje}
+          onSeleccionarMensaje={handleSeleccionarMensaje}
+        />
+      )}
 
       {/* Panel derecho - Detalle del mensaje o formulario */}
       <div className="flex-1 flex flex-col">
@@ -160,7 +154,7 @@ export default function ChatAsuntoPage() {
             onEnviar={handleEnviarMensaje}
             onCancelar={handleCancelarFormulario}
           />
-        ) : mensajeSeleccionado ? (
+        ) : mensajeSeleccionado && asuntoActual ? (
           <PanelDetalleMensaje
             asunto={asuntoActual}
             expediente={expediente}

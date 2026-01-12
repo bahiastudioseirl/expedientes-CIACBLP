@@ -60,6 +60,7 @@ class SolicitudResponse
                     'nombre_razon' => $parte->nombre_razon,
                     'numero_documento' => $parte->numero_documento,
                     'telefono' => $parte->telefono,
+                    'direccion_fiscal' => $parte->direccion_fiscal,
                     'correos' => $parte->correos ? $parte->correos->map(function ($correo) {
                         return [
                             'id' => $correo->id_solicitud_correo,

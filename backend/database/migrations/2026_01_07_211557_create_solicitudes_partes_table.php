@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nombre_razon');
             $table->string('numero_documento');
             $table->string('telefono')->nullable();
+            $table->string('direccion_fiscal')->nullable();
             $table->unsignedBigInteger('id_solicitud');
 
             $table->foreign('id_solicitud')->references('id_solicitud')->on('solicitudes')->onDelete('cascade');

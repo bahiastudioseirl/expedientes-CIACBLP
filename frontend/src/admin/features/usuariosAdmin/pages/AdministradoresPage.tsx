@@ -10,7 +10,6 @@ export default function AdministradoresPage() {
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [saving, setSaving] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleCrear = () => {
     setIsCrearModalOpen(true);
@@ -28,7 +27,6 @@ export default function AdministradoresPage() {
       
       if (response.success) {
         setIsCrearModalOpen(false);
-        setRefreshKey(prev => prev + 1); // Trigger refresh
       }
     } catch (err: any) {
       console.error('Error al crear administrador:', err);
@@ -46,21 +44,11 @@ export default function AdministradoresPage() {
       await actualizarUsuarioPersona(selectedUsuario.id_usuario, data);
       setIsEditarModalOpen(false);
       setSelectedUsuario(null);
-      setRefreshKey(prev => prev + 1);
     } catch (err: any) {
       console.error('Error al actualizar administrador:', err);
       throw err;
     }
   };
-
-  const handleUsuarioCreado = () => {
-    setRefreshKey(prev => prev + 1);
-  };
-
-  const handleUsuarioEditado = () => {
-    setRefreshKey(prev => prev + 1);
-  };
-
   const handleCloseEditModal = () => {
     setIsEditarModalOpen(false);
     setSelectedUsuario(null);

@@ -5,6 +5,7 @@ interface DemandanteData {
     nombre_razon: string;
     numero_documento: string;
     telefono: string;
+    direccion_fiscal: string;
 }
 
 interface CorreoDemandante {
@@ -66,18 +67,26 @@ export const DemandanteForm = ({
                 />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mt-6" >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6" >
                 <FormField
-                    label="Número de teléfono"
+                    label="Número de teléfono (opcional)"
                     name="demandante.telefono"
                     type="tel"
                     value={demandante.telefono}
                     onChange={handleFieldChange('demandante.telefono')}
                     placeholder="999 999 999"
                     className="md:col-span-2"
-                    required
+                />
+
+                <FormField
+                    label='Direccion Fiscal'
+                    name='demandante.direccion_fiscal'
+                    value={demandante.direccion_fiscal}
+                    onChange={handleFieldChange('demandante.direccion_fiscal')}
+                    placeholder="Ingresar dirección fiscal"
                 />
             </div>
+
 
             {/* Correos del demandante */}
             <div className="mt-8">

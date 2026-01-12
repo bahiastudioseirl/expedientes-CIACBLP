@@ -75,13 +75,12 @@ export const DemandadoForm = ({
             </div>
             <div className="mb-4 sm:mb-6">
                 <FormField
-                    label="Número de teléfono"
+                    label="Número de teléfono (opcional)"
                     name="demandado.telefono"
                     type="tel"
                     value={demandado.telefono}
                     onChange={handleFieldChange('demandado.telefono')}
                     placeholder="999 999 999"
-                    required
                 />
             </div>
 
@@ -138,40 +137,6 @@ export const DemandadoForm = ({
                     Agregar correos secundarios
                 </button>
             </div>
-
-            {/* Representante del demandado */}
-            <div className="mt-8 p-6 bg-gradient-to-br from-gray-50/80 to-gray-100/80 border-2 border-gray-200 rounded-2xl backdrop-blur-sm">
-                <h4 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-3">
-                    Representante Legal
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
-                    <FormField
-                        label="Nombre Completo"
-                        name="representante_demandado.nombre_completo"
-                        value={representante.nombre_completo}
-                        onChange={handleFieldChange('representante_demandado.nombre_completo')}
-                        placeholder="Nombre completo del representante"
-                        required
-                    />
-                    <FormField
-                        label="Número de Documento"
-                        name="representante_demandado.numero_documento"
-                        value={representante.numero_documento}
-                        onChange={handleFieldChange('representante_demandado.numero_documento')}
-                        placeholder="Ingresar DNI"
-                        required
-                    />
-                    <FormField
-                        label="Teléfono de Contacto (opcional)"
-                        name="representante_demandado.telefono"
-                        type="tel"
-                        value={representante.telefono}
-                        onChange={handleFieldChange('representante_demandado.telefono')}
-                        placeholder="999 999 999"
-                    />
-                </div>
-            </div>
-
             {/* Mesa de partes virtual */}
             <div className="mt-8">
                 <div className="mt-8 p-6 bg-gradient-to-br from-gray-50/80 to-gray-100/80 border-2 border-gray-200 rounded-2xl backdrop-blur-sm">
@@ -212,6 +177,41 @@ export const DemandadoForm = ({
                     </div>
                 )}
             </div>
+            
+            {/* Representante del demandado */}
+            <div className="mt-8 p-6 bg-gradient-to-br from-gray-50/80 to-gray-100/80 border-2 border-gray-200 rounded-2xl backdrop-blur-sm">
+                <h4 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-3">
+                    Representante Legal
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
+                    <FormField
+                        label="Nombre Completo"
+                        name="representante_demandado.nombre_completo"
+                        value={representante.nombre_completo}
+                        onChange={handleFieldChange('representante_demandado.nombre_completo')}
+                        placeholder="Nombre completo del representante"
+                        required
+                    />
+                    <FormField
+                        label="Número de Documento"
+                        name="representante_demandado.numero_documento"
+                        value={representante.numero_documento}
+                        onChange={handleFieldChange('representante_demandado.numero_documento')}
+                        placeholder="Ingresar DNI"
+                        required
+                    />
+                    <FormField
+                        label="Teléfono de Contacto (opcional)"
+                        name="representante_demandado.telefono"
+                        type="tel"
+                        value={representante.telefono}
+                        onChange={handleFieldChange('representante_demandado.telefono')}
+                        placeholder="999 999 999"
+                    />
+                </div>
+            </div>
+
+
         </FormSection>
     );
 };

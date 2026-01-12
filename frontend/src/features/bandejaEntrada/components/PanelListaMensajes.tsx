@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Plus, MessageCircle } from 'lucide-react';
-import { obtenerNombreCompleto, formatDateOnly, extraerTituloCorto } from '../utils/chatUtils';
+import { extraerTituloCorto } from '../utils/chatUtils';
 import { MensajeItemList } from './MensajeItemList';
 import type { Mensaje, Asunto, ExpedienteAsignado } from '../schemas/BandejaEntradaSchema';
 

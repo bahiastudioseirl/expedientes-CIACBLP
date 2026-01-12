@@ -10,7 +10,6 @@ export const RegistroSolicitudPage = () => {
     error,
     successMsg,
     showSuccessModal,
-    response,
     registrar,
     setError,
     closeSuccessModal

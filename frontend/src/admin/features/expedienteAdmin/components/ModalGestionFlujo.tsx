@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   XCircle,
   ArrowRight,
-  FileText,
   Plus
 } from 'lucide-react';
 import { 
