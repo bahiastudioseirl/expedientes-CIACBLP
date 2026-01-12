@@ -27,6 +27,10 @@ const PlantillaAdmin = lazy(() =>
     import('../../admin/features/plantillaAdmin/pages/PlantillaAdmin').then((module) => ({ default: module.default }))
 );
 
+const SolicitudAdmin = lazy(() =>
+    import('../../admin/features/solicitudAdmin/pages/SolicitudAdmin').then((module) => ({ default: module.default }))
+);
+
 // Usuarios Admin
 const AdministradoresPage = lazy(() =>
     import('../../admin/features/usuariosAdmin/pages/AdministradoresPage').then((module) => ({ default: module.default }))
@@ -156,6 +160,15 @@ export const routes = [
         element: (
           <LazyWrapper>
             <PlantillaAdmin />
+          </LazyWrapper>
+        ),
+      },
+      // Gestión de Solicitudes
+      {
+        path: 'solicitud',
+        element: (
+          <LazyWrapper>
+            <SolicitudAdmin />
           </LazyWrapper>
         ),
       },

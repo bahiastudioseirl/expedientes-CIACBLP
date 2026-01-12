@@ -29,7 +29,7 @@ export const RegistroSolicitudForm = ({
     setError 
 }: Props) => {
     const [form, setForm] = useState<RegistroSolicitudRequest>({
-        demandante: { nombre_razon: '', numero_documento: '', telefono: '' },
+        demandante: { nombre_razon: '', numero_documento: '', telefono: '', direccion_fiscal: '' },
         correos_demandante: [{ correo: '', es_principal: true }],
         representante_demandante: { nombre_completo: '', numero_documento: '', telefono: '' },
         demandado: { nombre_razon: '', numero_documento: '', telefono: '' },
@@ -62,8 +62,10 @@ export const RegistroSolicitudForm = ({
                 propone_arbitro: tipoDesignacion === 'unico' && opcionArbitroUnico === 'propone',
                 encarga_ciacblp: tipoDesignacion === 'unico' && opcionArbitroUnico === 'encarga'
             },
-            // No enviar árbitros cuando se encarga al CIACBLP
-            arbitros: opcionArbitroUnico === 'encarga' ? [] : (prev.arbitros.length === 0 ? [{ nombre_completo: '', correo: '', telefono: '' }] : prev.arbitros)
+            // Solo borrar árbitros cuando sea árbitro único Y se encargue al CIACBLP
+            arbitros: (tipoDesignacion === 'unico' && opcionArbitroUnico === 'encarga') 
+                ? [] 
+                : (prev.arbitros.length === 0 ? [{ nombre_completo: '', correo: '', telefono: '' }] : prev.arbitros)
         }));
     }, [tipoDesignacion, opcionArbitroUnico]);
 

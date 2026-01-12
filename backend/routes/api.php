@@ -49,7 +49,7 @@ Route::middleware(['force.json'])->prefix('usuario-solicitante')->group(function
 // Rutas protegidas para usuarios solicitantes autenticados
 Route::middleware(['force.json', 'solicitante.auth'])->prefix('solicitudes')->group(function () {
     Route::post('/', [SolicitudController::class, 'crear']);
-    
+
     // Obtener información del usuario solicitante autenticado
     Route::get('/me', function (Request $request) {
         $usuario = $request->attributes->get('usuario_solicitante');
@@ -62,7 +62,7 @@ Route::middleware(['force.json', 'solicitante.auth'])->prefix('solicitudes')->gr
             ]
         ]);
     });
-    
+
     // Logout para usuarios solicitantes
     Route::post('/logout', function (Request $request) {
         try {
@@ -82,10 +82,10 @@ Route::middleware(['force.json', 'solicitante.auth'])->prefix('solicitudes')->gr
 
 // Rutas con solo autenticación (cualquier usuario logueado)
 Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])->group(function () {
-    
+
     // Cerrar sesión
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-    
+
     Route::get('/me', function (Request $request) {
         $user = auth('api')->user();
         return response()->json([
@@ -97,11 +97,11 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
             ]
         ]);
     });
-    
+
 
     // Rutas disponibles para todos los usuarios autenticados
     Route::get('expedientes/asignados', [ExpedienteController::class, 'listarExpedientesAsignados']);
-    
+
     // Rutas de mensajes para usuarios autenticados
     Route::prefix('mensajes')->middleware(\App\Http\Middleware\HandlePostTooLarge::class)->group(function () {
         Route::post('/', [MensajeController::class, 'crearMensaje']);
@@ -119,8 +119,6 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         Route::get('/expediente/{idExpediente}/actual', [FlujoController::class, 'obtenerFlujoActual']);
         Route::get('/expediente/{idExpediente}/listar', [FlujoController::class, 'listarFlujosPorExpediente']);
     });
-    
-    
 });
 
 
@@ -129,7 +127,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
 
 // Rutas solo para Admin
 Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'admin'])->group(function () {
-    
+
     Route::prefix('usuarios')->group(function () {
         Route::post('/', [UsuarioController::class, 'crearUsuario']);
         Route::post('/administradores', [UsuarioController::class, 'crearAdministrador']);
@@ -150,6 +148,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
 
     Route::prefix('solicitudes')->group(function () {
         Route::get('/', [SolicitudController::class, 'listarTodas']);
+        Route::get('/{id}', [SolicitudController::class, 'verSolicitud']);
         Route::put('/{id}/admitir', [SolicitudController::class, 'admitirSolicitud']);
     });
 
@@ -196,12 +195,10 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::put('/{idAsunto}/mensajear', [AsuntoController::class, 'cerrarOAbrirAsunto']);
     });
 
-    Route::prefix('flujo')->group(function(){
+    Route::prefix('flujo')->group(function () {
         Route::post('/cambiar-etapa-subetapa', [FlujoController::class, 'cambiarEtapaSubetapa']);
         Route::patch('/{idFlujo}/actualizar-flujo-asunto', [FlujoController::class, 'actualizarFlujoYAsunto']);
     });
-    
-
 });
 
 
@@ -215,6 +212,4 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
 
 
 // Rutas para Participantes (Demandante, Demandado) - id_rol 4, 5
-Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'participant'])->group(function () {
-    
-});
+Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'participant'])->group(function () {});

@@ -1,8 +1,14 @@
-export interface Parte {
+export interface Demandante {
   nombre_razon: string;
   numero_documento: string;
   telefono: string;
   direccion_fiscal: string;
+}
+
+export interface Demandado {
+  nombre_razon: string;
+  numero_documento: string;
+  telefono: string;
 }
 
 export interface Correo {
@@ -40,10 +46,10 @@ export interface Arbitro {
 }
 
 export interface RegistroSolicitudRequest {
-  demandante: Parte;
+  demandante: Demandante;
   correos_demandante: Correo[];
   representante_demandante: Representante;
-  demandado: Parte;
+  demandado: Demandado;
   correos_demandado: Correo[];
   representante_demandado: Representante;
   demandado_extra: DemandadoExtra;

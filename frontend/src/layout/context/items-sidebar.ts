@@ -8,6 +8,7 @@ import {
     UserCheck,
     UserX,
     User,
+    ClipboardList,
     type LucideIcon
 } from 'lucide-react';
 
@@ -39,6 +40,11 @@ export const menuItems: MenuItem[] = [
         titulo: 'Plantillas',
         icon: Building,
         link: '/administrator/plantilla'
+    },
+    {
+        titulo: 'Solicitudes',
+        icon: ClipboardList,
+        link: '/administrator/solicitud'
     },
     {
         titulo: 'Usuarios',

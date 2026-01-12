@@ -98,4 +98,26 @@ class SolicitudController extends Controller
         }
     }
 
+    public function verSolicitud(int $id): JsonResponse
+    {
+        try {
+            $solicitud = $this->solicitudService->obtenerPorId($id);
+            if ($solicitud) {
+                return SolicitudResponse::solicitud($solicitud);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solicitud no encontrada'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al ver la solicitud: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al ver la solicitud',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }
