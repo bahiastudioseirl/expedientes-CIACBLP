@@ -1,19 +1,21 @@
 export interface LoginRequest {
-  numero_documento: string;
+  correo: string;
   contrasena: string;
 }
 
 export interface User {
   id: number;
-  nombre: string;
-  apellido: string;
-  numero_documento: string;
+  nombre_completo: string;
+  correo: string;
   rol: string;
 }
 
 export interface LoginResponse {
   success: boolean;
   message: string;
-  token: string;
-  user: User;
+  data: {
+    token: string;
+    usuario: User;
+  }
+
 }

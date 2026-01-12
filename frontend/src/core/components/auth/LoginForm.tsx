@@ -9,7 +9,7 @@ import logoCiacblp from "../../../assets/logo-ciacblp.webp";
 
 export const LoginForm = () => {
     const [credentials, setCredentials] = useState<LoginRequest>({
-        numero_documento: '',
+        correo: '',
         contrasena: ''
     });
 
@@ -27,10 +27,10 @@ export const LoginForm = () => {
             const response = await iniciarSesion(credentials);
 
             AuthStore.clearAll();
-            localStorage.setItem('authToken', response.token);
-            AuthStore.setUser(response.user);
+            localStorage.setItem('authToken', response.data.token);
+            AuthStore.setUser(response.data.usuario);
 
-            if (response.user.rol === 'Administrador') {
+            if (response.data.usuario.rol === 'Administrador') {
                 navigate('/administrator');
             } else {
                 navigate('/');
@@ -77,27 +77,19 @@ export const LoginForm = () => {
                     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="numero_documento" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Número de documento (DNI O RUC)
+                                <label htmlFor="correo" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Correo electrónico
                                 </label>
                                 <input
-                                    id="numero_documento"
-                                    name="numero_documento"
-                                    type="text"
-                                    autoComplete="off"
+                                    id="correo"
+                                    name="correo"
+                                    type="email"
+                                    autoComplete="on"
                                     required
-                                    value={credentials.numero_documento}
+                                    value={credentials.correo}
                                     onChange={handleChange}
-                                    onKeyDown={(e) => {
-                                        if (
-                                            !/[0-9]/.test(e.key) &&
-                                            !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)
-                                        ) {
-                                            e.preventDefault();
-                                        }
-                                    }}
                                     className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#224666] focus:border-[#224666] focus:z-10 sm:text-sm"
-                                    placeholder="12345678"
+                                    placeholder="Ingresa tu correo electrónico"
                                 />
                             </div>
 
