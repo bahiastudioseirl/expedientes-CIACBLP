@@ -46,4 +46,9 @@ class Expediente extends Model
     {
         return $this->hasOne(Asunto::class, 'id_expediente', 'id_expediente');
     }
+
+    public function usuariosExpedientes()
+    {
+        return $this->hasMany(UsuarioExpediente::class, 'id_expediente', 'id_expediente');
+    }
 }

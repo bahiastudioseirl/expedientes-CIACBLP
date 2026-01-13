@@ -27,9 +27,9 @@ export interface SubMenuItem {
 
 export const menuItems: MenuItem[] = [
     {
-        titulo: 'Bandeja de Entrada',
-        icon: Inbox,
-        link: '/bandeja-entrada'
+        titulo: 'Solicitudes',
+        icon: ClipboardList,
+        link: '/administrator/solicitud'
     },
     {
         titulo: 'Expedientes',
@@ -37,15 +37,16 @@ export const menuItems: MenuItem[] = [
         link: '/administrator/expediente'
     },
     {
+        titulo: 'Bandeja de Entrada',
+        icon: Inbox,
+        link: '/bandeja-entrada'
+    },
+    {
         titulo: 'Plantillas',
         icon: Building,
         link: '/administrator/plantilla'
     },
-    {
-        titulo: 'Solicitudes',
-        icon: ClipboardList,
-        link: '/administrator/solicitud'
-    },
+
     {
         titulo: 'Usuarios',
         icon: Users,

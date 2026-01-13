@@ -103,15 +103,16 @@ class ExpedienteService
         return $this->expedienteRepository->obtenerTodos();
     }
 
-
-
-
-
-
-
-
-
-
+    public function obtenerPorRolUsuario(int $idUsuario, int $idRol): Collection
+    {
+        // Si es administrador (rol 1), puede ver todos los expedientes
+        if ($idRol === 1) {
+            return $this->expedienteRepository->obtenerTodos();
+        }
+        
+        // Si no es administrador, solo ve sus expedientes asignados
+        return $this->expedienteRepository->obtenerPorUsuario($idUsuario);
+    }
 
 
 

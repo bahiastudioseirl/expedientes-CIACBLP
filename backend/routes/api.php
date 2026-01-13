@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArbitroController;
 use App\Http\Controllers\AsuntoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -100,7 +101,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
 
 
     // Rutas disponibles para todos los usuarios autenticados
-    Route::get('expedientes/asignados', [ExpedienteController::class, 'listarExpedientesAsignados']);
+    Route::get('expedientes/mis-expedientes', [ExpedienteController::class, 'listarMisExpedientes']);
 
     // Rutas de mensajes para usuarios autenticados
     Route::prefix('mensajes')->middleware(\App\Http\Middleware\HandlePostTooLarge::class)->group(function () {
@@ -176,8 +177,10 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::post('/{id}/crear-expediente', [ExpedienteController::class, 'crearExpedienteDesdeAdmitida']);
         Route::get('/', [ExpedienteController::class, 'listarExpedientes']);
         Route::get('/{id}', [ExpedienteController::class, 'obtenerExpediente']);
-
+        Route::post('/{id}/arbitro', [ArbitroController::class, 'crearEnExpediente']);
     });
+
+    Route::get('/arbitros/buscar', [ArbitroController::class, 'buscar']);
 });
 
 

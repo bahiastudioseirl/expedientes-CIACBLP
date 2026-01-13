@@ -30,6 +30,12 @@ class ExpedienteRepository
         return Expediente::all();
     }
 
+    public function obtenerPorUsuario(int $idUsuario): Collection
+    {
+        return Expediente::whereHas('usuariosExpedientes', function ($query) use ($idUsuario) {
+            $query->where('id_usuario', $idUsuario);
+        })->get();
+    }
 
 }
     

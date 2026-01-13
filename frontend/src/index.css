@@ -4,7 +4,7 @@
 /* 2️⃣ Importa Tailwind */
 @import "tailwindcss";
 
-/* 3️⃣ Tu animación personalizada */
+/* 3️⃣ Animaciones personalizadas */
 @keyframes confetti {
   0% {
     transform: translateY(0) rotate(0deg);
@@ -18,6 +18,15 @@
 
 .animate-confetti {
   animation: confetti linear forwards;
+}
+
+/* Animaciones para el modal de éxito */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
 }
 
 /* 4️⃣ (Opcional) Aplica Inter globalmente */

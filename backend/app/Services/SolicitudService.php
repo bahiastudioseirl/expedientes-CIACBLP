@@ -8,16 +8,13 @@ use App\Services\Solicitud\SolicitudParteService;
 use App\Services\Solicitud\SolicitudPretensionService;
 use App\Services\Solicitud\SolicitudDesignacionService;
 use App\Models\Solicitud;
-use App\Models\UsuarioSolicitante;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SolicitudCreada;
 use App\Mail\NotificarAdminSolicitud;
-use App\Models\Usuarios;
 use App\Repositories\UsuarioRepository;
 use App\Repositories\UsuarioSolicitanteRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 
 class SolicitudService
@@ -113,12 +110,6 @@ class SolicitudService
         return $this->solicitudRepository->obtenerPorId($id);
     }
 
-    public function obtenerPorUsuario(int $id_usuario): Collection
-    {
-        return $this->solicitudRepository->obtenerPorUsuario($id_usuario);
-    }
-
-
     private function crearSolicitudBase(CrearSolicitudDTO $dto, int $id_usuario_solicitante): Solicitud
     {
         $data = [
@@ -144,12 +135,6 @@ class SolicitudService
         return $this->solicitudRepository->admitirSolicitud($id);
     }
 
-
-    public function obtenerPartesPorSolicitud(int $id_solicitud)
-    {
-
-    }
-
     /**
      * Obtener datos básicos de las partes de una solicitud
      */
@@ -172,11 +157,6 @@ class SolicitudService
             'demandado' => $demandado
         ];
     }
-
-
-
-
-
     /**
      * Procesar y almacenar archivo de resumen de controversia
      */
@@ -187,7 +167,6 @@ class SolicitudService
         $extension = $archivo->getClientOriginalExtension();
         $nombreArchivo = "{$nombreOriginal}_{$fecha}.{$extension}";
         
-        // Crear directorio si no existe
         $directorioDestino = "resumen-solicitud/{$id_usuario_solicitante}";
         $rutaCompleta = public_path($directorioDestino);
         
@@ -195,10 +174,8 @@ class SolicitudService
             mkdir($rutaCompleta, 0755, true);
         }
         
-        // Mover archivo directamente a public
         $archivo->move($rutaCompleta, $nombreArchivo);
         
-        // Retornar ruta relativa para almacenar en BD
         return "{$directorioDestino}/{$nombreArchivo}";
     }
 }

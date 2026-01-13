@@ -7,6 +7,7 @@ use App\Http\Requests\Expedientes\CrearExpedienteRequest;
 use App\Http\Responses\ExpedienteResponse;
 use App\Services\ExpedienteService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ExpedienteController extends Controller
 {
@@ -62,6 +63,32 @@ class ExpedienteController extends Controller
         } catch (\Exception $e) {
             return ExpedienteResponse::error(
                 'Error al listar los expedientes: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
+    public function listarMisExpedientes(Request $request): JsonResponse
+    {
+        try {
+            // Obtener usuario autenticado desde el middleware JWT
+            $usuario = auth('api')->user();
+            
+            if (!$usuario) {
+                return ExpedienteResponse::error('Usuario no autenticado', 401);
+            }
+            
+            // Obtener expedientes según el rol del usuario
+            $expedientes = $this->expedienteService->obtenerPorRolUsuario(
+                $usuario->id_usuario,
+                $usuario->id_rol
+            );
+            
+            return ExpedienteResponse::expedientes($expedientes);
+            
+        } catch (\Exception $e) {
+            return ExpedienteResponse::error(
+                'Error al obtener mis expedientes: ' . $e->getMessage(),
                 500
             );
         }

@@ -4,10 +4,13 @@ import {
   CheckCircle,
   XCircle,
   Calendar,
-  Eye
+  Eye,
+  UserPlus,
+  UserCheck
 } from 'lucide-react';
 import ModalCrearExpedienteDesdeSolicitud from '../components/ModalCrearExpedienteDesdeSolicitud';
 import ModalVerExpediente from '../components/ModalVerExpediente';
+import ModalAgregarArbitro from '../components/ModalAgregarArbitro';
 import { useExpedienteAdmin } from '../hooks/useExpedienteAdmin';
 
 export default function ExpedienteAdmin() {
@@ -24,6 +27,7 @@ export default function ExpedienteAdmin() {
     isModalDesdeSolicitud,
     idSolicitudParaExpediente,
     isViewModalOpen,
+    isAgregarArbitroModalOpen,
     selectedExpediente,
     
     // Paginación
@@ -37,6 +41,9 @@ export default function ExpedienteAdmin() {
     handleCloseModalDesdeSolicitud,
     handleSuccessCrearExpediente,
     handleViewExpediente,
+    handleOpenAgregarArbitroModal,
+    handleCloseAgregarArbitroModal,
+    handleSuccessAgregarArbitro,
     handleCloseViewModal,
     getNombreDemandante,
     getNombreDemandado,
@@ -176,6 +183,23 @@ export default function ExpedienteAdmin() {
                             >
                               <Eye className="w-4 h-4" />
                             </button>
+                            {expediente.arbitro ? (
+                              <button
+                                disabled
+                                className="p-2 text-green-600 bg-green-50 rounded-lg cursor-not-allowed"
+                                title={`Árbitro asignado: ${expediente.arbitro.nombre_completo}`}
+                              >
+                                <UserCheck className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleOpenAgregarArbitroModal(expediente)}
+                                className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                                title="Agregar árbitro"
+                              >
+                                <UserPlus className="w-4 h-4" />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -247,6 +271,16 @@ export default function ExpedienteAdmin() {
         onClose={handleCloseViewModal}
         expediente={selectedExpediente}
       />
+
+      {/* Modal Agregar Árbitro */}
+      {selectedExpediente && (
+        <ModalAgregarArbitro
+          open={isAgregarArbitroModalOpen}
+          onClose={handleCloseAgregarArbitroModal}
+          idExpediente={selectedExpediente.id}
+          onSuccess={handleSuccessAgregarArbitro}
+        />
+      )}
 
     </div>
   );

@@ -120,26 +120,6 @@ class SolicitudController extends Controller
         }
     }
 
-    public function verPartesSolicitud(int $id): JsonResponse
-    {
-        try {
-            $partes = $this->solicitudService->obtenerPartesPorSolicitud($id);
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'partes' => $partes
-                ]
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error al obtener las partes de la solicitud: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener las partes de la solicitud',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function obtenerDatosPartes(int $id): JsonResponse
     {
         try {
@@ -158,5 +138,6 @@ class SolicitudController extends Controller
             ], 500);
         }
     }
+
 
 }

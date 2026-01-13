@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { obtenerExpedientes } from '../services/obtenerExpedientes';
+import { obtenerExpedientes, obtenerMisExpedientes } from '../services/obtenerExpedientes';
+import { AuthStore } from '../../../../core/components/auth/services/AuthStore';
 import type { Expediente } from '../schemas/ExpedienteSchema';
 
 export function useExpedienteAdmin() {
@@ -11,6 +12,7 @@ export function useExpedienteAdmin() {
   const [idSolicitudParaExpediente, setIdSolicitudParaExpediente] = useState<number | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isFlujoModalOpen, setIsFlujoModalOpen] = useState(false);
+  const [isAgregarArbitroModalOpen, setIsAgregarArbitroModalOpen] = useState(false);
   const [selectedExpediente, setSelectedExpediente] = useState<Expediente | null>(null);
   
   // Estados de datos
@@ -52,7 +54,14 @@ export function useExpedienteAdmin() {
     setLoading(true);
     setError("");
     try {
-      const response = await obtenerExpedientes();
+      // Obtener el rol del usuario autenticado
+      const userRole = AuthStore.getUserRole();
+      
+      // Si es Administrador, obtener todos los expedientes; sino, obtener solo los asignados
+      const response = userRole === 'Administrador' 
+        ? await obtenerExpedientes() 
+        : await obtenerMisExpedientes();
+        
       if (response.success) {
         const expedientesOrdenados = response.data.expedientes.sort((a, b) => {
           const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
@@ -106,6 +115,20 @@ export function useExpedienteAdmin() {
     setSelectedExpediente(null);
   }, []);
 
+  const handleOpenAgregarArbitroModal = useCallback((expediente: Expediente) => {
+    setSelectedExpediente(expediente);
+    setIsAgregarArbitroModalOpen(true);
+  }, []);
+
+  const handleCloseAgregarArbitroModal = useCallback(() => {
+    setIsAgregarArbitroModalOpen(false);
+    setSelectedExpediente(null);
+  }, []);
+
+  const handleSuccessAgregarArbitro = useCallback(() => {
+    cargarExpedientes();
+  }, [cargarExpedientes]);
+
   const handleCloseModalDesdeSolicitud = useCallback(() => {
     setIsModalDesdeSolicitud(false);
     setIdSolicitudParaExpediente(null);
@@ -124,6 +147,7 @@ export function useExpedienteAdmin() {
   }, []);
 
   return {
+    isAgregarArbitroModalOpen,
     // Estados
     expedientes: filteredData,
     paginatedData: paginationData.paginatedData,
@@ -152,6 +176,9 @@ export function useExpedienteAdmin() {
     handleViewExpediente,
     handleCloseViewModal,
     handleOpenFlujoModal,
+    handleOpenAgregarArbitroModal,
+    handleCloseAgregarArbitroModal,
+    handleSuccessAgregarArbitro,
     handleCloseFlujoModal,
     handleCloseModalDesdeSolicitud,
     handleSuccessCrearExpediente,

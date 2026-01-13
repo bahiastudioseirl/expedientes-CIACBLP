@@ -9,98 +9,19 @@ use App\Models\Correos;
 use App\Repositories\UsuarioRepository;
 use App\Repositories\CorreoRepository;
 use App\Exceptions\UltimoUsuarioException;
+use App\Repositories\SecondDB\PostulantesArbitroRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 class UsuarioService
 {
     public function __construct(
         private readonly UsuarioRepository $usuarioRepository,
-        private readonly CorreoRepository $correoRepository
+        private readonly PostulantesArbitroRepository $postulantesArbitroRepository
     ){}
 
-    public function crearUsuario(CrearUsuarioDTO $data): Usuarios
+    public function crearUsuario(CrearUsuarioDTO $data)
     {
-        $usuario = $this->usuarioRepository->crear($data->toArray());
-        
-        // Crear correos si se proporcionan
-        if (!empty($data->correos)) {
-            foreach ($data->correos as $correo) {
-                Correos::create([
-                    'id_usuario' => $usuario->id_usuario,
-                    'correo_electronico' => $correo
-                ]);
-            }
-        }
-        
-        return $usuario->load(['rol', 'correos']);
-    }
 
-    // Método unificado para crear usuarios personas (admin, secretario, arbitro)
-    public function crearUsuarioPersona(CrearUsuarioDTO $data, int $idRol): Usuarios
-    {
-        $datosArray = $data->toArray();
-        $datosArray['id_rol'] = $idRol;
-        
-        $usuario = $this->usuarioRepository->crear($datosArray);
-        
-        // Crear correos si se proporcionan
-        if (!empty($data->correos)) {
-            foreach ($data->correos as $correo) {
-                Correos::create([
-                    'id_usuario' => $usuario->id_usuario,
-                    'correo_electronico' => $correo
-                ]);
-            }
-        }
-        
-        return $usuario->load(['rol', 'correos']);
-    }
-
-    // Método unificado para crear usuarios empresa (demandante, demandado)
-    public function crearUsuarioEmpresa(CrearUsuarioDTO $data, int $idRol): Usuarios
-    {
-        $datosArray = $data->toArray();
-        $datosArray['id_rol'] = $idRol;
-        
-        $usuario = $this->usuarioRepository->crear($datosArray);
-        
-        // Crear correos si se proporcionan
-        if (!empty($data->correos)) {
-            foreach ($data->correos as $correo) {
-                Correos::create([
-                    'id_usuario' => $usuario->id_usuario,
-                    'correo_electronico' => $correo
-                ]);
-            }
-        }
-        
-        return $usuario->load(['rol', 'correos']);
-    }
-
-    // Métodos específicos que usan los métodos unificados
-    public function crearUsuarioAdministrador(CrearUsuarioDTO $data): Usuarios
-    {
-        return $this->crearUsuarioPersona($data, 1); // ID del rol administrador
-    }
-
-    public function crearUsuarioSecretario(CrearUsuarioDTO $data): Usuarios
-    {
-        return $this->crearUsuarioPersona($data, 3); // ID del rol secretario
-    }
-    
-    public function crearUsuarioArbitro(CrearUsuarioDTO $data): Usuarios
-    {
-        return $this->crearUsuarioPersona($data, 2); // ID del rol arbitro
-    }
-    
-    public function crearUsuarioDemandante(CrearUsuarioDTO $data): Usuarios
-    {
-        return $this->crearUsuarioEmpresa($data, 4); // ID del rol demandante
-    }
-
-    public function crearUsuarioDemandado(CrearUsuarioDTO $data): Usuarios
-    {
-        return $this->crearUsuarioEmpresa($data, 5); // ID del rol demandado
     }
 
     public function listarUsuarios(): Collection
@@ -116,24 +37,6 @@ class UsuarioService
     public function obtenerUsuarioPorId(int $id): ?Usuarios
     {
         return $this->usuarioRepository->obtenerPorId($id);
-    }
-
-    public function actualizarUsuario(int $id, ActualizarUsuarioDTO $data): ?Usuarios
-    {
-        $usuario = $this->usuarioRepository->obtenerPorId($id);
-        if (!$usuario) {
-            return null;
-        }
-        
-        // Actualizar datos básicos del usuario
-        $this->usuarioRepository->actualizar($usuario, $data->toArray());
-        
-        // Actualizar correos si se proporcionaron
-        if ($data->correos !== null) {
-            $this->correoRepository->actualizarCorreosPorUsuario($id, $data->correos);
-        }
-        
-        return $usuario->fresh()->load(['rol', 'correos']);
     }
 
     public function cambiarEstadoUsuario(int $id): bool
@@ -174,5 +77,26 @@ class UsuarioService
     {
         return $this->usuarioRepository->listarUsuariosDemandados();
     }
+
+    public function buscarArbitrosPorNombre(string $nombre, int $limite = 10): array
+    {
+        // Primero buscar en la BD principal (usuarios árbitros existentes)
+        $resultadosPrincipales = $this->usuarioRepository->buscarArbitrosPorNombre($nombre, $limite);
+        
+        // Si encuentra resultados en la BD principal, retornarlos
+        if (!empty($resultadosPrincipales)) {
+            return $resultadosPrincipales;
+        }
+        
+        // Si no encuentra en BD principal, buscar en BD secundaria (Postulantes)
+        $resultadosSecundarios = $this->postulantesArbitroRepository->buscarPorNombre($nombre, $limite);
+        
+        // Marcar el origen como BD secundaria
+        return array_map(function ($arbitro) {
+            $arbitro['origen'] = 'bd_secundaria';
+            return $arbitro;
+        }, $resultadosSecundarios);
+    }
+
 
 }

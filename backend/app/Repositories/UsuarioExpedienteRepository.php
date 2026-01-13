@@ -32,4 +32,11 @@ class UsuarioExpedienteRepository
             ->where('id_expediente', $idExpediente)
             ->delete();
     }
+
+    public function existeVinculo(int $idUsuario, int $idExpediente): bool
+    {
+        return UsuarioExpediente::where('id_usuario', $idUsuario)
+            ->where('id_expediente', $idExpediente)
+            ->exists();
+    }
 }

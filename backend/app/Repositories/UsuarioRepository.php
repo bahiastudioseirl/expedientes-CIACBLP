@@ -105,4 +105,35 @@ class UsuarioRepository
             ->first();
     }
 
+    public function buscarPorDocumentoOCorreo(string $numeroDocumento, string $correo): ?Usuarios
+    {
+        return Usuarios::where(function ($query) use ($numeroDocumento, $correo) {
+            $query->where('numero_documento', $numeroDocumento)
+                  ->orWhere('correo', $correo);
+        })
+        ->first();
+    }
+
+    public function buscarArbitrosPorNombre(string $nombre, int $limite = 10): array
+    {
+        $resultados = Usuarios::with(['rol'])
+            ->whereHas('rol', function ($query) {
+                $query->where('nombre', 'Arbitro');
+            })
+            ->where('nombre_completo', 'like', '%' . $nombre . '%')
+            ->limit($limite)
+            ->get();
+
+        return $resultados->map(function ($usuario) {
+            return [
+                'id' => $usuario->id_usuario,
+                'nombre_completo' => $usuario->nombre_completo,
+                'numero_documento' => $usuario->numero_documento,
+                'telefono' => $usuario->telefono,
+                'correo' => $usuario->correo,
+                'origen' => 'bd_principal'
+            ];
+        })->toArray();
+    }
 }
+

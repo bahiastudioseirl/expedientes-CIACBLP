@@ -33,6 +33,21 @@ class ExpedienteResponse
         ], $codigo);
     }
 
+    public static function arbitroVinculado(array $data): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $data['mensaje'],
+            'data' => [
+                'usuario_existente' => $data['usuario_existente'],
+                'nombre_completo' => $data['nombre_completo'],
+                'correo' => $data['correo'],
+                'telefono' => $data['telefono'],
+                'numero_documento' => $data['numero_documento'],
+            ]
+        ], 201);
+    }
+
     public static function expediente(Expediente $expediente): JsonResponse
     {
         return response()->json([

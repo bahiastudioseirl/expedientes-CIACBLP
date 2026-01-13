@@ -14,7 +14,7 @@ interface BandejaEntradaProps {
 export default function BandejaEntrada({
     onSelectExpediente
 }: BandejaEntradaProps) {
-    const [expedientes, setExpedientes] = useState<ExpedienteAsignado[]>([]);
+    const [expedientes, setExpedientes] = useState<any[]>([]); // Cambiado a any[] para flexibilidad
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +31,7 @@ export default function BandejaEntrada({
         try {
             const response = await obtenerExpedientesAsignados();
             if (response.success) {
+                // El endpoint ya retorna la estructura correcta
                 const expedientesOrdenados = response.data.expedientes.sort((a, b) => {
                     const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
                     const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -142,39 +143,50 @@ export default function BandejaEntrada({
                 ) : (
                     paginatedData.map((expediente) => (
                         <div
-                            key={expediente.id_expediente}
-                            className="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all cursor-pointer group"
+                            key={expediente.id}
+                            className="bg-white border border-slate-200 rounded-2xl p-6 mb-2 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col md:flex-row md:items-center md:justify-between gap-4"
                             onClick={() => onSelectExpediente(expediente)}
                         >
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="flex-shrink-0">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                        <FileText className="w-6 h-6 text-blue-600" />
+                                    </div>
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center space-x-3 mb-3">
-                                        <div className="flex-shrink-0">
-                                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                                <FileText className="w-5 h-5 text-blue-600" />
-                                            </div>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-1 group-hover:text-blue-700 transition-colors">
+                                        Caso arbitral N° {expediente.codigo_expediente}
+                                    </h3>
+                                    <div className="space-y-1">
+                                        <div className="text-base text-slate-800">
+                                            <span className="font-semibold text-slate-700">Demandante:</span> <span className="text-slate-900">{expediente.demandante?.map((d: any) => d.nombre_razon).join(', ')}</span>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
-                                                Caso arbitral N° {expediente.codigo_expediente}
-                                            </h3>
-                                            {expediente.participantes && (
-                                                <p className="text-sm text-slate-600 mt-1 line-clamp-2">
-                                                    {getRolParticipante(expediente.participantes, "demandante")} vs. {getRolParticipante(expediente.participantes, "demandado")}
-                                                </p>
-                                            )}
+                                        <div className="text-base text-slate-800">
+                                            <span className="font-semibold text-slate-700">Demandado:</span> <span className="text-slate-900">{expediente.demandado?.map((d: any) => d.nombre_razon).join(', ')}</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-4 mt-2">
+                                            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200">
+                                                <span className="font-semibold">Secretario:</span> {expediente.secretario?.nombre_completo || 'N/A'}
+                                            </span>
+                                            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200">
+                                                <span className="font-semibold">Árbitro:</span> {expediente.arbitro?.nombre_completo || 'N/A'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center space-x-3 ml-4">
-                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${expediente.activo
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                        }`}>
-                                        {expediente.activo ? 'Activo' : 'Inactivo'}
-                                    </span>
-                                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                                </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2 min-w-[120px]">
+                                <span className={`px-3 py-1 text-sm font-semibold rounded-full ${expediente.activo
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-red-100 text-red-700'
+                                    }`}>
+                                    {expediente.activo ? 'Activo' : 'Inactivo'}
+                                </span>
+                                <span className="text-xs text-slate-500">Creado: {expediente.created_at ? new Date(expediente.created_at).toLocaleDateString('es-PE', {
+                                    year: 'numeric', month: '2-digit', day: '2-digit'
+                                }) : 'N/A'}</span>
+                                <span className="text-xs text-blue-700 font-medium">ID Solicitud: {expediente.id_solicitud}</span>
+                                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
                             </div>
                         </div>
                     ))
