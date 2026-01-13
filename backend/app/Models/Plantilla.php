@@ -14,7 +14,7 @@ class Plantilla extends Model
 
     protected $fillable = [
         'nombre',
-        'activo'
+        'activo',
     ];
 
     protected function casts(): array

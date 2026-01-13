@@ -13,18 +13,20 @@ class SubEtapa extends Model
     protected $primaryKey = 'id_sub_etapa';
 
     protected $fillable = [
+        'id_etapa',
         'nombre',
-        'tiene_tiempo',
-        'duracion_dias',
-        'es_opcional',
-        'id_etapa'
+        'descripcion',
+        'orden',
+        'dias_habiles',
+        'es_habil',
+        'es_obligatorio',
     ];
 
     protected function casts(): array
     {
         return [
-            'tiene_tiempo' => 'boolean',
-            'es_opcional' => 'boolean',
+            'es_habil' => 'boolean',
+            'es_obligatorio' => 'boolean',
         ];
     }
 

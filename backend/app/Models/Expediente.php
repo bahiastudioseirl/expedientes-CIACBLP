@@ -32,6 +32,16 @@ class Expediente extends Model
         return $this->belongsTo(Plantilla::class, 'id_plantilla', 'id_plantilla');
     }
 
+    public function solicitud()
+    {
+        return $this->belongsTo(Solicitud::class, 'id_solicitud', 'id_solicitud');
+    }
+
+    public function flujos()
+    {
+        return $this->hasMany(Flujo::class, 'id_expediente', 'id_expediente');
+    }
+
     public function asunto()
     {
         return $this->hasOne(Asunto::class, 'id_expediente', 'id_expediente');

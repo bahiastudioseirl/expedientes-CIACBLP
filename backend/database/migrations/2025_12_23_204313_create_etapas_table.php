@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('etapas', function (Blueprint $table) {
             $table->id('id_etapa');
-            $table->string('nombre');
             $table->unsignedBigInteger('id_plantilla');
+            $table->string('nombre');
+            $table->integer('orden');
+            
             $table->foreign('id_plantilla')->references('id_plantilla')->on('plantillas')->onDelete('cascade');
             $table->timestamps();
         });

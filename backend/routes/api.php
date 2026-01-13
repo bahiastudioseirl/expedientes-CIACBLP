@@ -173,13 +173,9 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     });
 
     Route::prefix('expedientes')->group(function () {
-        Route::post('/', [ExpedienteController::class, 'crearExpediente']);
-        Route::get('/', [ExpedienteController::class, 'listarExpedientes']);
-        Route::get('/{id}', [ExpedienteController::class, 'obtenerExpedientePorId']);
-        Route::patch('/{id}', [ExpedienteController::class, 'actualizarExpediente']);
-        Route::get('/codigo/{codigo}', [ExpedienteController::class, 'obtenerPorCodigoExpediente']);
-        Route::put('/{id}/estado', [ExpedienteController::class, 'cambiarEstadoExpediente']);
-        Route::get('/verificar-usuario/{numeroDocumento}', [ExpedienteController::class, 'verificarUsuarioPorDocumento']);
+         Route::post('/{id}/crear-expediente', [ExpedienteController::class, 'crearExpediente']);
+
+
     });
 });
 

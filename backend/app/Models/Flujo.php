@@ -12,12 +12,13 @@ class Flujo extends Model
     protected $primaryKey = 'id_flujo';
 
     protected $fillable = [
-        'estado',
-        'fecha_inicio',
-        'fecha_fin',
         'id_expediente',
         'id_etapa',
         'id_subetapa',
+        'fecha_inicio',
+        'fecha_limite',
+        'fecha_fin',
+        'estado',
     ];
 
     public function expediente()

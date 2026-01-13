@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('id_flujo');
             $table->string('estado', 100);
             $table->date('fecha_inicio');
+            $table->date('fecha_limite')->nullable();
             $table->date('fecha_fin')->nullable();
             $table->unsignedBigInteger('id_expediente');
             $table->unsignedBigInteger('id_etapa')->nullable();

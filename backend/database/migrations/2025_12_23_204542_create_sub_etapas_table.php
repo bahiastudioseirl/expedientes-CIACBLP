@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('sub_etapas', function (Blueprint $table) {
             $table->id('id_sub_etapa');
-            $table->string('nombre');
-            $table->boolean('tiene_tiempo');
-            $table->integer('duracion_dias')->nullable();
-            $table->boolean('es_opcional');
-
             $table->unsignedBigInteger('id_etapa');
+            $table->string('nombre');
+            $table->text('descripcion')->nullable();
+            $table->integer('orden');
+            $table->integer('dias_habiles')->default(0);
+            $table->boolean('es_habil')->default(true);
+            $table->boolean('es_obligatorio')->default(true);
+
             $table->foreign('id_etapa')->references('id_etapa')->on('etapas')->onDelete('cascade');
             
             $table->timestamps();

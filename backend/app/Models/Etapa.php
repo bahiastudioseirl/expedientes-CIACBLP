@@ -13,8 +13,9 @@ class Etapa extends Model
     protected $primaryKey = 'id_etapa';
 
     protected $fillable = [
+        'id_plantilla',
         'nombre',
-        'id_plantilla'
+        'orden',
     ];
 
     public function plantilla()

@@ -28,7 +28,13 @@ class ExpedienteRepository
     {
         return Expediente::with(['plantilla', 'solicitud'])->find($id_expediente);
     }
-
     
+    public function obtenerUltimoPorAño(int $año): ?Expediente
+    {
+        return Expediente::whereYear('created_at', $año)
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
 
 }
+    

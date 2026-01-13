@@ -5,40 +5,19 @@ namespace App\DTOs\Expedientes;
 class CrearExpedienteDTO
 {
     public function __construct(
-        public readonly ?string $codigo_expediente,
-        public readonly ?int $id_plantilla,
         public readonly int $id_solicitud,
-        public readonly bool $activo
-    ){}
+        public readonly string $nombre_secretario,
+        public readonly string $correo_secretario,
+        public readonly ?string $telefono_secretario = null,
+    ) {}
 
     public static function fromRequest(array $data): self
     {
         return new self(
-            codigo_expediente: $data['codigo_expediente'] ?? null,
-            id_plantilla: $data['id_plantilla'] ?? null,
             id_solicitud: $data['id_solicitud'],
-            activo: $data['activo'] ?? true,
+            nombre_secretario: $data['nombre_secretario'],
+            correo_secretario: $data['correo_secretario'],
+            telefono_secretario: $data['telefono_secretario'] ?? null,
         );
     }
-
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            codigo_expediente: $data['codigo_expediente'] ?? null,
-            id_plantilla: $data['id_plantilla'] ?? null,
-            id_solicitud: $data['id_solicitud'],
-            activo: $data['activo'] ?? true,
-        );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'codigo_expediente' => $this->codigo_expediente,
-            'id_plantilla' => $this->id_plantilla,
-            'id_solicitud' => $this->id_solicitud,
-            'activo' => $this->activo,
-        ];
-    }
-
 }

@@ -36,6 +36,8 @@ export const ResumenControversia = ({
                         />
                         <span className="text-sm font-medium text-gray-700">Redactar (máximo 2000 caracteres)</span>
                     </label>
+                    
+                    {/* 
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input
                             type="radio"
@@ -45,7 +47,9 @@ export const ResumenControversia = ({
                             className="w-4 h-4 text-[#733AEA] border-2 border-gray-300 focus:ring-2 focus:ring-purple-100"
                         />
                         <span className="text-sm font-medium text-gray-700">Subir archivo</span>
-                    </label>
+                    </label> 
+                    */}
+                    
                 </div>
             </div>
             {tipoResumen === 'texto' ? (

@@ -14,9 +14,22 @@ class ExpedienteResponse
             'success' => true,
             'message' => 'Expediente creado exitosamente',
             'data' => [
-                'expediente' => self::formatExpediente($expediente),
+                'id' => $expediente->id_expediente,
+                'codigo_expediente' => $expediente->codigo_expediente,
+                'id_solicitud' => $expediente->id_solicitud,
+                'id_plantilla' => $expediente->id_plantilla,
+                'activo' => $expediente->activo,
+                'created_at' => $expediente->created_at->toISOString(),
             ]
         ], 201);
+    }
+
+    public static function error(string $mensaje, int $codigo = 500): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $mensaje,
+        ], $codigo);
     }
 
     public static function expediente(Expediente $expediente): JsonResponse
