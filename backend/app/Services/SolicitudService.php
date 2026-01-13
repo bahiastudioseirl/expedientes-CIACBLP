@@ -145,6 +145,34 @@ class SolicitudService
     }
 
 
+    public function obtenerPartesPorSolicitud(int $id_solicitud)
+    {
+
+    }
+
+    /**
+     * Obtener datos básicos de las partes de una solicitud
+     */
+    public function obtenerDatosPartes(int $id_solicitud): array
+    {
+        $solicitud = $this->solicitudRepository->obtenerPorId($id_solicitud);
+        
+        if (!$solicitud) {
+            throw new \Exception('Solicitud no encontrada');
+        }
+
+        // Cargar relaciones necesarias
+        $solicitud->load(['partes.correos']);
+
+        $demandante = $solicitud->partes->where('tipo', 'demandante')->first();
+        $demandado = $solicitud->partes->where('tipo', 'demandado')->first();
+
+        return [
+            'demandante' => $demandante,
+            'demandado' => $demandado
+        ];
+    }
+
 
 
 

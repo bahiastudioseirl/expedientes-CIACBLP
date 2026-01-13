@@ -21,4 +21,6 @@ class SolicitudParteRepository
     {
         return SolicitudParte::find($id);
     }
+
+    
 }

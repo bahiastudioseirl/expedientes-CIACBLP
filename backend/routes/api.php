@@ -149,6 +149,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     Route::prefix('solicitudes')->group(function () {
         Route::get('/', [SolicitudController::class, 'listarTodas']);
         Route::get('/{id}', [SolicitudController::class, 'verSolicitud']);
+        Route::get('/{id}/datos-partes', [SolicitudController::class, 'obtenerDatosPartes']);
         Route::put('/{id}/admitir', [SolicitudController::class, 'admitirSolicitud']);
     });
 

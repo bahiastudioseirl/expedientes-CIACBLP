@@ -18,52 +18,17 @@ class ExpedienteRepository
         return $expediente->update($data);
     }
 
-    public function listarExpedientes(): Collection
-    {
-        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos', 'asunto'])
-                        ->where('activo', true)
-                        ->get();
-    }
-
-    public function obtenerPorId(int $id): ?Expediente
-    {
-        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos', 'asunto'])->find($id);
-    }
-
     public function cambiarEstado(Expediente $expediente, bool $activo): bool
     {
         $expediente->activo = $activo;
         return $expediente->save();
     }
 
-    public function crearParticipante(array $data): ExpedienteParticipante
+    public function obtenerPorId(int $id_expediente): ?Expediente
     {
-        return ExpedienteParticipante::create($data);
+        return Expediente::with(['plantilla', 'solicitud'])->find($id_expediente);
     }
 
-    public function obtenerPorCodigoExpediente(string $codigo): ?Expediente
-    {
-        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos', 'asunto'])
-                        ->where('codigo_expediente', $codigo)
-                        ->first();
-    }
-
-    public function eliminarParticipantes(int $idExpediente): bool
-    {
-        return ExpedienteParticipante::where('id_expediente', $idExpediente)->delete();
-    }
-
-    public function listarExpedientesPorUsuario(int $idUsuario, int $idRol): Collection
-    {
-        if ($idRol === 1) { // Admin
-            return $this->listarExpedientes();
-        }
-        return Expediente::with(['plantilla', 'usuario', 'participantes.usuario.correos', 'asunto'])
-            ->where('activo', true)
-            ->whereHas('participantes', function ($q) use ($idUsuario) {
-                $q->where('id_usuario', $idUsuario);
-            })
-            ->get();
-    }
+    
 
 }

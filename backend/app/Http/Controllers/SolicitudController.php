@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\DTOs\Solicitudes\CrearSolicitudDTO;
 use App\Http\Requests\Solicitud\CrearSolicitudRequest;
 use App\Http\Responses\SolicitudResponse;
+use App\Http\Responses\SolicitudParteResponse;
 use App\Services\SolicitudService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -115,6 +115,45 @@ class SolicitudController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al ver la solicitud',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function verPartesSolicitud(int $id): JsonResponse
+    {
+        try {
+            $partes = $this->solicitudService->obtenerPartesPorSolicitud($id);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'partes' => $partes
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener las partes de la solicitud: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las partes de la solicitud',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerDatosPartes(int $id): JsonResponse
+    {
+        try {
+            $datosPartes = $this->solicitudService->obtenerDatosPartes($id);
+            
+            return SolicitudParteResponse::datosPartes(
+                $datosPartes['demandante'], 
+                $datosPartes['demandado']
+            );
+        } catch (\Exception $e) {
+            Log::error('Error al obtener datos de las partes: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener datos de las partes',
                 'error' => $e->getMessage()
             ], 500);
         }
