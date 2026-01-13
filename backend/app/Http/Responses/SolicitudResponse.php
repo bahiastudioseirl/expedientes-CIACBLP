@@ -53,6 +53,7 @@ class SolicitudResponse
         return [
             'id' => $solicitud->id_solicitud,
             'estado' => $solicitud->estado,
+            'tiene_expediente' => $solicitud->expediente !== null,
             'partes' => $solicitud->partes->map(function ($parte) {
                 $parteData = [
                     'id' => $parte->id_solicitud_parte,

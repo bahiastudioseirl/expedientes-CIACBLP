@@ -16,6 +16,7 @@ use App\Services\Expediente\CreadorUsuariosExpedienteService;
 use App\Services\Expediente\DuplicadorPlantillaService;
 use App\Services\Expediente\GeneradorCodigoExpedienteService;
 use App\Services\Expediente\InicializadorFlujoService;
+use Illuminate\Database\Eloquent\Collection;
 
 class ExpedienteService
 {
@@ -92,9 +93,15 @@ class ExpedienteService
         });
     }
 
+    public function obtenerPorId(int $id): ?Expediente
+    {
+        return $this->expedienteRepository->obtenerPorId($id);
+    }
 
-
-
+    public function obtenerTodos(): Collection
+    {
+        return $this->expedienteRepository->obtenerTodos();
+    }
 
 
 

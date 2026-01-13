@@ -41,4 +41,9 @@ class Solicitud extends Model
     {
         return $this->hasOne(SolicitudDesignacion::class, 'id_solicitud', 'id_solicitud');
     }
+
+    public function expediente()
+    {
+        return $this->hasOne(Expediente::class, 'id_solicitud', 'id_solicitud');
+    }
 }

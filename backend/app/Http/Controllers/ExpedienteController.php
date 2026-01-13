@@ -14,7 +14,7 @@ class ExpedienteController extends Controller
         private readonly ExpedienteService $expedienteService
     ){}
 
-    public function crearExpediente(CrearExpedienteRequest $request, int $idSolicitud): JsonResponse
+    public function crearExpedienteDesdeAdmitida(CrearExpedienteRequest $request, int $idSolicitud): JsonResponse
     {
         try {
             $dto = CrearExpedienteDTO::fromRequest(
@@ -28,6 +28,40 @@ class ExpedienteController extends Controller
         } catch (\Exception $e) {
             return ExpedienteResponse::error(
                 'Error al crear el expediente: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
+    public function obtenerExpediente(int $idExpediente): JsonResponse
+    {
+        try {
+            $expediente = $this->expedienteService->obtenerPorId($idExpediente);
+            
+            if (!$expediente) {
+                return ExpedienteResponse::error('Expediente no encontrado', 404);
+            }
+            
+            return ExpedienteResponse::expediente($expediente);
+            
+        } catch (\Exception $e) {
+            return ExpedienteResponse::error(
+                'Error al obtener el expediente: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
+    public function listarExpedientes(): JsonResponse
+    {
+        try {
+            $expedientes = $this->expedienteService->obtenerTodos();
+            
+            return ExpedienteResponse::expedientes($expedientes);
+            
+        } catch (\Exception $e) {
+            return ExpedienteResponse::error(
+                'Error al listar los expedientes: ' . $e->getMessage(),
                 500
             );
         }

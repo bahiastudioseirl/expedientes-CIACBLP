@@ -1,22 +1,23 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { CheckCircle, FileText, Search, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, FileText, Search, Eye, FileSignature, Check } from 'lucide-react';
 import { obtenerSolicitudes } from '../services/obtenerSolicitudes';
-import { admitirSolicitud } from '../services/admitirSolicitud';
 import { obtenerSolicitudDetalle } from '../services/obtenerSolicitudDetalle';
+import { admitirSolicitud } from '../services/admitirSolicitud';
 import type { Solicitud } from '../schemas/SolicitudSchema';
 import ModalDetalleSolicitud from '../components/ModalDetalleSolicitud';
+import ModalNotificacion from '../components/ModalNotificacion';
 
 /**
  * Componente principal para la gestión de solicitudes de arbitraje
  */
 export default function SolicitudAdmin() {
+  const navigate = useNavigate();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [admitiendoId, setAdmitiendoId] = useState<number | null>(null);
-  const [solicitudDetalle, setSolicitudDetalle] = useState<Solicitud | null>(null);
-
+  const [solicitudDetalle, setSolicitudDetalle] = useState<Solicitud | null>(null);  const [showNotificacion, setShowNotificacion] = useState(false);
   useEffect(() => {
     cargarSolicitudes();
   }, []);
@@ -34,18 +35,19 @@ export default function SolicitudAdmin() {
     }
   }, []);
 
-  const handleAdmitir = useCallback(async (id: number) => {
-    setAdmitiendoId(id);
-    setError('');
+  const handleAdmitir = useCallback(async (idSolicitud: number) => {
     try {
-      await admitirSolicitud(id);
-      await cargarSolicitudes();
-    } catch (err) {
-      setError('No se pudo admitir la solicitud');
-    } finally {
-      setAdmitiendoId(null);
+      await admitirSolicitud(idSolicitud);
+      setShowNotificacion(true);
+      cargarSolicitudes();
+    } catch (error) {
+      console.error('Error al admitir solicitud:', error);
     }
-  }, [cargarSolicitudes]);
+  }, []);
+
+  const handleCrearExpediente = useCallback((idSolicitud: number) => {
+    navigate(`/administrator/expediente?crearDesdeSolicitud=${idSolicitud}`);
+  }, [navigate]);
 
   const handleVerDetalle = useCallback(async (id: number) => {
     try {
@@ -199,17 +201,28 @@ export default function SolicitudAdmin() {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => handleAdmitir(solicitud.id)}
-                            disabled={admitiendoId === solicitud.id || solicitud.estado === 'admitida'}
-                            className={`px-3 py-1.5 rounded-lg text-white text-xs transition-colors ${
-                              solicitud.estado === 'admitida'
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-[#132436] hover:bg-[#224666] disabled:opacity-50'
-                            }`}
-                          >
-                            {admitiendoId === solicitud.id ? 'Admitiendo...' : 'Admitir'}
-                          </button>
+                          
+                          {solicitud.estado === 'pendiente' && (
+                            <button
+                              onClick={() => handleAdmitir(solicitud.id)}
+                              className="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs transition-colors flex items-center space-x-1"
+                              title="Admitir solicitud"
+                            >
+                              <Check className="w-3 h-3" />
+                              <span>Admitir</span>
+                            </button>
+                          )}
+
+                          {solicitud.estado === 'admitida' && !solicitud.tiene_expediente && (
+                            <button
+                              onClick={() => handleCrearExpediente(solicitud.id)}
+                              className="px-3 py-1.5 rounded-lg bg-[#132436] hover:bg-[#224666] text-white text-xs transition-colors flex items-center space-x-1"
+                              title="Crear expediente"
+                            >
+                              <FileSignature className="w-3 h-3" />
+                              <span>Crear Expediente</span>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -221,11 +234,18 @@ export default function SolicitudAdmin() {
         </div>
       )}
 
-      {/* Modal de detalle - Mantenemos solo esto separado */}
+      {/* Modal de detalle */}
       <ModalDetalleSolicitud
         solicitud={solicitudDetalle}
         isOpen={!!solicitudDetalle}
         onClose={handleCloseModal}
+      />
+
+      {/* Modal de notificación */}
+      <ModalNotificacion
+        open={showNotificacion}
+        onClose={() => setShowNotificacion(false)}
+        mensaje="Ya puedes generar el expediente"
       />
     </div>
   );

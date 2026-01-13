@@ -48,6 +48,7 @@ export interface DesignacionArbitral {
 export interface Solicitud {
   id: number;
   estado: string; // 'pendiente' | 'admitida' | 'rechazada'
+  tiene_expediente: boolean;
   partes: Parte[];
   resumen_controversia: string;
   resumen_controversia_tipo: string; // 'texto' | 'archivo'

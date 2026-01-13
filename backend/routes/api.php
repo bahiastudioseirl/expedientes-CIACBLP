@@ -173,8 +173,9 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     });
 
     Route::prefix('expedientes')->group(function () {
-         Route::post('/{id}/crear-expediente', [ExpedienteController::class, 'crearExpediente']);
-
+        Route::post('/{id}/crear-expediente', [ExpedienteController::class, 'crearExpedienteDesdeAdmitida']);
+        Route::get('/', [ExpedienteController::class, 'listarExpedientes']);
+        Route::get('/{id}', [ExpedienteController::class, 'obtenerExpediente']);
 
     });
 });

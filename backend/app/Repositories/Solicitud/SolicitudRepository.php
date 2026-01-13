@@ -29,7 +29,7 @@ class SolicitudRepository
 
     public function listarTodas(): Collection
     {
-        return Solicitud::all();
+        return Solicitud::with('expediente:id_expediente,id_solicitud,codigo_expediente')->get();
     }
 
     public function admitirSolicitud(int $id): bool
