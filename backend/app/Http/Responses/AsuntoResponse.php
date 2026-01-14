@@ -29,6 +29,7 @@ class AsuntoResponse
             'id_expediente' => $asunto->id_expediente,
             'titulo' => $asunto->titulo,
             'activo' => (bool) $asunto->activo,
+            'id_flujo' => $asunto->id_flujo,
         ];
     }
 

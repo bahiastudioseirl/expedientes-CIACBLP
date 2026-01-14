@@ -14,10 +14,11 @@ class AsuntoController extends Controller
     )
     {}    
 
-    public function verAsuntosPorExpediente(int $idExpediente)
+    public function verAsuntosPorExpediente(string $idExpediente)
     {
         try{
-            $asuntos = $this->asuntoService->verAsuntosPorExpediente($idExpediente);
+            $idExpedienteInt = (int) $idExpediente;
+            $asuntos = $this->asuntoService->verAsuntosPorExpediente($idExpedienteInt);
             
             if(!$asuntos){
                 return response()->json([
