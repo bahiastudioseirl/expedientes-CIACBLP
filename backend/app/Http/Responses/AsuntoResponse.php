@@ -51,6 +51,24 @@ class AsuntoResponse
         }
     }
 
+    public static function asuntoActualizado($asunto): JsonResponse
+    {
+        if ($asunto) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Asunto actualizado exitosamente',
+                'data' => [
+                    'asunto' => self::formatAsuntoExtendido($asunto)
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo actualizar el asunto',
+                'data' => null
+            ], 400);
+        }
+    }
 
     public static function formatAsuntoExtendido($asunto): array
     {

@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\DTOs\Asuntos\ActualizarAsuntoDTO;
 use App\DTOs\Asuntos\CrearAsuntoDTO;
+use App\Models\Asunto;
 use App\Models\Flujo;
 use App\Repositories\AsuntoRepository;
 use App\Repositories\FlujoRepository;
@@ -35,14 +37,14 @@ class AsuntoService
 
         // 3. Obtener datos de las partes
         $datosPartes = $this->solicitudService->obtenerDatosPartes($expediente->id_solicitud);
-        
+
         $nombreDemandante = $datosPartes['demandante']->nombre_razon ?? 'Demandante';
         $nombreDemandado = $datosPartes['demandado']->nombre_razon ?? 'Demandado';
 
         // 4. Construir el título parseado
-        $tituloParsed = $nombreDemandante . ' - ' . $nombreDemandado . 
-                       ' // Caso arbitral ' . $expediente->codigo_expediente . 
-                       ' | ' . $crearAsuntoDTO->titulo;
+        $tituloParsed = $nombreDemandante . ' - ' . $nombreDemandado .
+            ' // Caso arbitral ' . $expediente->codigo_expediente .
+            ' | ' . $crearAsuntoDTO->titulo;
 
         // 5. Crear el asunto
         return $this->asuntoRepository->crear([
@@ -87,5 +89,26 @@ class AsuntoService
             'message' => $mensaje,
             'data' => $resultado ? $this->asuntoRepository->obtenerPorId($idAsunto) : null
         ];
+    }
+
+    public function actualizarAsunto(int $idAsunto, ActualizarAsuntoDTO $data): Asunto
+    {
+        $expediente = $this->expedienteRepository->obtenerPorId($data->id_expediente);
+        if (!$expediente) {
+            throw new Exception("Expediente no encontrado");
+        }
+
+        $datosPartes = $this->solicitudService->obtenerDatosPartes($expediente->id_solicitud);
+
+        $nombreDemandante = $datosPartes['demandante']->nombre_razon ?? 'Demandante';
+        $nombreDemandado = $datosPartes['demandado']->nombre_razon ?? 'Demandado';
+
+        $tituloParsed = $nombreDemandante . ' - ' . $nombreDemandado .
+            ' // Caso arbitral ' . $expediente->codigo_expediente .
+            ' | ' . $data->titulo;
+        
+        return $this->asuntoRepository->actualizar($idAsunto, [
+            'titulo' => $tituloParsed,
+        ]);
     }
 }

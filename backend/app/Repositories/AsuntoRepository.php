@@ -41,4 +41,11 @@ class AsuntoRepository
         $asunto = Asunto::find($id);
         return $asunto ? $asunto->activo : null;
     }
+
+    public function actualizar(int $id, array $data): Asunto
+    {   
+        $asunto = Asunto::find($id);
+        $asunto->update($data);
+        return $asunto;
+    }
 }

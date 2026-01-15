@@ -212,6 +212,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
 Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'staff'])->group(function () {
     Route::prefix('asuntos')->group(function () {
         Route::post('/', [AsuntoController::class, 'crearAsunto']);
+        Route::patch('/{idAsunto}', [AsuntoController::class, 'actualizarAsunto']);
         Route::put('/{idAsunto}/mensajear', [AsuntoController::class, 'cerrarOAbrirAsunto']);
     });
 

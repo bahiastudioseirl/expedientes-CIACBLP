@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Asuntos\ActualizarAsuntoDTO;
 use App\DTOs\Asuntos\CrearAsuntoDTO;
+use App\Http\Requests\Asunto\ActualizarAsuntoRequest;
 use App\Http\Requests\Asunto\CrearAsuntoRequest;
 use App\Http\Responses\AsuntoResponse;
 use App\Services\AsuntoService;
@@ -68,6 +70,20 @@ class AsuntoController extends Controller
         }
     }
 
+    public function actualizarAsunto(int $idAsunto, ActualizarAsuntoRequest $request)
+    {
+        try {
+            $dto = ActualizarAsuntoDTO::fromArray($request->validated());
+            $success = $this->asuntoService->actualizarAsunto($idAsunto, $dto);
+            return AsuntoResponse::asuntoActualizado($success);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el asunto',
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
 
 
 }
