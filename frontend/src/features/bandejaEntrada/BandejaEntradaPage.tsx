@@ -13,17 +13,23 @@ interface BandejaUser {
 const mapUserToBandejaUser = (user: User): BandejaUser => {
   const roleMap: Record<string, number> = {
     'Administrador': 1,
-    'Árbitro a Cargo': 2, 
-    'Secretario Arbitral': 3,
+    'Arbitro': 2, 
+    'Secretario': 3,
     'Demandante': 4,
-    'Demandado': 4
+    'Demandado': 5
   };
+
+  // Extraer nombre y apellido de nombre_completo
+  const nombreCompleto = user.nombre_completo || '';
+  const partes = nombreCompleto.trim().split(' ');
+  const nombre = partes[0] || '';
+  const apellido = partes.slice(1).join(' ') || undefined;
 
   return {
     id_usuario: user.id,
     id_rol: roleMap[user.rol] || 4, // Por defecto participante
-    nombre: user.nombre,
-    apellido: user.apellido
+    nombre: nombre,
+    apellido: apellido
   };
 };
 

@@ -8,17 +8,37 @@ interface FormularioRespuestaProps {
   expediente: ExpedienteAsignado;
   onEnviar: (mensaje: string, adjuntos: File[], destinatarios: number[]) => Promise<boolean>;
   onCancelar: () => void;
+  currentUser?: {
+    id_usuario: number;
+    id_rol: number;
+    nombre: string;
+  };
 }
 
 export const FormularioRespuesta: React.FC<FormularioRespuestaProps> = ({
   expediente,
   onEnviar,
-  onCancelar
+  onCancelar,
+  currentUser
 }) => {
+  // Función para obtener destinatarios iniciales según el rol del usuario
+  const getDestinatariosIniciales = () => {
+    if (!currentUser) return getAllParticipanteIds(expediente);
+    
+    // Para administradores, secretarios y árbitros: todos seleccionados por defecto
+    if (currentUser.id_rol === 1 || currentUser.id_rol === 2 || currentUser.id_rol === 3) {
+      return getAllParticipanteIds(expediente);
+    }
+    
+    // Para demandados y demandantes: todos seleccionados por defecto
+    // (Las restricciones se aplicarán en el selector pero el estado inicial incluye a todos)
+    return getAllParticipanteIds(expediente);
+  };
+
   const [mensaje, setMensaje] = useState('');
   const [adjuntos, setAdjuntos] = useState<File[]>([]);
   const [destinatariosSeleccionados, setDestinatariosSeleccionados] = useState<number[]>(
-    getAllParticipanteIds(expediente)
+    getDestinatariosIniciales()
   );
   const [sending, setSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -102,6 +122,7 @@ export const FormularioRespuesta: React.FC<FormularioRespuestaProps> = ({
             destinatariosSeleccionados={destinatariosSeleccionados}
             onToggleDestinatario={toggleDestinatario}
             variant="response"
+            currentUser={currentUser}
           />
         </div>
         </div>

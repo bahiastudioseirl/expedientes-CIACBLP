@@ -39,4 +39,13 @@ class UsuarioExpedienteRepository
             ->where('id_expediente', $idExpediente)
             ->exists();
     }
+
+    public function existenDemandadosEnExpediente(int $idExpediente): bool
+    {
+        return UsuarioExpediente::where('id_expediente', $idExpediente)
+            ->whereHas('usuario.rol', function ($query) {
+                $query->where('nombre', 'Demandado');
+            })
+            ->exists();
+    }
 }

@@ -114,6 +114,17 @@ class ExpedienteService
         return $this->expedienteRepository->obtenerPorUsuario($idUsuario);
     }
 
+    public function obtenerParticipantes(int $idExpediente): Collection
+    {
+        $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
+        
+        if (!$expediente) {
+            throw new \Exception('Expediente no encontrado');
+        }
+
+        return $expediente->participantes()->with('usuario.rol')->get();
+    }
+
 
 
 

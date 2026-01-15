@@ -38,7 +38,7 @@ class FlujoRepository
     {
         return Flujo::with(['etapa', 'subetapa'])
                    ->where('id_expediente', $idExpediente)
-                   ->where('estado', 'en proceso')
+                   ->where('estado', 'en_proceso')
                    ->first();
     }
 

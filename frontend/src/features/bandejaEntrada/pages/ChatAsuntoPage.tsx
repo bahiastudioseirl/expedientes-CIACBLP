@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useChatMensajes } from '../hooks/useChatMensajes';
 import { getValidParticipantes } from '../utils/chatUtils';
+import { obtenerParticipantesExpediente } from '../services/participantesService';
 import { PanelListaMensajes } from '../components/PanelListaMensajes';
 import { PanelDetalleMensaje } from '../components/PanelDetalleMensaje';
 import { FormularioNuevoMensaje } from '../components/FormularioNuevoMensaje';
@@ -19,6 +20,7 @@ export default function ChatAsuntoPage() {
   // Estados locales para UI - mostrar formulario por defecto
   const [mostrandoFormularioNuevo, setMostrandoFormularioNuevo] = useState(true);
   const [respondiendoMensaje, setRespondiendoMensaje] = useState<number | null>(null);
+  const [expedienteConParticipantes, setExpedienteConParticipantes] = useState(null);
 
   // Hook personalizado para manejo de mensajes
   const {
@@ -42,7 +44,24 @@ export default function ChatAsuntoPage() {
       return;
     }
     cargarMensajes();
+    cargarParticipantes();
   }, [asuntoActual?.id_asunto, asunto, expediente, navigate, cargarMensajes]);
+
+  const cargarParticipantes = async () => {
+    if (!expediente?.id) return;
+    
+    try {
+      const participantes = await obtenerParticipantesExpediente(expediente.id);
+      setExpedienteConParticipantes({
+        ...expediente,
+        participantes: participantes
+      });
+    } catch (error) {
+      console.error('Error al cargar participantes:', error);
+      // Si no se pueden cargar participantes, usar el expediente original
+      setExpedienteConParticipantes(expediente);
+    }
+  };
 
   const handleGoBack = () => {
     navigate('/bandeja-entrada', {
@@ -107,7 +126,7 @@ export default function ChatAsuntoPage() {
   }
 
   // Validación adicional para asegurar que hay participantes
-  if (getValidParticipantes(expediente).length === 0) {
+  if (expedienteConParticipantes && getValidParticipantes(expedienteConParticipantes).length === 0) {
     return (
       <div className="h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
@@ -132,10 +151,10 @@ export default function ChatAsuntoPage() {
   return (
     <div className="fixed inset-y-0 left-64 right-0 flex bg-gradient-to-b from-slate-50 to-slate-100">
       {/* Panel izquierdo - Lista de mensajes */}
-      {asuntoActual && (
+      {asuntoActual && expedienteConParticipantes && (
         <PanelListaMensajes
           asunto={asuntoActual}
-          expediente={expediente}
+          expediente={expedienteConParticipantes}
           mensajes={mensajes}
           mensajeSeleccionado={mensajeSeleccionado}
           loading={loading}
@@ -148,16 +167,17 @@ export default function ChatAsuntoPage() {
 
       {/* Panel derecho - Detalle del mensaje o formulario */}
       <div className="flex-1 flex flex-col">
-        {mostrandoFormularioNuevo ? (
+        {mostrandoFormularioNuevo && expedienteConParticipantes ? (
           <FormularioNuevoMensaje
-            expediente={expediente}
+            expediente={expedienteConParticipantes}
             onEnviar={handleEnviarMensaje}
             onCancelar={handleCancelarFormulario}
+            currentUser={currentUser}
           />
-        ) : mensajeSeleccionado && asuntoActual ? (
+        ) : mensajeSeleccionado && asuntoActual && expedienteConParticipantes ? (
           <PanelDetalleMensaje
             asunto={asuntoActual}
-            expediente={expediente}
+            expediente={expedienteConParticipantes}
             mensajeSeleccionado={mensajeSeleccionado}
             hiloMensajes={hiloMensajes}
             loadingHilo={loadingHilo}
@@ -165,6 +185,7 @@ export default function ChatAsuntoPage() {
             onResponderMensaje={handleResponderMensaje}
             onCancelarRespuesta={() => setRespondiendoMensaje(null)}
             onEnviarRespuesta={handleEnviarRespuesta}
+            currentUser={currentUser}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-slate-50 to-blue-50">

@@ -14,7 +14,7 @@ interface BandejaEntradaProps {
 export default function BandejaEntrada({
     onSelectExpediente
 }: BandejaEntradaProps) {
-    const [expedientes, setExpedientes] = useState<any[]>([]); // Cambiado a any[] para flexibilidad
+    const [expedientes, setExpedientes] = useState<ExpedienteAsignado[]>([]); // Volver al tipo correcto
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');

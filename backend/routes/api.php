@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\CredencialesController;
 use App\Http\Controllers\ExpedienteController;
 use App\Http\Controllers\FlujoController;
 use App\Http\Controllers\MensajeController;
@@ -103,6 +104,12 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
     // Rutas disponibles para todos los usuarios autenticados
     Route::get('expedientes/mis-expedientes', [ExpedienteController::class, 'listarMisExpedientes']);
 
+    // Rutas de expedientes para usuarios autenticados
+    Route::prefix('expedientes')->group(function () {
+        Route::get('/{id}', [ExpedienteController::class, 'obtenerExpediente']);
+        Route::get('/{id}/participantes', [ExpedienteController::class, 'obtenerParticipantes']);
+    });
+
     // Rutas de mensajes para usuarios autenticados
     Route::prefix('mensajes')->middleware(\App\Http\Middleware\HandlePostTooLarge::class)->group(function () {
         Route::post('/', [MensajeController::class, 'crearMensaje']);
@@ -112,6 +119,12 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         Route::get('/{idMensaje}/hilo', [MensajeController::class, 'obtenerHiloMensaje']);
     });
 
+    Route::prefix('credenciales')->group(function () {
+        Route::post('/expediente/{idExpediente}/enviar-demandado', [MensajeController::class, 'enviarCredencialesDemandado']);
+        Route::get('/expediente/{idExpediente}/verificar', [MensajeController::class, 'verificarCredencialesDisponibles']);
+        Route::get('/expediente/{idExpediente}/puede-enviar', [CredencialesController::class, 'puedeEnviarCredenciales']);
+    });
+
     Route::prefix('asuntos')->group(function () {
         Route::get('/expediente/{idExpediente}', [AsuntoController::class, 'verAsuntosPorExpediente']);
     });
@@ -119,6 +132,11 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
     Route::prefix('flujo')->group(function () {
         Route::get('/expediente/{idExpediente}/actual', [FlujoController::class, 'obtenerFlujoActual']);
         Route::get('/expediente/{idExpediente}/listar', [FlujoController::class, 'listarFlujosPorExpediente']);
+    });
+
+    // Rutas de perfil para usuarios autenticados
+    Route::prefix('perfil')->group(function () {
+        Route::put('/actualizar', [UsuarioController::class, 'actualizarPerfil']);
     });
 });
 
@@ -176,7 +194,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     Route::prefix('expedientes')->group(function () {
         Route::post('/{id}/crear-expediente', [ExpedienteController::class, 'crearExpedienteDesdeAdmitida']);
         Route::get('/', [ExpedienteController::class, 'listarExpedientes']);
-        Route::get('/{id}', [ExpedienteController::class, 'obtenerExpediente']);
+        Route::post('/{id}/credenciales/enviar-demandado', [CredencialesController::class, 'enviarCredencialesDemandado']);
         Route::post('/{id}/arbitro', [ArbitroController::class, 'crearEnExpediente']);
     });
 
@@ -193,6 +211,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
 // Rutas para (Administrador, Secretario, Árbitro)
 Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 'staff'])->group(function () {
     Route::prefix('asuntos')->group(function () {
+        Route::post('/', [AsuntoController::class, 'crearAsunto']);
         Route::put('/{idAsunto}/mensajear', [AsuntoController::class, 'cerrarOAbrirAsunto']);
     });
 

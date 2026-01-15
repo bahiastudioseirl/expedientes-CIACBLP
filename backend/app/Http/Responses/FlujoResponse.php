@@ -39,6 +39,7 @@ class FlujoResponse
             'id_expediente' => $flujo->id_expediente,
             'estado' => $flujo->estado,
             'fecha_inicio' => $flujo->fecha_inicio,
+            'fecha_limite' => $flujo->fecha_limite,
             'fecha_fin' => $flujo->fecha_fin,
             'etapa' => $flujo->etapa ? [
                 'id_etapa' => $flujo->etapa->id_etapa,

@@ -94,5 +94,24 @@ class ExpedienteController extends Controller
         }
     }
 
+    public function obtenerParticipantes(int $idExpediente): JsonResponse
+    {
+        try {
+            $participantes = $this->expedienteService->obtenerParticipantes($idExpediente);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $participantes,
+                'message' => 'Participantes obtenidos exitosamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            return ExpedienteResponse::error(
+                'Error al obtener participantes: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
 
 }

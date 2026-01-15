@@ -19,7 +19,9 @@ class AsuntoRepository
 
     public function verAsuntosPorExpediente(int $idExpediente)
     {
-        return Asunto::where('id_expediente', $idExpediente)->get();
+        return Asunto::where('id_expediente', $idExpediente)
+            ->orderByDesc('id_asunto')
+            ->get();
     }
 
     public function cerrarOAbrirAsunto(Asunto $asunto, bool $cerrar): bool

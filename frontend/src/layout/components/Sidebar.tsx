@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, ChevronRight, X } from 'lucide-react';
-import { menuItems, type MenuItem, type SubMenuItem } from '../context/items-sidebar';
+import { getMenuItems, type MenuItem, type SubMenuItem } from '../context/items-sidebar';
 import logoCiacblp from '../../assets/logo-ciacblp.webp';
 
 interface SidebarProps {
@@ -12,6 +12,7 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const menuItems = getMenuItems(); // Obtener los elementos del menú dinámicamente
 
   const toggleExpand = (titulo: string) => {
     setExpandedItems(prev =>
@@ -62,7 +63,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       {/* Menu Items */}
       <nav className="p-4">
         <ul className="space-y-2">
-          {menuItems.map((item) => (
+          {getMenuItems().map((item) => (
             <li key={item.titulo}>
               {/* Item Principal */}
               {item.link ? (

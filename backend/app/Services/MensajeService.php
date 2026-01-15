@@ -9,10 +9,15 @@ use App\Repositories\AdjuntoRepository;
 use App\Repositories\UsuarioMensajeRepository;
 use App\Models\Mensajes;
 use App\Repositories\AsuntoRepository;
+use App\Repositories\UsuarioRepository;
+use App\Repositories\ExpedienteRepository;
+use App\Mail\NotificacionNuevoMensaje;
 use Illuminate\Http\UploadedFile;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class MensajeService
 {
@@ -20,7 +25,9 @@ class MensajeService
         private readonly MensajeRepository $mensajeRepository,
         private readonly AdjuntoRepository $adjuntoRepository,
         private readonly UsuarioMensajeRepository $usuarioMensajeRepository,
-        private readonly AsuntoRepository $asuntoRepository
+        private readonly AsuntoRepository $asuntoRepository,
+        private readonly UsuarioRepository $usuarioRepository,
+        private readonly ExpedienteRepository $expedienteRepository
     ) {}
 
     public function crearMensaje(CrearMensajeDTO $datos, array $usuariosDestinatarios, ?array $adjuntos = null): Mensajes
@@ -40,9 +47,13 @@ class MensajeService
         $mensaje = $this->mensajeRepository->crear($mensajeData);
         $this->crearRelacionesUsuarios($mensaje->id_mensaje, $usuariosDestinatarios);
 
+        $rutasAdjuntos = [];
         if ($adjuntos && count($adjuntos) > 0) {
-            $this->procesarAdjuntos($mensaje->id_mensaje, $adjuntos, $datos->id_asunto);
+            $rutasAdjuntos = $this->procesarAdjuntos($mensaje->id_mensaje, $adjuntos, $datos->id_asunto);
         }
+
+        // Enviar notificaciones por email
+        $this->enviarNotificacionesEmail($mensaje, $usuariosDestinatarios, $datos->id_usuario, $rutasAdjuntos);
 
         return $this->mensajeRepository->obtenerPorId($mensaje->id_mensaje);
     }
@@ -86,9 +97,13 @@ class MensajeService
         $respuesta = $this->mensajeRepository->crear($respuestaData);
         $this->crearRelacionesUsuarios($respuesta->id_mensaje, $usuariosDestinatarios);
 
+        $rutasAdjuntos = [];
         if ($adjuntos && count($adjuntos) > 0) {
-            $this->procesarAdjuntos($respuesta->id_mensaje, $adjuntos, $mensajePadre->id_asunto);
+            $rutasAdjuntos = $this->procesarAdjuntos($respuesta->id_mensaje, $adjuntos, $mensajePadre->id_asunto);
         }
+
+        // Enviar notificaciones por email para la respuesta
+        $this->enviarNotificacionesEmail($respuesta, $usuariosDestinatarios, $datos->id_usuario, $rutasAdjuntos);
 
         return $this->mensajeRepository->obtenerPorId($respuesta->id_mensaje);
     }
@@ -108,9 +123,16 @@ class MensajeService
 
     private function crearRelacionesUsuarios(int $idMensaje, array $usuariosDestinatarios): void
     {
+        // Obtener todos los administradores para asegurar que siempre reciban los mensajes
+        $administradores = $this->usuarioRepository->obtenerAdministradores();
+        $idsAdministradores = $administradores->pluck('id_usuario')->toArray();
+        
+        // Combinar destinatarios seleccionados con administradores (eliminar duplicados)
+        $todosDestinatarios = array_unique(array_merge($usuariosDestinatarios, $idsAdministradores));
+        
         $relacionesData = [];
         
-        foreach ($usuariosDestinatarios as $idUsuario) {
+        foreach ($todosDestinatarios as $idUsuario) {
             $relacionesData[] = [
                 'id_mensaje' => $idMensaje,
                 'id_usuario' => $idUsuario,
@@ -123,10 +145,12 @@ class MensajeService
         $this->usuarioMensajeRepository->crearMultiples($relacionesData);
     }
 
-    private function procesarAdjuntos(int $idMensaje, array $adjuntos, int $idAsunto): void
+    private function procesarAdjuntos(int $idMensaje, array $adjuntos, int $idAsunto): array
     {
         $asunto = Asunto::with('expediente')->find($idAsunto);
         $codigoExpediente = $asunto->expediente->codigo_expediente ?? 'sin-codigo';
+        
+        $archivosGuardados = [];
 
         foreach ($adjuntos as $archivo) {
             if ($archivo instanceof UploadedFile) {
@@ -137,8 +161,16 @@ class MensajeService
                     'nombre_archivo' => $archivo->getClientOriginalName(),
                     'ruta_archivo' => $rutaArchivo
                 ]);
+                
+                // Guardar información del archivo para adjuntar en correos
+                $archivosGuardados[] = [
+                    'nombre' => $archivo->getClientOriginalName(),
+                    'ruta' => public_path($rutaArchivo)
+                ];
             }
         }
+        
+        return $archivosGuardados;
     }
 
     private function guardarArchivo(UploadedFile $archivo, string $codigoExpediente): string
@@ -163,5 +195,57 @@ class MensajeService
         $archivo->move($directorio, $nombreUnico);
 
         return $codigoExpediente . '/' . $nombreUnico;
+    }
+
+    private function enviarNotificacionesEmail(Mensajes $mensaje, array $usuariosDestinatarios, int $idRemitente, array $rutasAdjuntos = []): void
+    {
+        try {
+            // Obtener datos del asunto y expediente
+            $asunto = $this->asuntoRepository->obtenerPorId($mensaje->id_asunto);
+            if (!$asunto) return;
+
+            $expediente = $this->expedienteRepository->obtenerPorId($asunto->id_expediente);
+            if (!$expediente) return;
+
+            // Obtener remitente
+            $remitente = $this->usuarioRepository->obtenerPorId($idRemitente);
+            if (!$remitente) return;
+
+            $nombreRemitente = !empty($remitente->nombre_completo) ? $remitente->nombre_completo : $remitente->correo;
+
+            // Crear lista de destinatarios únicos, incluyendo al remitente y al administrador
+            $todosDestinatarios = array_unique(array_merge(
+                $usuariosDestinatarios, 
+                [$idRemitente], 
+                $this->obtenerAdministradores()
+            ));
+
+            // Enviar notificación a cada destinatario
+            foreach ($todosDestinatarios as $idDestinatario) {
+                $destinatario = $this->usuarioRepository->obtenerPorId($idDestinatario);
+                if (!$destinatario || empty($destinatario->correo)) continue;
+
+                $nombreDestinatario = !empty($destinatario->nombre_completo) ? $destinatario->nombre_completo : 'Participante';
+
+                Mail::to($destinatario->correo)->send(new NotificacionNuevoMensaje(
+                    nombreRemitente: $nombreRemitente,
+                    contenidoMensaje: $mensaje->contenido,
+                    codigoExpediente: $expediente->codigo_expediente,
+                    asuntoTitulo: $asunto->titulo,
+                    rutasAdjuntos: $rutasAdjuntos,
+                    nombreDestinatario: $nombreDestinatario
+                ));
+            }
+        } catch (Exception $e) {
+            // Log error pero no fallar el envío del mensaje
+            Log::error('Error al enviar notificaciones de email: ' . $e->getMessage());
+        }
+    }
+
+    private function obtenerAdministradores(): array
+    {
+        // Obtener todos los usuarios con rol de administrador
+        $administradores = $this->usuarioRepository->obtenerAdministradores();
+        return $administradores->pluck('id_usuario')->toArray();
     }
 }

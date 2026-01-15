@@ -6,10 +6,16 @@ export const obtenerNombreCompleto = (usuario: any): string => {
   if (usuario.nombre_empresa?.trim()) {
     return usuario.nombre_empresa.trim();
   }
+  if (usuario.nombre_completo?.trim()) {
+    return usuario.nombre_completo.trim();
+  }
   if (usuario.nombre?.trim()) {
     const nombre = usuario.nombre.trim();
     const apellido = usuario.apellido?.trim();
     return apellido ? `${nombre} ${apellido}` : nombre;
+  }
+  if (usuario.correo?.trim()) {
+    return usuario.correo.trim();
   }
   if (usuario.email?.trim()) {
     return usuario.email.trim();

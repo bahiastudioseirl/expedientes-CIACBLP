@@ -6,7 +6,7 @@ class CrearAsuntoDTO
 {
     public function __construct(
         public string $titulo,
-        public int $id_flujo,
+        public ?int $id_flujo,
         public int $id_expediente
     ){}
 
@@ -14,7 +14,7 @@ class CrearAsuntoDTO
     {
         return new self(
             titulo: $data['titulo'],
-            id_flujo: $data['id_flujo'],
+            id_flujo: $data['id_flujo'] ?? null,
             id_expediente: $data['id_expediente']
         );
     }
@@ -23,7 +23,7 @@ class CrearAsuntoDTO
     {
         return new self(
             titulo: $data['titulo'],
-            id_flujo: $data['id_flujo'],
+            id_flujo: $data['id_flujo'] ?? null,
             id_expediente: $data['id_expediente']
         );
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\Usuarios\ActualizarUsuarioDTO;
 use App\DTOs\Usuarios\CrearUsuarioDTO;
+use App\DTOs\Usuarios\ActualizarPerfilDTO;
 use App\Models\Usuarios;
 use App\Models\Correos;
 use App\Repositories\UsuarioRepository;
@@ -98,5 +99,14 @@ class UsuarioService
         }, $resultadosSecundarios);
     }
 
+    public function actualizarPerfil(ActualizarPerfilDTO $dto): Usuarios
+    {
+        $usuario = $this->usuarioRepository->obtenerPorId($dto->id_usuario);
+        
+        if (!$usuario) {
+            throw new \Exception('Usuario no encontrado');
+        }
 
+        return $this->usuarioRepository->actualizarPerfil($dto);
+    }
 }

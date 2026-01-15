@@ -25,7 +25,6 @@
         <strong>Teléfono:</strong> {{ $telefonoSecretario }}
     </p>
 
-    <p>Puede ponerse en contacto con el secretario asignado para cualquier consulta sobre su expediente.</p>
 
     <hr>
     <div class='email-footer'>

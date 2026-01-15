@@ -6,6 +6,7 @@ use App\Models\Usuarios;
 use App\Repositories\UsuarioRepository;
 use App\Repositories\UsuarioExpedienteRepository;
 use App\Repositories\RolRepository;
+use App\Repositories\ExpedienteRepository;
 use App\Mail\CredencialesExpediente;
 use App\Mail\AsignacionExpediente;
 use Illuminate\Support\Facades\DB;
@@ -17,14 +18,21 @@ class CreadorUsuariosExpedienteService
         private readonly GeneradorCredencialesService $generadorCredenciales,
         private readonly UsuarioRepository $usuarioRepository,
         private readonly UsuarioExpedienteRepository $usuarioExpedienteRepository,
-        private readonly RolRepository $rolRepository
+        private readonly RolRepository $rolRepository,
+        private readonly ExpedienteRepository $expedienteRepository
     ) {}
 
-    public function crearUsuariosPorCorreos(array $correos, int $idExpediente, string $rolNombre): array
+    public function crearUsuariosPorCorreos(array $correos, int $idExpediente, string $rolNombre, string $mensaje = '', string $asuntoTitulo = ''): array
     {
-        return DB::transaction(function () use ($correos, $idExpediente, $rolNombre) {
+        return DB::transaction(function () use ($correos, $idExpediente, $rolNombre, $mensaje, $asuntoTitulo) {
             $rol = $this->obtenerRolOFallar($rolNombre);
             $credenciales = [];
+            
+            // Obtener el expediente para envío de emails
+            $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
+            if (!$expediente) {
+                throw new \Exception('Expediente no encontrado');
+            }
 
             foreach ($correos as $correo) {
                 $contrasenaGenerada = $this->generadorCredenciales->generarContrasena();
@@ -40,8 +48,18 @@ class CreadorUsuariosExpedienteService
                 ]);
 
                 $this->vincularUsuarioExpediente($usuario->id_usuario, $idExpediente);
+                
+                // Enviar credenciales por email
+                Mail::to($correo)->send(new CredencialesExpediente(
+                    correo: $correo,
+                    contrasena: $contrasenaGenerada,
+                    codigoExpediente: $expediente->codigo_expediente,
+                    asuntoTitulo: $asuntoTitulo ?: 'Asunto',
+                    mensaje: $mensaje
+                ));
 
                 $credenciales[$correo] = [
+                    'id_usuario' => $usuario->id_usuario,
                     'correo' => $correo,
                     'contrasena' => $contrasenaGenerada,
                 ];
@@ -170,12 +188,18 @@ class CreadorUsuariosExpedienteService
 
         $this->vincularUsuarioExpediente($usuario->id_usuario, $idExpediente);
 
+        // Obtener el expediente para envío de email
+        $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
+        if (!$expediente) {
+            throw new \Exception('Expediente no encontrado');
+        }
+        
         Mail::to($correo)->send(new CredencialesExpediente(
-            nombre_completo: $nombreCompleto,
             correo: $correo,
             contrasena: $contrasenaGenerada,
-            codigo_expediente: $this->generarCodigoExpediente($idExpediente),
-            numeroDocumento: $numeroDocumento
+            codigoExpediente: $expediente->codigo_expediente,
+            asuntoTitulo: 'Credenciales de acceso',
+            mensaje: ''
         ));
 
         return [

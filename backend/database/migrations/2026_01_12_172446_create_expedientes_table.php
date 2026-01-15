@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_plantilla');
             $table->unsignedBigInteger('id_solicitud');
             $table->boolean('activo')->default(true);
-
+            $table->boolean('credenciales_demandado_enviadas')->default(false);
 
             $table->foreign('id_plantilla')->references('id_plantilla')->on('plantillas')->onDelete('cascade');
 

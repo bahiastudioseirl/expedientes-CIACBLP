@@ -9,7 +9,7 @@
         .email-footer { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; border-top: 1px solid #e9ecef; }
         .credentials-box { background-color: #f8f9fa; border: 2px solid #007bff; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
         .warning-text { color: #dc3545; font-weight: bold; }
-        .highlight { background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; margin: 20px 0; }
+        .mensaje-box { background-color: #e9f4ff; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; }
         p { margin-bottom: 15px; }
     </style>
 </head>
@@ -24,29 +24,20 @@
             <p style="margin: 10px 0 0 0; color: #6c757d;">Centro de Arbitraje</p>
         </div>
         <div class='email-body'>
-            <p><strong>Estimado(a) {{ $nombre_completo }}:</strong></p>
+            <p><strong>Estimado(a) participante:</strong></p>
             
-            <p>Hemos registrado su participación en el caso arbitral: <strong>N° {{ $codigo_expediente }}</strong></p>
-            
-            <p>Se ha creado una cuenta en nuestro sistema para que pueda acceder a la información y documentos relacionados con el proceso arbitral.</p>
+            @if(!empty($mensaje))
+            <div class="mensaje-box">
+                <p><strong>Mensaje del Secretario:</strong></p>
+                <p>{{ $mensaje }}</p>
+            </div>
+            @endif
             
             <div class="credentials-box">
                 <h3 style="margin-top: 0; color: #007bff;">Sus credenciales de acceso:</h3>
-                <p><strong>Usuario:</strong> {{ $numeroDocumento }}</p>
+                <p><strong>Correo:</strong> {{ $correo }}</p>
                 <p><strong>Contraseña:</strong> <span class='warning-text'>{{ $contrasena }}</span></p>
             </div>
-            
-            <div class="highlight">
-                <p><strong>Importante:</strong></p>
-                <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li>Sus credenciales son personales, únicas, confidenciales e intransferibles</li>
-                    <li>Mantenga seguras sus credenciales de acceso</li>
-                </ul>
-            </div>
-            
-            <p>Podrá acceder al sistema a través de nuestra plataforma web utilizando las credenciales proporcionadas.</p>
-            
-            <p>Si tiene alguna consulta o dificultad para acceder, no dude en comunicarse con nosotros.</p>
             
             <p>Atentamente,</p>
             <p><strong>CIACBLP</strong></p>

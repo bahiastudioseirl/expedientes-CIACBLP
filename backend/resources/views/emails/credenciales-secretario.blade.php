@@ -18,9 +18,8 @@
         <strong>Contraseña:</strong> {{ $contrasena }}
     </p>
 
-    <p><strong>Importante:</strong> Por favor, cambie su contraseña al iniciar sesión por primera vez.</p>
+    <p><strong>Como secretario/a, tendrá acceso a las funciones administrativas del expediente y será responsable de gestionar el flujo del procedimiento arbitral.</strong></p>
 
-    <p>Como secretario/a, tendrá acceso a las funciones administrativas del expediente y será responsable de gestionar el flujo del procedimiento arbitral.</p>
 
     <hr>
     <div class='email-footer'>

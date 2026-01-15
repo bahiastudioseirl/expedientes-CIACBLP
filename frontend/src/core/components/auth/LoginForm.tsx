@@ -33,7 +33,8 @@ export const LoginForm = () => {
             if (response.data.usuario.rol === 'Administrador') {
                 navigate('/administrator');
             } else {
-                navigate('/');
+                // Para secretarios, árbitros, demandados, demandantes y otros usuarios -> Bandeja de entrada
+                navigate('/bandeja-entrada');
             }
         } catch (err: any) {
             console.error('Error en login:', err);

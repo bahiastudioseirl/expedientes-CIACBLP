@@ -37,5 +37,11 @@ class ExpedienteRepository
         })->get();
     }
 
+    public function actualizar(int $id, array $data): bool
+    {
+        $expediente = Expediente::find($id);
+        return $expediente ? $expediente->update($data) : false;
+    }
+
 }
     

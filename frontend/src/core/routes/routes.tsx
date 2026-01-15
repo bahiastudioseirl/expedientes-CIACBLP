@@ -132,6 +132,26 @@ export const routes = [
         ],
     },
 
+    // RUTA DE EXPEDIENTES (para todos los usuarios autenticados)
+    {
+        path: '/expedientes',
+        element: (
+            <ProtectedRoute>
+                <AdminLayout />
+            </ProtectedRoute>
+        ),
+        children: [
+            {
+                index: true,
+                element: (
+                    <LazyWrapper>
+                        <ExpedienteAdmin />
+                    </LazyWrapper>
+                ),
+            },
+        ],
+    },
+
     // RUTAS ADMINISTRATIVAS
  {
     path: '/administrator',
@@ -215,6 +235,39 @@ export const routes = [
       },
     ],
   },
+
+    // Ruta 403 - No autorizado
+  {
+    path: '/unauthorized',
+    element: (
+      <div className='flex items-center justify-center min-h-screen p-6 bg-gray-50'>
+        <div className='w-full max-w-md p-8 text-center bg-white shadow-lg rounded-xl'>
+          <div className='flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-orange-100 rounded-full'>
+            <svg className='w-10 h-10 text-orange-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M12 15v2m-6 0h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
+              />
+            </svg>
+          </div>
+          <h1 className='mb-2 text-4xl font-bold text-gray-900'>403</h1>
+          <h2 className='mb-4 text-xl font-semibold text-gray-700'>No autorizado</h2>
+          <p className='mb-6 text-gray-600'>No tienes permisos para acceder a esta sección</p>
+          <a
+            href='/'
+            className='inline-flex items-center px-4 py-2 text-white transition-colors bg-orange-600 rounded-lg hover:bg-orange-700'>
+            <svg className='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
+            </svg>
+            Volver al inicio
+          </a>
+        </div>
+      </div>
+    ),
+  },
+
     // Ruta 404 - Página no encontrada
   {
     path: '/404',

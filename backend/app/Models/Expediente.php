@@ -17,13 +17,15 @@ class Expediente extends Model
         'codigo_expediente',
         'id_plantilla',
         'id_solicitud',
-        'activo'
+        'activo',
+        'credenciales_demandado_enviadas'
     ];
 
     protected function casts(): array
     {
         return [
             'activo' => 'boolean',
+            'credenciales_demandado_enviadas' => 'boolean',
         ];
     }
 
@@ -48,6 +50,11 @@ class Expediente extends Model
     }
 
     public function usuariosExpedientes()
+    {
+        return $this->hasMany(UsuarioExpediente::class, 'id_expediente', 'id_expediente');
+    }
+
+    public function participantes()
     {
         return $this->hasMany(UsuarioExpediente::class, 'id_expediente', 'id_expediente');
     }

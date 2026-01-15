@@ -2,15 +2,44 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { LogOut, User, Menu } from 'lucide-react';
+import { AuthStore } from '../../core/components/auth/services/AuthStore';
+import { CompletarPerfilModal } from '../../components/modals/CompletarPerfilModal';
+import { useCompletarPerfil } from '../../hooks/useCompletarPerfil';
+import type { User as UserType } from '../../core/components/auth/schemas/LoginSchema';
 
 export const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserType | null>(AuthStore.getUser());
+  
+  const { mostrarModal, guardarPerfil, cerrarModal } = useCompletarPerfil({
+    usuario: currentUser,
+    onPerfilActualizado: (usuarioActualizado) => {
+      AuthStore.setUser(usuarioActualizado);
+      setCurrentUser(usuarioActualizado);
+    }
+  });
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('authToken');
+    AuthStore.clearAll();
     window.location.href = '/';
+  };
+
+  // Determinar el título del panel según el rol
+  const getPanelTitle = () => {
+    switch (currentUser?.rol) {
+      case 'Administrador':
+        return 'Panel de Administración';
+      case 'Secretario':
+        return 'Portal Secretario';
+      case 'Arbitro':
+        return 'Portal de Árbitro';
+      case 'Demandado':
+        return 'Portal del Demandado';
+      case 'Demandante':
+        return 'Portal del Demandante';
+      default:
+        return 'Portal CIACBLP';
+    }
   };
 
   return (
@@ -37,7 +66,7 @@ export const AdminLayout = () => {
               
               <div>
                 <h1 className="text-lg sm:text-xl font-semibold text-white">
-                  Panel de Administración
+                  {getPanelTitle()}
                 </h1>
                 <p className="text-xs sm:text-sm text-white hidden sm:block">
                   Gestión de Expedientes CIACBLP
@@ -49,7 +78,10 @@ export const AdminLayout = () => {
             <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="hidden sm:flex items-center space-x-2 text-sm text-white">
                 <User className="w-4 h-4" />
-                <span className="hidden md:inline">Administrador</span>
+                <div className="hidden md:flex flex-col text-right">
+                  <span className="text-xs font-medium">{currentUser?.nombre_completo || 'Usuario'}</span>
+                  <span className="text-xs opacity-75">{currentUser?.rol}</span>
+                </div>
               </div>
               
               <button
@@ -71,6 +103,21 @@ export const AdminLayout = () => {
           </div>
         </main>
       </div>
+      
+      {/* Modal de completar perfil */}
+      {currentUser && (
+        <CompletarPerfilModal
+          isOpen={mostrarModal}
+          onClose={cerrarModal}
+          currentUser={{
+            id_usuario: currentUser.id,
+            nombre_completo: currentUser.nombre_completo,
+            correo: currentUser.correo,
+            rol: currentUser.rol
+          }}
+          onSave={guardarPerfil}
+        />
+      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@
 // =============================================
 
 export interface ExpedienteAsignado {
-  id_expediente: number;
+  id: number;
   codigo_expediente: string;
   asunto: string | null;
   activo: boolean;
@@ -40,13 +40,16 @@ export interface Asunto {
   id_expediente: number;
   titulo: string;
   activo: boolean;
-  etapa?: {
-    id_etapa: number;
-    nombre: string;
-  };
-  sub_etapa?: {
-    id_sub_etapa: number;
-    nombre: string;
+  flujo?: {
+    id_flujo: number;
+    etapa: {
+      id_etapa: number;
+      nombre: string;
+      sub_etapa?: {
+        id_sub_etapa: number;
+        nombre: string;
+      };
+    };
   };
 }
 

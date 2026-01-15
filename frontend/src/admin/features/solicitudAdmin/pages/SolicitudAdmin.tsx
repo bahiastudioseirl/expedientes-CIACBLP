@@ -28,6 +28,11 @@ export default function SolicitudAdmin() {
     try {
       const response = await obtenerSolicitudes();
       setSolicitudes(response.data.solicitudes);
+      
+      // Si no hay solicitudes, no mostrar como error
+      if (response.data.solicitudes.length === 0 && response.message === "No hay solicitudes registradas") {
+        setError(''); // No establecer error, solo dejar la lista vacía
+      }
     } catch (err) {
       setError('Error al cargar solicitudes');
     } finally {

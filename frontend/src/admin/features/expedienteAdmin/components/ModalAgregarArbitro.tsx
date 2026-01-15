@@ -188,7 +188,7 @@ export default function ModalAgregarArbitro({
                             : 'bg-blue-100 text-blue-800'
                         }`}
                       >
-                        {arbitro.origen === 'bd_principal' ? 'Registrado' : 'Postulante'}
+                        {arbitro.origen === 'bd_principal' ? 'Registrado' : 'Árbitro'}
                       </span>
                     </div>
                   </button>

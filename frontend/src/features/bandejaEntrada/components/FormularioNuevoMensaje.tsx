@@ -1,27 +1,110 @@
-import React, { useState, useRef } from 'react';
-import { Send, Paperclip, X } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Paperclip, X, Mail } from 'lucide-react';
 import { getAllParticipanteIds } from '../utils/chatUtils';
 import { SelectorDestinatarios } from './SelectorDestinatarios';
+import { enviarCredencialesDemandado, verificarPuedeEnviarCredenciales } from '../services/credencialesService';
 import type { ExpedienteAsignado } from '../schemas/BandejaEntradaSchema';
 
 interface FormularioNuevoMensajeProps {
   expediente: ExpedienteAsignado;
   onEnviar: (mensaje: string, adjuntos: File[], destinatarios: number[]) => Promise<boolean>;
   onCancelar: () => void;
+  currentUser?: {
+    id_usuario: number;
+    id_rol: number;
+    nombre: string;
+  };
 }
 
 export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
   expediente,
   onEnviar,
-  onCancelar
+  onCancelar,
+  currentUser
 }) => {
+  // Función para obtener destinatarios iniciales según el rol del usuario
+  const getDestinatariosIniciales = () => {
+    if (!currentUser) return getAllParticipanteIds(expediente);
+    
+    // Para administradores, secretarios y árbitros: todos seleccionados por defecto
+    if (currentUser.id_rol === 1 || currentUser.id_rol === 2 || currentUser.id_rol === 3) {
+      return getAllParticipanteIds(expediente);
+    }
+    
+    // Para demandados y demandantes: todos seleccionados por defecto
+    // (Las restricciones se aplicarán en el selector pero el estado inicial incluye a todos)
+    return getAllParticipanteIds(expediente);
+  };
+
   const [mensaje, setMensaje] = useState('');
   const [adjuntos, setAdjuntos] = useState<File[]>([]);
   const [destinatariosSeleccionados, setDestinatariosSeleccionados] = useState<number[]>(
-    getAllParticipanteIds(expediente)
+    getDestinatariosIniciales()
   );
   const [sending, setSending] = useState(false);
+  
+  // Estados para credenciales
+  const [puedeEnviarCredenciales, setPuedeEnviarCredenciales] = useState(false);
+  const [enviarCredencialesDemandados, setEnviarCredencialesDemandados] = useState(false);
+  const [enviandoCredenciales, setEnviandoCredenciales] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    verificarCredenciales();
+  }, [expediente.id, currentUser]);
+
+  // Desmarcar todos los destinatarios cuando se marca el checkbox de credenciales
+  useEffect(() => {
+    if (enviarCredencialesDemandados) {
+      setDestinatariosSeleccionados([]);
+    } else {
+      // Restaurar destinatarios por defecto cuando se desmarca
+      setDestinatariosSeleccionados(getDestinatariosIniciales());
+    }
+  }, [enviarCredencialesDemandados]);
+
+  const verificarCredenciales = async () => {
+    if (!expediente?.id || !currentUser) {
+      return;
+    }
+    
+    // Solo mostrar para administradores (rol 1), secretarios (rol 2) y árbitros (rol 3)
+    if (currentUser.id_rol !== 1 && currentUser.id_rol !== 2 && currentUser.id_rol !== 3) {
+      return;
+    }
+    
+    try {
+      const response = await verificarPuedeEnviarCredenciales(expediente.id);
+      setPuedeEnviarCredenciales(response.data.puede_enviar);
+    } catch (error) {
+      console.error('Error al verificar credenciales:', error);
+    }
+  };
+
+  const handleEnviarCredenciales = async (): Promise<number[]> => {
+    if (!expediente?.id) return [];
+    
+    setEnviandoCredenciales(true);
+    
+    try {
+      const response = await enviarCredencialesDemandado(expediente.id, mensaje);
+      
+      if (response.success) {
+        setPuedeEnviarCredenciales(false);
+        console.log('Credenciales enviadas exitosamente');
+        return response.data?.ids_usuarios || [];
+      } else {
+        console.error('Error al enviar credenciales:', response.message);
+        return [];
+      }
+    } catch (error: any) {
+      console.error('Error al enviar credenciales:', error);
+      return [];
+    } finally {
+      setEnviandoCredenciales(false);
+    }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -42,16 +125,57 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
     });
   };
 
+  const toggleRol = (rol: string, seleccionar: boolean) => {
+    // Obtener participantes válidos y agrupar por rol
+    const participantesValidos = getAllParticipanteIds(expediente);
+    const participantesExpediente = expediente.participantes || [];
+    
+    const participantesDelRol = participantesExpediente
+      .filter((p: any) => p.usuario?.rol?.nombre === rol)
+      .map((p: any) => p.usuario.id_usuario);
+    
+    setDestinatariosSeleccionados(prev => {
+      if (seleccionar) {
+        // Agregar todos los del rol que no estén ya seleccionados
+        const nuevos = participantesDelRol.filter((id: number) => !prev.includes(id));
+        return [...prev, ...nuevos];
+      } else {
+        // Quitar todos los del rol
+        return prev.filter(id => !participantesDelRol.includes(id));
+      }
+    });
+  };
+
   const handleEnviar = async () => {
     setSending(true);
-    const success = await onEnviar(mensaje, adjuntos, destinatariosSeleccionados);
-    if (success) {
-      setMensaje('');
-      setAdjuntos([]);
-      setDestinatariosSeleccionados([]);
-      onCancelar();
+    
+    let destinatariosFinales = destinatariosSeleccionados;
+    
+    // Si el checkbox está marcado, enviar credenciales primero y obtener los IDs de usuarios creados
+    if (enviarCredencialesDemandados && puedeEnviarCredenciales) {
+      const idsUsuariosCreados = await handleEnviarCredenciales();
+      // Usar los IDs de usuarios recién creados como destinatarios
+      if (idsUsuariosCreados.length > 0) {
+        destinatariosFinales = idsUsuariosCreados;
+      }
     }
+    
+    // Si hay mensaje o adjuntos, enviar el mensaje a la bandeja
+    if ((mensaje.trim() || adjuntos.length > 0) && destinatariosFinales.length > 0) {
+      const success = await onEnviar(mensaje, adjuntos, destinatariosFinales);
+      if (!success) {
+        setSending(false);
+        return;
+      }
+    }
+    
+    // Limpiar y cerrar
+    setMensaje('');
+    setAdjuntos([]);
+    setDestinatariosSeleccionados([]);
+    setEnviarCredencialesDemandados(false);
     setSending(false);
+    onCancelar();
   };
 
   return (
@@ -61,9 +185,9 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
         <p className="text-sm text-slate-600">Selecciona los destinatarios del expediente que recibirán el mensaje</p>
       </header>
 
-      <div className="flex-1 flex flex-col">
-        <div className="flex-1 p-6">
-          <div className="w-full max-w-none">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="w-full max-w-none space-y-6">
             {/* Adjuntos preview */}
             {adjuntos.length > 0 && (
               <div className="mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm">
@@ -88,11 +212,38 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
             )}
 
             <div className="space-y-4">
+              {/* Checkbox para enviar credenciales - solo para admin, secretarios y árbitros */}
+              {currentUser && (currentUser.id_rol === 1 || currentUser.id_rol === 2 || currentUser.id_rol === 3) && puedeEnviarCredenciales && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={enviarCredencialesDemandados}
+                      onChange={(e) => setEnviarCredencialesDemandados(e.target.checked)}
+                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                      disabled={sending || enviandoCredenciales}
+                    />
+                    <span className="text-sm font-medium text-green-800">
+                      Enviar credenciales a demandados
+                    </span>
+                    {enviandoCredenciales && (
+                      <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                    )}
+                  </label>
+                  <p className="text-xs text-green-700 mt-1 ml-7">
+                    Se enviaran las credenciales de acceso por correo electrónico a todos los demandados
+                  </p>
+                </div>
+              )}
+
               {/* Selector de destinatarios */}
               <SelectorDestinatarios
                 expediente={expediente}
                 destinatariosSeleccionados={destinatariosSeleccionados}
                 onToggleDestinatario={toggleDestinatario}
+                onToggleRol={toggleRol}
+                currentUser={currentUser}
+                deshabilitado={enviarCredencialesDemandados && puedeEnviarCredenciales}
               />
 
               <div>
@@ -103,8 +254,8 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
                   value={mensaje}
                   onChange={(e) => setMensaje(e.target.value)}
                   placeholder="Escribe tu mensaje..."
-                  rows={12}
-                  className="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
+                  rows={8}
+                  className="w-full p-4 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
                   disabled={sending}
                 />
               </div>
@@ -134,7 +285,13 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
               </button>
               <button
                 onClick={handleEnviar}
-                disabled={sending || (!mensaje.trim() && adjuntos.length === 0) || destinatariosSeleccionados.length === 0}
+                disabled={sending || (
+                  // Si está enviando credenciales, solo necesita el checkbox marcado (mensaje opcional)
+                  enviarCredencialesDemandados && puedeEnviarCredenciales ? 
+                    false : 
+                    // Si no está enviando credenciales, necesita mensaje o adjuntos Y destinatarios
+                    (!mensaje.trim() && adjuntos.length === 0) || destinatariosSeleccionados.length === 0
+                )}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold flex items-center space-x-2"
               >
                 {sending ? (

@@ -22,5 +22,12 @@ class SolicitudParteRepository
         return SolicitudParte::find($id);
     }
 
+    public function obtenerPorSolicitudYTipo(int $idSolicitud, string $tipo): Collection
+    {
+        return SolicitudParte::where('id_solicitud', $idSolicitud)
+            ->where('tipo', $tipo)
+            ->get();
+    }
+
     
 }

@@ -54,6 +54,23 @@ class UsuarioResponse
         ]);
     }
 
+    public static function perfilActualizado(Usuarios $usuario): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Perfil actualizado exitosamente',
+            'data' => [
+                'usuario' => [
+                    'id' => $usuario->id_usuario,
+                    'id_usuario' => $usuario->id_usuario,
+                    'nombre_completo' => $usuario->nombre_completo,
+                    'correo' => $usuario->correo,
+                    'rol' => $usuario->rol->nombre ?? ''
+                ]
+            ]
+        ]);
+    }
+
 
 
     public static function format(Usuarios $usuario): array

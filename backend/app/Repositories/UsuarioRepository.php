@@ -41,9 +41,18 @@ class UsuarioRepository
                       ->get();
     }
 
+    public function obtenerAdministradores(): Collection
+    {
+        return Usuarios::whereHas('rol', function ($query) {
+                            $query->where('nombre', 'Administrador');
+                        })
+                        ->where('activo', true)
+                        ->get();
+    }
+
     public function obtenerPorId(int $id): ?Usuarios
     {
-        return Usuarios::with(['rol', 'correos'])->find($id);
+        return Usuarios::with(['rol'])->find($id);
     }
 
 
@@ -114,6 +123,11 @@ class UsuarioRepository
         ->first();
     }
 
+    public function obtenerPorCorreo(string $correo): ?Usuarios
+    {
+        return Usuarios::where('correo', $correo)->first();
+    }
+
     public function buscarArbitrosPorNombre(string $nombre, int $limite = 10): array
     {
         $resultados = Usuarios::with(['rol'])
@@ -134,6 +148,16 @@ class UsuarioRepository
                 'origen' => 'bd_principal'
             ];
         })->toArray();
+    }
+
+    public function actualizarPerfil(\App\DTOs\Usuarios\ActualizarPerfilDTO $dto): Usuarios
+    {
+        $usuario = Usuarios::with('rol')->findOrFail($dto->id_usuario);
+        $usuario->nombre_completo = $dto->nombre_completo;
+        $usuario->updated_at = now();
+        $usuario->save();
+        
+        return $usuario->fresh(['rol']);
     }
 }
 

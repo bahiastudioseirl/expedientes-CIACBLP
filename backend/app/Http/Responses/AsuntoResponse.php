@@ -14,23 +14,22 @@ class AsuntoResponse
             'message' => 'Asuntos obtenidos exitosamente',
             'data' => [
                 'asuntos' => $asuntos->map(function ($asunto) {
-                    return self::formatAsunto($asunto);
+                    return self::formatAsuntoExtendido($asunto);
                 })
             ]
         ]);
-
     }
 
 
-    public static function formatAsunto($asunto): array
+    public static function asuntoCreado($asunto): JsonResponse
     {
-        return [
-            'id_asunto' => $asunto->id_asunto,
-            'id_expediente' => $asunto->id_expediente,
-            'titulo' => $asunto->titulo,
-            'activo' => (bool) $asunto->activo,
-            'id_flujo' => $asunto->id_flujo,
-        ];
+        return response()->json([
+            'success' => true,
+            'message' => 'Asunto creado exitosamente',
+            'data' => [
+                'asunto' => self::formatAsuntoExtendido($asunto)
+            ]
+        ], 201);
     }
 
     public static function asuntoEstado(array $resultado): JsonResponse
@@ -40,7 +39,7 @@ class AsuntoResponse
                 'success' => true,
                 'message' => $resultado['message'],
                 'data' => [
-                    'asunto' => $resultado['data'] ? self::formatAsunto($resultado['data']) : null
+                    'asunto' => $resultado['data'] ? self::formatAsuntoExtendido($resultado['data']) : null
                 ]
             ]);
         } else {
@@ -50,5 +49,34 @@ class AsuntoResponse
                 'data' => null
             ], 400);
         }
+    }
+
+
+    public static function formatAsuntoExtendido($asunto): array
+    {
+        $asunto->loadMissing(['flujo.etapa', 'flujo.subetapa']);
+
+        return [
+            'id_asunto'     => $asunto->id_asunto,
+            'id_expediente' => $asunto->id_expediente,
+            'titulo'        => $asunto->titulo,
+            'activo'        => (bool) $asunto->activo,
+
+            'flujo' => $asunto->flujo ? [
+                'id_flujo' => $asunto->flujo->id_flujo,
+
+                'etapa' => $asunto->flujo->etapa ? [
+                    'id_etapa' => $asunto->flujo->etapa->id_etapa,
+                    'nombre'   => $asunto->flujo->etapa->nombre,
+
+                    'sub_etapa' => $asunto->flujo->subetapa ? [
+                        'id_sub_etapa' => $asunto->flujo->subetapa->id_sub_etapa,
+                        'nombre'      => $asunto->flujo->subetapa->nombre,
+                    ] : null,
+
+                ] : null,
+
+            ] : null,
+        ];
     }
 }

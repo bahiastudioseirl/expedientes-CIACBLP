@@ -15,6 +15,11 @@ interface PanelDetalleMensajeProps {
   onResponderMensaje: (idMensaje: number) => void;
   onCancelarRespuesta: () => void;
   onEnviarRespuesta: (mensaje: string, adjuntos: File[], destinatarios: number[]) => Promise<boolean>;
+  currentUser?: {
+    id_usuario: number;
+    id_rol: number;
+    nombre: string;
+  };
 }
 
 export const PanelDetalleMensaje: React.FC<PanelDetalleMensajeProps> = ({
@@ -26,7 +31,8 @@ export const PanelDetalleMensaje: React.FC<PanelDetalleMensajeProps> = ({
   respondiendoMensaje,
   onResponderMensaje,
   onCancelarRespuesta,
-  onEnviarRespuesta
+  onEnviarRespuesta,
+  currentUser
 }) => {
   return (
     <div className="flex flex-col h-full">
@@ -83,6 +89,7 @@ export const PanelDetalleMensaje: React.FC<PanelDetalleMensajeProps> = ({
                   expediente={expediente}
                   onEnviar={onEnviarRespuesta}
                   onCancelar={onCancelarRespuesta}
+                  currentUser={currentUser}
                 />
               )}
             </>

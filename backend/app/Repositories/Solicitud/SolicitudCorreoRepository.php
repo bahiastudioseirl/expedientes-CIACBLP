@@ -21,4 +21,10 @@ class SolicitudCorreoRepository
     {
         return SolicitudCorreo::where('id_solicitud_parte', $id_solicitud_parte)->get();
     }
+
+    public function obtenerPorSolicitudParte(int $idSolicitudParte): Collection
+    {
+        return SolicitudCorreo::where('id_solicitud_parte', $idSolicitudParte)
+            ->get();
+    }
 }

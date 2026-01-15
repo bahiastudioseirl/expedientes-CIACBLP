@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Asuntos\CrearAsuntoDTO;
+use App\Http\Requests\Asunto\CrearAsuntoRequest;
 use App\Http\Responses\AsuntoResponse;
 use App\Services\AsuntoService;
 
@@ -50,4 +52,22 @@ class AsuntoController extends Controller
             ], 400);
         }
     }
+
+    public function crearAsunto(CrearAsuntoRequest $request)
+    {
+        try {
+            $dto = CrearAsuntoDTO::fromArray($request->validated());
+            $asunto = $this->asuntoService->crearAsunto($dto);
+            return AsuntoResponse::asuntoCreado($asunto);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear el asunto',
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+
+
 }

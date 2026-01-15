@@ -13,17 +13,17 @@ class CredencialesExpediente extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public readonly string $nombre_completo,
         public readonly string $correo,
         public readonly string $contrasena,
-        public readonly string $codigo_expediente,
-        public readonly string $numeroDocumento
+        public readonly string $codigoExpediente,
+        public readonly string $asuntoTitulo,
+        public readonly string $mensaje = ''
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->codigo_expediente,
+            subject: $this->asuntoTitulo,
         );
     }
 
@@ -31,6 +31,13 @@ class CredencialesExpediente extends Mailable
     {
         return new Content(
             html: 'emails.credenciales-expediente',
+            with: [
+                'correo' => $this->correo,
+                'contrasena' => $this->contrasena,
+                'mensaje' => $this->mensaje,
+                'codigo_expediente' => $this->codigoExpediente,
+                'asunto_titulo' => $this->asuntoTitulo
+            ]
         );
     }
 

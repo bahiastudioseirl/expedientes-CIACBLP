@@ -27,7 +27,7 @@
         <div class='email-body'>
             <p><strong>Estimado(a) {{ $nombreCompleto }}:</strong></p>
             
-            <p>Hemos recibido una solicitud de acceso a su cuenta en el sistema del Centro de Arbitraje de la Cámara de Comercio e Industria Boliviano-Alemana La Paz.</p>
+            <p>Hemos recibido una solicitud de acceso a su cuenta en el sistema de CIACBLP</p>
             
             <p>Para completar el proceso de verificación, utilice el siguiente código:</p>
             
