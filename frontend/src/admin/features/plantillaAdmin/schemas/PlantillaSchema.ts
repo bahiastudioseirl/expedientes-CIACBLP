@@ -6,11 +6,14 @@ export interface CrearPlantillaRequest {
   nombre: string;
   etapas: {
     nombre: string;
+    orden: number;
     sub_etapas: {
       nombre?: string;
-      tiene_tiempo: boolean;
-      duracion_dias: number | null;
-      es_opcional: boolean;
+      descripcion?: string;
+      orden: number;
+      dias_habiles: number;
+      es_habil: boolean;
+      es_obligatorio: boolean;
     }[];
   }[];
 }
@@ -18,12 +21,16 @@ export interface CrearPlantillaRequest {
 export interface ActualizarPlantillaRequest {
   nombre: string;
   etapas: {
+    id_etapa?: number;
     nombre: string;
+    orden: number;
     sub_etapas: {
+      id_sub_etapa?: number;
       nombre?: string;
-      tiene_tiempo: boolean;
-      duracion_dias: number | null;
-      es_opcional: boolean;
+      orden: number;
+      dias_habiles: number;
+      es_habil: boolean;
+      es_obligatorio: boolean;
     }[];
   }[];
 }
@@ -35,9 +42,11 @@ export interface ActualizarPlantillaRequest {
 export interface SubEtapa {
   id_sub_etapa: number;
   nombre: string;
-  tiene_tiempo: boolean;
-  duracion_dias: number | null;
-  es_opcional: boolean;
+  descripcion?: string;
+  orden: number;
+  dias_habiles: number;
+  es_habil: boolean;
+  es_obligatorio: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -45,6 +54,7 @@ export interface SubEtapa {
 export interface Etapa {
   id_etapa: number;
   nombre: string;
+  orden: number;
   sub_etapas: SubEtapa[];
 }
 

@@ -19,11 +19,14 @@ class CrearPlantillaRequest extends FormRequest
             
             'etapas' => 'required|array|min:1',
             'etapas.*.nombre' => 'required|string|max:255',
+            'etapas.*.orden' => 'required|integer|min:1',
             'etapas.*.sub_etapas' => 'required|array|min:1',
             'etapas.*.sub_etapas.*.nombre' => 'sometimes|string|max:255',
-            'etapas.*.sub_etapas.*.tiene_tiempo' => 'required|boolean',
-            'etapas.*.sub_etapas.*.duracion_dias' => 'nullable|integer|min:1|required_if:etapas.*.sub_etapas.*.tiene_tiempo,true',
-            'etapas.*.sub_etapas.*.es_opcional' => 'required|boolean',
+            'etapas.*.sub_etapas.*.orden' => 'required|integer|min:1',
+            'etapas.*.sub_etapas.*.dias_habiles' => 'required|integer|min:0',
+            'etapas.*.sub_etapas.*.es_habil' => 'required|boolean',
+            'etapas.*.sub_etapas.*.descripcion' => 'nullable|string',
+            'etapas.*.sub_etapas.*.es_obligatorio' => 'required|boolean',
         ];
     }
 
@@ -43,13 +46,17 @@ class CrearPlantillaRequest extends FormRequest
             'etapas.*.sub_etapas.array' => 'Las sub-etapas deben ser un array.',
             'etapas.*.sub_etapas.min' => 'Cada etapa debe tener al menos una sub-etapa.',
             'etapas.*.sub_etapas.*.nombre.max' => 'El nombre de la sub-etapa no puede exceder 255 caracteres.',
-            'etapas.*.sub_etapas.*.tiene_tiempo.required' => 'Debe especificar si la sub-etapa tiene tiempo.',
-            'etapas.*.sub_etapas.*.tiene_tiempo.boolean' => 'El campo tiene_tiempo debe ser verdadero o falso.',
-            'etapas.*.sub_etapas.*.duracion_dias.required_if' => 'La duración en días es obligatoria cuando la sub-etapa tiene tiempo.',
-            'etapas.*.sub_etapas.*.duracion_dias.integer' => 'La duración debe ser un número entero.',
-            'etapas.*.sub_etapas.*.duracion_dias.min' => 'La duración debe ser al menos 1 día.',
-            'etapas.*.sub_etapas.*.es_opcional.required' => 'Debe especificar si la sub-etapa es opcional.',
-            'etapas.*.sub_etapas.*.es_opcional.boolean' => 'El campo es_opcional debe ser verdadero o falso.',
+            'etapas.*.sub_etapas.*.orden.required' => 'El orden de la sub-etapa es obligatorio.',
+            'etapas.*.sub_etapas.*.orden.integer' => 'El orden debe ser un número entero.',
+            'etapas.*.sub_etapas.*.orden.min' => 'El orden debe ser al menos 1.',
+            'etapas.*.sub_etapas.*.dias_habiles.required' => 'Los días hábiles son obligatorios.',
+            'etapas.*.sub_etapas.*.dias_habiles.integer' => 'Los días hábiles deben ser un número entero.',
+            'etapas.*.sub_etapas.*.dias_habiles.min' => 'Los días hábiles no pueden ser negativos.',
+            'etapas.*.sub_etapas.*.es_habil.required' => 'Debe especificar si la sub-etapa es hábil.',
+            'etapas.*.sub_etapas.*.es_habil.boolean' => 'El campo es_habil debe ser verdadero o falso.',
+            'etapas.*.sub_etapas.*.descripcion.string' => 'La descripción debe ser texto.',
+            'etapas.*.sub_etapas.*.es_obligatorio.required' => 'Debe especificar si la sub-etapa es obligatoria.',
+            'etapas.*.sub_etapas.*.es_obligatorio.boolean' => 'El campo es_obligatorio debe ser verdadero o falso.',
         ];
     }
 }

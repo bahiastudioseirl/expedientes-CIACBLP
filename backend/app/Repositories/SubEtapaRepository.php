@@ -25,4 +25,30 @@ class SubEtapaRepository
     {
         return SubEtapa::find($id);
     }
+
+    public function reordenarSubEtapasDesde(int $etapaId, int $ordenInicio): void
+    {
+        SubEtapa::where('id_etapa', $etapaId)
+            ->where('orden', '>=', $ordenInicio)
+            ->increment('orden');
+    }
+
+    public function obtenerSiguienteOrden(int $etapaId): int
+    {
+        $maxOrden = SubEtapa::where('id_etapa', $etapaId)->max('orden');
+        return ($maxOrden ?? 0) + 1;
+    }
+
+    public function reajustarOrdenesSubEtapas(int $etapaId): void
+    {
+        $subEtapas = SubEtapa::where('id_etapa', $etapaId)
+            ->orderBy('orden')
+            ->get();
+        
+        $orden = 1;
+        foreach ($subEtapas as $subEtapa) {
+            $subEtapa->update(['orden' => $orden]);
+            $orden++;
+        }
+    }
 }

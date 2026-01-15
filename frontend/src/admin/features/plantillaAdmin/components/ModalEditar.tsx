@@ -1,4 +1,4 @@
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, MoveUp, MoveDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Plantilla, ActualizarPlantillaRequest } from "../schemas/PlantillaSchema";
 
@@ -11,14 +11,18 @@ type Props = {
 };
 
 interface SubEtapaForm {
+    id_sub_etapa?: number;
     nombre: string;
-    tiene_tiempo: boolean;
-    duracion_dias: number | null;
-    es_opcional: boolean;
+    orden: number;
+    dias_habiles: number;
+    es_habil: boolean;
+    es_obligatorio: boolean;
 }
 
 interface EtapaForm {
+    id_etapa?: number;
     nombre: string;
+    orden: number;
     sub_etapas: SubEtapaForm[];
 }
 
@@ -31,13 +35,17 @@ export default function ModalEditar({open, plantilla, onClose, onSave, loading}:
     useEffect(() => {
         if (open && plantilla) {
             setNombre(plantilla.nombre);
-            setEtapas(plantilla.etapas.map(etapa => ({
+            setEtapas(plantilla.etapas.map((etapa, idx) => ({
+                id_etapa: etapa.id_etapa,
                 nombre: etapa.nombre,
-                sub_etapas: etapa.sub_etapas.map(sub => ({
+                orden: etapa.orden || (idx + 1),
+                sub_etapas: etapa.sub_etapas.map((sub, subIdx) => ({
+                    id_sub_etapa: sub.id_sub_etapa,
                     nombre: sub.nombre,
-                    tiene_tiempo: sub.tiene_tiempo,
-                    duracion_dias: sub.duracion_dias,
-                    es_opcional: sub.es_opcional
+                    orden: sub.orden || (subIdx + 1),
+                    dias_habiles: sub.dias_habiles || 0,
+                    es_habil: sub.dias_habiles > 0,
+                    es_obligatorio: sub.es_obligatorio ?? true
                 }))
             })));
             setError("");
@@ -54,19 +62,42 @@ export default function ModalEditar({open, plantilla, onClose, onSave, loading}:
     }, [open, onClose]);
 
     const agregarEtapa = () => {
+        const nuevoOrden = etapas.length + 1;
         setEtapas([...etapas, {
-            nombre: `Etapa ${etapas.length + 1}`,
+            nombre: `Etapa ${nuevoOrden}`,
+            orden: nuevoOrden,
             sub_etapas: [{
                 nombre: "Sub Etapa 1",
-                tiene_tiempo: false,
-                duracion_dias: null,
-                es_opcional: false
+                orden: 1,
+                dias_habiles: 0,
+                es_habil: false,
+                es_obligatorio: true
             }]
         }]);
     };
 
     const eliminarEtapa = (index: number) => {
-        setEtapas(etapas.filter((_, i) => i !== index));
+        const nuevasEtapas = etapas.filter((_, i) => i !== index);
+        // Reordenar
+        nuevasEtapas.forEach((etapa, idx) => {
+            etapa.orden = idx + 1;
+        });
+        setEtapas(nuevasEtapas);
+    };
+
+    const moverEtapa = (index: number, direccion: 'arriba' | 'abajo') => {
+        if (direccion === 'arriba' && index === 0) return;
+        if (direccion === 'abajo' && index === etapas.length - 1) return;
+        
+        const nuevasEtapas = [...etapas];
+        const nuevoIndex = direccion === 'arriba' ? index - 1 : index + 1;
+        [nuevasEtapas[index], nuevasEtapas[nuevoIndex]] = [nuevasEtapas[nuevoIndex], nuevasEtapas[index]];
+        
+        // Actualizar órdenes
+        nuevasEtapas.forEach((etapa, idx) => {
+            etapa.orden = idx + 1;
+        });
+        setEtapas(nuevasEtapas);
     };
 
     const actualizarEtapa = (index: number, campo: string, valor: any) => {
@@ -77,11 +108,13 @@ export default function ModalEditar({open, plantilla, onClose, onSave, loading}:
 
     const agregarSubEtapa = (etapaIndex: number) => {
         const nuevasEtapas = [...etapas];
+        const nuevoOrden = nuevasEtapas[etapaIndex].sub_etapas.length + 1;
         nuevasEtapas[etapaIndex].sub_etapas.push({
-            nombre: `Sub Etapa ${nuevasEtapas[etapaIndex].sub_etapas.length + 1}`,
-            tiene_tiempo: false,
-            duracion_dias: null,
-            es_opcional: false
+            nombre: `Sub Etapa ${nuevoOrden}`,
+            orden: nuevoOrden,
+            dias_habiles: 0,
+            es_habil: false,
+            es_obligatorio: true
         });
         setEtapas(nuevasEtapas);
     };
@@ -89,6 +122,27 @@ export default function ModalEditar({open, plantilla, onClose, onSave, loading}:
     const eliminarSubEtapa = (etapaIndex: number, subIndex: number) => {
         const nuevasEtapas = [...etapas];
         nuevasEtapas[etapaIndex].sub_etapas = nuevasEtapas[etapaIndex].sub_etapas.filter((_, i) => i !== subIndex);
+        // Reordenar
+        nuevasEtapas[etapaIndex].sub_etapas.forEach((sub, idx) => {
+            sub.orden = idx + 1;
+        });
+        setEtapas(nuevasEtapas);
+    };
+
+    const moverSubEtapa = (etapaIndex: number, subIndex: number, direccion: 'arriba' | 'abajo') => {
+        const nuevasEtapas = [...etapas];
+        const subEtapas = nuevasEtapas[etapaIndex].sub_etapas;
+        
+        if (direccion === 'arriba' && subIndex === 0) return;
+        if (direccion === 'abajo' && subIndex === subEtapas.length - 1) return;
+        
+        const nuevoIndex = direccion === 'arriba' ? subIndex - 1 : subIndex + 1;
+        [subEtapas[subIndex], subEtapas[nuevoIndex]] = [subEtapas[nuevoIndex], subEtapas[subIndex]];
+        
+        // Actualizar órdenes
+        subEtapas.forEach((sub, idx) => {
+            sub.orden = idx + 1;
+        });
         setEtapas(nuevasEtapas);
     };
 
@@ -129,6 +183,12 @@ export default function ModalEditar({open, plantilla, onClose, onSave, loading}:
             etapas
         });
     };
+
+    // Ordenar etapas y sub_etapas por orden antes de mostrar
+    const sortedEtapas = (etapas ?? plantilla?.etapas ?? []).slice().sort((a, b) => a.orden - b.orden).map(etapa => ({
+        ...etapa,
+        sub_etapas: (etapa.sub_etapas ?? []).slice().sort((a, b) => a.orden - b.orden)
+    }));
 
     if (!open || !plantilla) return null;
 
@@ -179,9 +239,30 @@ export default function ModalEditar({open, plantilla, onClose, onSave, loading}:
                             </div>
 
                             <div className="space-y-4">
-                                {etapas.map((etapa, etapaIndex) => (
+                                {sortedEtapas.map((etapa, etapaIndex) => (
                                     <div key={etapaIndex} className="border border-slate-200 rounded-lg p-4">
                                         <div className="flex items-center gap-2 mb-3">
+                                            <div className="flex flex-col gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => moverEtapa(etapaIndex, 'arriba')}
+                                                    disabled={etapaIndex === 0}
+                                                    className="p-1 text-slate-500 hover:bg-slate-100 rounded disabled:opacity-30"
+                                                    title="Mover arriba"
+                                                >
+                                                    <MoveUp className="w-3 h-3" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => moverEtapa(etapaIndex, 'abajo')}
+                                                    disabled={etapaIndex === etapas.length - 1}
+                                                    className="p-1 text-slate-500 hover:bg-slate-100 rounded disabled:opacity-30"
+                                                    title="Mover abajo"
+                                                >
+                                                    <MoveDown className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                            <span className="text-xs font-medium text-slate-500 w-8">#{etapa.orden}</span>
                                             <input
                                                 type="text"
                                                 value={etapa.nombre}
@@ -215,6 +296,25 @@ export default function ModalEditar({open, plantilla, onClose, onSave, loading}:
                                             {etapa.sub_etapas.map((subEtapa, subIndex) => (
                                                 <div key={subIndex} className="bg-slate-50 rounded p-3 space-y-2">
                                                     <div className="flex items-center gap-2">
+                                                        <div className="flex flex-col gap-1">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => moverSubEtapa(etapaIndex, subIndex, 'arriba')}
+                                                                disabled={subIndex === 0}
+                                                                className="p-0.5 text-slate-500 hover:bg-slate-200 rounded disabled:opacity-30"
+                                                            >
+                                                                <MoveUp className="w-3 h-3" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => moverSubEtapa(etapaIndex, subIndex, 'abajo')}
+                                                                disabled={subIndex === etapa.sub_etapas.length - 1}
+                                                                className="p-0.5 text-slate-500 hover:bg-slate-200 rounded disabled:opacity-30"
+                                                            >
+                                                                <MoveDown className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                        <span className="text-xs font-medium text-slate-500 w-6">#{subEtapa.orden}</span>
                                                         <input
                                                             type="text"
                                                             value={subEtapa.nombre}
@@ -231,40 +331,55 @@ export default function ModalEditar({open, plantilla, onClose, onSave, loading}:
                                                             <Trash2 className="w-3 h-3" />
                                                         </button>
                                                     </div>
-                                                    <div className="grid grid-cols-3 gap-2 text-sm">
-                                                        <label className="flex items-center gap-2">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={subEtapa.tiene_tiempo}
-                                                                onChange={(e) => {
-                                                                    actualizarSubEtapa(etapaIndex, subIndex, 'tiene_tiempo', e.target.checked);
-                                                                    if (!e.target.checked) {
-                                                                        actualizarSubEtapa(etapaIndex, subIndex, 'duracion_dias', null);
-                                                                    }
-                                                                }}
-                                                                className="rounded"
-                                                            />
-                                                            Tiene tiempo
-                                                        </label>
+                                                    <div className="grid grid-cols-2 gap-2 text-sm">
                                                         <div>
-                                                            <input
-                                                                type="number"
-                                                                value={subEtapa.duracion_dias || ''}
-                                                                onChange={(e) => actualizarSubEtapa(etapaIndex, subIndex, 'duracion_dias', e.target.value ? parseInt(e.target.value) : null)}
-                                                                placeholder="Días"
-                                                                disabled={!subEtapa.tiene_tiempo}
-                                                                className="w-full rounded border border-slate-300 px-2 py-1 text-sm disabled:bg-slate-100"
-                                                            />
+                                                            <label className="flex items-center gap-2 mb-1">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={subEtapa.dias_habiles > 0}
+                                                                    onChange={(e) => {
+                                                                        if (e.target.checked) {
+                                                                            actualizarSubEtapa(etapaIndex, subIndex, 'dias_habiles', 1);
+                                                                            actualizarSubEtapa(etapaIndex, subIndex, 'es_habil', true);
+                                                                        } else {
+                                                                            actualizarSubEtapa(etapaIndex, subIndex, 'dias_habiles', 0);
+                                                                            actualizarSubEtapa(etapaIndex, subIndex, 'es_habil', false);
+                                                                        }
+                                                                    }}
+                                                                    className="rounded"
+                                                                />
+                                                                <span className="text-xs text-slate-600">Tiene tiempo</span>
+                                                            </label>
+                                                            {subEtapa.dias_habiles > 0 ? (
+                                                                <input
+                                                                    type="number"
+                                                                    value={subEtapa.dias_habiles}
+                                                                    onChange={(e) => {
+                                                                        const dias = parseInt(e.target.value) || 1;
+                                                                        actualizarSubEtapa(etapaIndex, subIndex, 'dias_habiles', dias);
+                                                                        actualizarSubEtapa(etapaIndex, subIndex, 'es_habil', true);
+                                                                    }}
+                                                                    min="1"
+                                                                    placeholder="Días"
+                                                                    className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full rounded border border-slate-200 bg-slate-100 px-2 py-1 text-sm text-slate-400">
+                                                                    Sin días hábiles
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        <label className="flex items-center gap-2">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={subEtapa.es_opcional}
-                                                                onChange={(e) => actualizarSubEtapa(etapaIndex, subIndex, 'es_opcional', e.target.checked)}
-                                                                className="rounded"
-                                                            />
-                                                            Es opcional
-                                                        </label>
+                                                        <div className="flex items-end">
+                                                            <label className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={subEtapa.es_obligatorio}
+                                                                    onChange={(e) => actualizarSubEtapa(etapaIndex, subIndex, 'es_obligatorio', e.target.checked)}
+                                                                    className="rounded"
+                                                                />
+                                                                Es obligatorio
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}

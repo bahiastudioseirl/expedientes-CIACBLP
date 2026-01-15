@@ -25,25 +25,32 @@ class PlantillaService
             // Crear plantilla
             $plantilla = $this->plantillaRepository->crear($data->toArray());
 
-            // Crear etapas y sus sub-etapas
-            foreach ($data->getEtapas() as $etapaData) {
+            foreach ($data->getEtapas() as $index => $etapaData) {
                 $subEtapasData = $etapaData['sub_etapas'] ?? [];
+                
+                // Determinar el orden de la etapa
+                $orden = $etapaData['orden'] ?? ($index + 1);
                 
                 // Crear etapa
                 $etapaInfo = [
                     'nombre' => $etapaData['nombre'],
-                    'id_plantilla' => $plantilla->id_plantilla
+                    'id_plantilla' => $plantilla->id_plantilla,
+                    'orden' => $orden
                 ];
                 
                 $etapa = $this->etapaRepository->crear($etapaInfo);
 
                 // Crear sub-etapas para esta etapa
-                foreach ($subEtapasData as $index => $subEtapaData) {
+                foreach ($subEtapasData as $subIndex => $subEtapaData) {
+                    $subOrden = $subEtapaData['orden'] ?? ($subIndex + 1);
+                    
                     $subEtapaInfo = [
-                        'nombre' => $subEtapaData['nombre'] ?? 'Sub Etapa ' . ($index + 1),
-                        'tiene_tiempo' => $subEtapaData['tiene_tiempo'],
-                        'duracion_dias' => $subEtapaData['duracion_dias'] ?? null,
-                        'es_opcional' => $subEtapaData['es_opcional'],
+                        'nombre' => $subEtapaData['nombre'] ?? 'Sub Etapa ' . ($subIndex + 1),
+                        'descripcion' => $subEtapaData['descripcion'] ?? null,
+                        'orden' => $subOrden,
+                        'dias_habiles' => $subEtapaData['dias_habiles'] ?? 0,
+                        'es_habil' => $subEtapaData['es_habil'] ?? true,
+                        'es_obligatorio' => $subEtapaData['es_obligatorio'] ?? true,
                         'id_etapa' => $etapa->id_etapa
                     ];
                     
@@ -77,14 +84,23 @@ class PlantillaService
         $etapasExistentes = $plantilla->etapas->keyBy('id_etapa');
         $etapasEnviadas = collect();
 
-        foreach ($nuevasEtapas as $etapaData) {
+        foreach ($nuevasEtapas as $index => $etapaData) {
             $idEtapa = $etapaData['id_etapa'] ?? null;
+            $ordenDeseado = $etapaData['orden'] ?? ($index + 1);
 
             if ($idEtapa && $etapasExistentes->has($idEtapa)) {
                 // Actualizar etapa existente
                 $etapaExistente = $etapasExistentes->get($idEtapa);
+                
+                if ($etapaExistente->orden != $ordenDeseado) {
+                    if ($ordenDeseado < $etapaExistente->orden) {
+                        $this->etapaRepository->reordenarEtapasDesde($plantilla->id_plantilla, $ordenDeseado);
+                    }
+                }
+                
                 $this->etapaRepository->actualizar($etapaExistente, [
-                    'nombre' => $etapaData['nombre']
+                    'nombre' => $etapaData['nombre'],
+                    'orden' => $ordenDeseado
                 ]);
 
                 // Actualizar sub-etapas de esta etapa
@@ -92,21 +108,28 @@ class PlantillaService
                 
                 $etapasEnviadas->push($idEtapa);
             } else {
-                // Crear nueva etapa
+                // Crear nueva etapa - hacer espacio si es necesario
+                $this->etapaRepository->reordenarEtapasDesde($plantilla->id_plantilla, $ordenDeseado);
+                
                 $etapaInfo = [
                     'nombre' => $etapaData['nombre'],
-                    'id_plantilla' => $plantilla->id_plantilla
+                    'id_plantilla' => $plantilla->id_plantilla,
+                    'orden' => $ordenDeseado
                 ];
                 
                 $nuevaEtapa = $this->etapaRepository->crear($etapaInfo);
 
                 // Crear sub-etapas para la nueva etapa
-                foreach ($etapaData['sub_etapas'] ?? [] as $index => $subEtapaData) {
+                foreach ($etapaData['sub_etapas'] ?? [] as $subIndex => $subEtapaData) {
+                    $subOrden = $subEtapaData['orden'] ?? ($subIndex + 1);
+                    
                     $subEtapaInfo = [
-                        'nombre' => $subEtapaData['nombre'] ?? 'Sub Etapa ' . ($index + 1),
-                        'tiene_tiempo' => $subEtapaData['tiene_tiempo'],
-                        'duracion_dias' => $subEtapaData['duracion_dias'] ?? null,
-                        'es_opcional' => $subEtapaData['es_opcional'],
+                        'nombre' => $subEtapaData['nombre'] ?? 'Sub Etapa ' . ($subIndex + 1),
+                        'descripcion' => $subEtapaData['descripcion'] ?? null,
+                        'orden' => $subOrden,
+                        'dias_habiles' => $subEtapaData['dias_habiles'] ?? 0,
+                        'es_habil' => $subEtapaData['es_habil'] ?? true,
+                        'es_obligatorio' => $subEtapaData['es_obligatorio'] ?? true,
                         'id_etapa' => $nuevaEtapa->id_etapa
                     ];
                     
@@ -121,6 +144,9 @@ class PlantillaService
                 $this->etapaRepository->eliminar($etapaExistente);
             }
         }
+        
+        // Reajustar todos los órdenes para que sean consecutivos
+        $this->etapaRepository->reajustarOrdenesEtapas($plantilla->id_plantilla);
     }
 
     private function actualizarSubEtapasCompleta($etapa, array $nuevasSubEtapas): void
@@ -130,25 +156,40 @@ class PlantillaService
 
         foreach ($nuevasSubEtapas as $index => $subEtapaData) {
             $idSubEtapa = $subEtapaData['id_sub_etapa'] ?? null;
+            $ordenDeseado = $subEtapaData['orden'] ?? ($index + 1);
 
             if ($idSubEtapa && $subEtapasExistentes->has($idSubEtapa)) {
                 // Actualizar sub-etapa existente
                 $subEtapaExistente = $subEtapasExistentes->get($idSubEtapa);
+                
+                // Si el orden cambió, reordenar
+                if ($subEtapaExistente->orden != $ordenDeseado) {
+                    if ($ordenDeseado < $subEtapaExistente->orden) {
+                        $this->subEtapaRepository->reordenarSubEtapasDesde($etapa->id_etapa, $ordenDeseado);
+                    }
+                }
+                
                 $this->subEtapaRepository->actualizar($subEtapaExistente, [
                     'nombre' => $subEtapaData['nombre'] ?? 'Sub Etapa ' . ($index + 1),
-                    'tiene_tiempo' => $subEtapaData['tiene_tiempo'],
-                    'duracion_dias' => $subEtapaData['duracion_dias'] ?? null,
-                    'es_opcional' => $subEtapaData['es_opcional'],
+                    'descripcion' => $subEtapaData['descripcion'] ?? null,
+                    'orden' => $ordenDeseado,
+                    'dias_habiles' => $subEtapaData['dias_habiles'] ?? 0,
+                    'es_habil' => $subEtapaData['es_habil'] ?? true,
+                    'es_obligatorio' => $subEtapaData['es_obligatorio'] ?? true,
                 ]);
                 
                 $subEtapasEnviadas->push($idSubEtapa);
             } else {
-                // Crear nueva sub-etapa
+                // Crear nueva sub-etapa - hacer espacio si es necesario
+                $this->subEtapaRepository->reordenarSubEtapasDesde($etapa->id_etapa, $ordenDeseado);
+                
                 $subEtapaInfo = [
                     'nombre' => $subEtapaData['nombre'] ?? 'Sub Etapa ' . ($index + 1),
-                    'tiene_tiempo' => $subEtapaData['tiene_tiempo'],
-                    'duracion_dias' => $subEtapaData['duracion_dias'] ?? null,
-                    'es_opcional' => $subEtapaData['es_opcional'],
+                    'descripcion' => $subEtapaData['descripcion'] ?? null,
+                    'orden' => $ordenDeseado,
+                    'dias_habiles' => $subEtapaData['dias_habiles'] ?? 0,
+                    'es_habil' => $subEtapaData['es_habil'] ?? true,
+                    'es_obligatorio' => $subEtapaData['es_obligatorio'] ?? true,
                     'id_etapa' => $etapa->id_etapa
                 ];
                 
@@ -162,6 +203,9 @@ class PlantillaService
                 $this->subEtapaRepository->eliminar($subEtapaExistente);
             }
         }
+        
+        // Reajustar todos los órdenes para que sean consecutivos
+        $this->subEtapaRepository->reajustarOrdenesSubEtapas($etapa->id_etapa);
     }
 
     public function listarPlantillas(): Collection

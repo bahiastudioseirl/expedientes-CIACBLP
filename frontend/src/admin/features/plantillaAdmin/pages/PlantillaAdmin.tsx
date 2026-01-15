@@ -158,6 +158,8 @@ export default function PlantillaAdmin() {
                                 <p className="mt-1 text-slate-600">Administra las plantillas para tus expedientes</p>
                             </div>
                         </div>
+                        
+                        {/*
                         <button
                             onClick={openModal}
                             className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
@@ -165,6 +167,7 @@ export default function PlantillaAdmin() {
                             <Plus className="w-4 h-4" />
                             <span>Nueva plantilla</span>
                         </button>
+                        */}
                     </div>
                 </div>
 

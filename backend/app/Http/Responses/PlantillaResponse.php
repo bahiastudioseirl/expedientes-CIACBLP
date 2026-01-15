@@ -77,13 +77,16 @@ class PlantillaResponse
                 return [
                     'id_etapa' => $etapa->id_etapa,
                     'nombre' => $etapa->nombre,
+                    'orden' => $etapa->orden,
                     'sub_etapas' => $etapa->subEtapas?->map(function ($subEtapa) {
                         return [
                             'id_sub_etapa' => $subEtapa->id_sub_etapa,
                             'nombre' => $subEtapa->nombre,
-                            'tiene_tiempo' => (bool) $subEtapa->tiene_tiempo,
-                            'duracion_dias' => $subEtapa->duracion_dias,
-                            'es_opcional' => (bool) $subEtapa->es_opcional,
+                            'descripcion' => $subEtapa->descripcion,
+                            'orden' => $subEtapa->orden,
+                            'dias_habiles' => $subEtapa->dias_habiles,
+                            'es_habil' => (bool) $subEtapa->es_habil,
+                            'es_obligatorio' => (bool) $subEtapa->es_obligatorio,
                         ];
                     }) ?? []
                 ];
