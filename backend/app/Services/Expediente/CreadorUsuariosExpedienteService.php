@@ -22,9 +22,9 @@ class CreadorUsuariosExpedienteService
         private readonly ExpedienteRepository $expedienteRepository
     ) {}
 
-    public function crearUsuariosPorCorreos(array $correos, int $idExpediente, string $rolNombre, string $mensaje = '', string $asuntoTitulo = ''): array
+    public function crearUsuariosPorCorreos(array $correos, int $idExpediente, string $rolNombre, string $mensaje = '', string $asuntoTitulo = '', bool $enviarCorreo = true): array
     {
-        return DB::transaction(function () use ($correos, $idExpediente, $rolNombre, $mensaje, $asuntoTitulo) {
+        return DB::transaction(function () use ($correos, $idExpediente, $rolNombre, $mensaje, $asuntoTitulo, $enviarCorreo) {
             $rol = $this->obtenerRolOFallar($rolNombre);
             $credenciales = [];
             
@@ -49,14 +49,16 @@ class CreadorUsuariosExpedienteService
 
                 $this->vincularUsuarioExpediente($usuario->id_usuario, $idExpediente);
                 
-                // Enviar credenciales por email
-                Mail::to($correo)->send(new CredencialesExpediente(
-                    correo: $correo,
-                    contrasena: $contrasenaGenerada,
-                    codigoExpediente: $expediente->codigo_expediente,
-                    asuntoTitulo: $asuntoTitulo ?: 'Asunto',
-                    mensaje: $mensaje
-                ));
+                // Enviar credenciales por email solo si está habilitado
+                if ($enviarCorreo) {
+                    Mail::to($correo)->send(new CredencialesExpediente(
+                        correo: $correo,
+                        contrasena: $contrasenaGenerada,
+                        codigoExpediente: $expediente->codigo_expediente,
+                        asuntoTitulo: $asuntoTitulo ?: 'Asunto',
+                        mensaje: $mensaje
+                    ));
+                }
 
                 $credenciales[$correo] = [
                     'id_usuario' => $usuario->id_usuario,

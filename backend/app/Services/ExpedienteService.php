@@ -60,11 +60,12 @@ class ExpedienteService
                 ? $datosPartes['demandante']->correos 
                 : $datosPartes['demandante']->correos->pluck('correo')->toArray();
 
-            // 6. Crear usuarios para demandantes
+            // 6. Crear usuarios para demandantes (sin enviar correo porque ya reciben SolicitudAdmitidaDemandante)
             $credencialesDemandantes = $this->creadorUsuarios->crearUsuariosPorCorreos(
                 correos: $correosDemandante,
                 idExpediente: $expediente->id_expediente,
-                rolNombre: 'Demandante'
+                rolNombre: 'Demandante',
+                enviarCorreo: false  // No enviar correo aquí porque se envía SolicitudAdmitidaDemandante después
             );
 
             // 7. Crear usuario secretario

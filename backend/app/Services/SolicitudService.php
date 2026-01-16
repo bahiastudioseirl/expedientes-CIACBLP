@@ -96,9 +96,8 @@ class SolicitudService
 
             // Enviar correo al administrador
             $admin = $this->usuarioRepository->obtenerUsuarioPorRolYEstado(1, true);
-            if ($admin && $admin->correos && $admin->correos->count() > 0) {
-                $correoAdmin = $admin->correos->first()->direccion;
-                Mail::to($correoAdmin)->send(new NotificarAdminSolicitud());
+            if ($admin && $admin->correo) {
+                Mail::to($admin->correo)->send(new NotificarAdminSolicitud());
             }
 
             return $solicitudCompleta->load(['partes.correos', 'partes.representante', 'partes.demandadoExtra', 'pretensiones', 'designacion.arbitro']);
