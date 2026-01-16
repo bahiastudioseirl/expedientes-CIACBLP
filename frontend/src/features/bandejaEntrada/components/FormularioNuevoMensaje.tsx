@@ -25,12 +25,12 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
   // Función para obtener destinatarios iniciales según el rol del usuario
   const getDestinatariosIniciales = () => {
     if (!currentUser) return getAllParticipanteIds(expediente);
-    
+
     // Para administradores, secretarios y árbitros: todos seleccionados por defecto
     if (currentUser.id_rol === 1 || currentUser.id_rol === 2 || currentUser.id_rol === 3) {
       return getAllParticipanteIds(expediente);
     }
-    
+
     // Para demandados y demandantes: todos seleccionados por defecto
     // (Las restricciones se aplicarán en el selector pero el estado inicial incluye a todos)
     return getAllParticipanteIds(expediente);
@@ -42,12 +42,12 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
     getDestinatariosIniciales()
   );
   const [sending, setSending] = useState(false);
-  
+
   // Estados para credenciales
   const [puedeEnviarCredenciales, setPuedeEnviarCredenciales] = useState(false);
   const [enviarCredencialesDemandados, setEnviarCredencialesDemandados] = useState(false);
   const [enviandoCredenciales, setEnviandoCredenciales] = useState(false);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -68,12 +68,12 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
     if (!expediente?.id || !currentUser) {
       return;
     }
-    
+
     // Solo mostrar para administradores (rol 1), secretarios (rol 2) y árbitros (rol 3)
     if (currentUser.id_rol !== 1 && currentUser.id_rol !== 2 && currentUser.id_rol !== 3) {
       return;
     }
-    
+
     try {
       const response = await verificarPuedeEnviarCredenciales(expediente.id);
       setPuedeEnviarCredenciales(response.data.puede_enviar);
@@ -84,12 +84,12 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
 
   const handleEnviarCredenciales = async (): Promise<number[]> => {
     if (!expediente?.id) return [];
-    
+
     setEnviandoCredenciales(true);
-    
+
     try {
       const response = await enviarCredencialesDemandado(expediente.id, mensaje);
-      
+
       if (response.success) {
         setPuedeEnviarCredenciales(false);
         console.log('Credenciales enviadas exitosamente');
@@ -129,11 +129,11 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
     // Obtener participantes válidos y agrupar por rol
     const participantesValidos = getAllParticipanteIds(expediente);
     const participantesExpediente = expediente.participantes || [];
-    
+
     const participantesDelRol = participantesExpediente
       .filter((p: any) => p.usuario?.rol?.nombre === rol)
       .map((p: any) => p.usuario.id_usuario);
-    
+
     setDestinatariosSeleccionados(prev => {
       if (seleccionar) {
         // Agregar todos los del rol que no estén ya seleccionados
@@ -148,9 +148,9 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
 
   const handleEnviar = async () => {
     setSending(true);
-    
+
     let destinatariosFinales = destinatariosSeleccionados;
-    
+
     // Si el checkbox está marcado, enviar credenciales primero y obtener los IDs de usuarios creados
     if (enviarCredencialesDemandados && puedeEnviarCredenciales) {
       const idsUsuariosCreados = await handleEnviarCredenciales();
@@ -159,7 +159,7 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
         destinatariosFinales = idsUsuariosCreados;
       }
     }
-    
+
     // Si hay mensaje o adjuntos, enviar el mensaje a la bandeja
     if ((mensaje.trim() || adjuntos.length > 0) && destinatariosFinales.length > 0) {
       const success = await onEnviar(mensaje, adjuntos, destinatariosFinales);
@@ -168,7 +168,7 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
         return;
       }
     }
-    
+
     // Limpiar y cerrar
     setMensaje('');
     setAdjuntos([]);
@@ -236,16 +236,6 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
                 </div>
               )}
 
-              {/* Selector de destinatarios */}
-              <SelectorDestinatarios
-                expediente={expediente}
-                destinatariosSeleccionados={destinatariosSeleccionados}
-                onToggleDestinatario={toggleDestinatario}
-                onToggleRol={toggleRol}
-                currentUser={currentUser}
-                deshabilitado={enviarCredencialesDemandados && puedeEnviarCredenciales}
-              />
-
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Mensaje
@@ -259,6 +249,18 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
                   disabled={sending}
                 />
               </div>
+
+              {/* Selector de destinatarios */}
+              <SelectorDestinatarios
+                expediente={expediente}
+                destinatariosSeleccionados={destinatariosSeleccionados}
+                onToggleDestinatario={toggleDestinatario}
+                onToggleRol={toggleRol}
+                currentUser={currentUser}
+                deshabilitado={enviarCredencialesDemandados && puedeEnviarCredenciales}
+              />
+
+
             </div>
           </div>
         </div>
@@ -287,8 +289,8 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
                 onClick={handleEnviar}
                 disabled={sending || (
                   // Si está enviando credenciales, solo necesita el checkbox marcado (mensaje opcional)
-                  enviarCredencialesDemandados && puedeEnviarCredenciales ? 
-                    false : 
+                  enviarCredencialesDemandados && puedeEnviarCredenciales ?
+                    false :
                     // Si no está enviando credenciales, necesita mensaje o adjuntos Y destinatarios
                     (!mensaje.trim() && adjuntos.length === 0) || destinatariosSeleccionados.length === 0
                 )}
