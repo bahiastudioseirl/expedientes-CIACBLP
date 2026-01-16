@@ -48,7 +48,7 @@ class CrearSolicitudRequest extends FormRequest
             'demandado_extra.direccion_fiscal' => 'nullable|string|max:255',
 
             // Resumen de la controversia
-            'resumen_controversia' => 'required_if:resumen_controversia_tipo,texto|nullable|string|max:1000',
+            'resumen_controversia' => 'required_if:resumen_controversia_tipo,texto|nullable|string|max:2000',
             'resumen_controversia_tipo' => 'required|string|in:texto,archivo',
             'resumen_controversia_archivo' => 'required_if:resumen_controversia_tipo,archivo|nullable|file|mimes:pdf,doc,docx,txt|max:10240', // 10MB
 
@@ -59,7 +59,7 @@ class CrearSolicitudRequest extends FormRequest
             'pretensiones.*.cuantia' => 'nullable|numeric|min:0',
 
             // Medida Cautelar
-            'medida_cautelar' => 'nullable|string|max:500',
+            'medida_cautelar' => 'nullable|string|max:1000',
 
             // Designación Arbitral
             'designacion.arbitro_unico' => 'required|boolean',
