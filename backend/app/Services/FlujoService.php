@@ -7,6 +7,7 @@ use App\DTOs\Flujos\ActualizarFlujoDTO;
 use App\Repositories\EtapaRepository;
 use App\Repositories\ExpedienteRepository;
 use App\Repositories\FlujoRepository;
+use App\Repositories\MensajeRepository;
 use App\Repositories\SubEtapaRepository;
 use App\Services\Expediente\CalculadorDiasHabilesService;
 
@@ -17,7 +18,8 @@ class FlujoService
         private readonly SubEtapaRepository $subEtapaRepository,
         private readonly CalculadorDiasHabilesService $calculadorDiasHabiles,
         private readonly ExpedienteRepository $expedienteRepository,
-        private readonly EtapaRepository $etapaRepository
+        private readonly EtapaRepository $etapaRepository,
+        private readonly MensajeRepository $mensajeRepository
     )
     {}
 
@@ -106,15 +108,28 @@ class FlujoService
         return $this->etapaRepository->obtenerEtapasPorPlantilla($idPlantilla);
     }
 
-
-
-
-
-
-
     public function listarFlujosPorExpediente(int $idExpediente)
     {
         return $this->flujoRepository->listarFlujosPorExpediente($idExpediente);
     }
-    
+
+    public function obtenerCaminoExpediente(int $idExpediente)
+    {
+        $expediente = $this->expedienteRepository->obtenerExpedienteCompleto($idExpediente);
+        
+        if (!$expediente) {
+            throw new \Exception('Expediente no encontrado');
+        }
+
+        $flujos = $this->flujoRepository->listarFlujosPorExpediente($idExpediente);
+        
+        $mensajesAgrupados = $this->mensajeRepository->obtenerMensajesAgrupadosPorFlujo($idExpediente);
+        
+        return [
+            'expediente' => $expediente,
+            'flujos' => $flujos,
+            'mensajes_agrupados' => $mensajesAgrupados
+        ];
+    }
+
 }

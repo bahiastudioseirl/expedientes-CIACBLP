@@ -7,12 +7,14 @@ import {
   Eye,
   UserPlus,
   UserCheck,
-  Settings
+  Settings,
+  MapPin
 } from 'lucide-react';
 import ModalCrearExpedienteDesdeSolicitud from '../components/ModalCrearExpedienteDesdeSolicitud';
 import ModalVerExpediente from '../components/ModalVerExpediente';
 import ModalAgregarArbitro from '../components/ModalAgregarArbitro';
 import ModalGestionFlujo from '../components/ModalGestionFlujo';
+import ModalCaminoExpediente from '../components/ModalCaminoExpediente';
 import { useExpedienteAdmin } from '../hooks/useExpedienteAdmin';
 
 export default function ExpedienteAdmin() {
@@ -31,6 +33,7 @@ export default function ExpedienteAdmin() {
     isViewModalOpen,
     isAgregarArbitroModalOpen,
     isGestionFlujoModalOpen,
+    isCaminoModalOpen,
     selectedExpediente,
     
     // Paginación
@@ -50,6 +53,8 @@ export default function ExpedienteAdmin() {
     handleOpenGestionFlujoModal,
     handleCloseGestionFlujoModal,
     handleSuccessGestionFlujo,
+    handleOpenCaminoModal,
+    handleCloseCaminoModal,
     handleCloseViewModal,
     getNombreDemandante,
     getNombreDemandado,
@@ -190,6 +195,13 @@ export default function ExpedienteAdmin() {
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
+                              onClick={() => handleOpenCaminoModal(expediente)}
+                              className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              title="Ver camino del expediente"
+                            >
+                              <MapPin className="w-4 h-4" />
+                            </button>
+                            <button
                               onClick={() => handleOpenGestionFlujoModal(expediente)}
                               className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                               title="Gestionar flujo del expediente"
@@ -302,6 +314,15 @@ export default function ExpedienteAdmin() {
           codigoExpediente={selectedExpediente.codigo_expediente}
           onClose={handleCloseGestionFlujoModal}
           onSuccess={handleSuccessGestionFlujo}
+        />
+      )}
+
+      {/* Modal Camino del Expediente */}
+      {selectedExpediente && isCaminoModalOpen && (
+        <ModalCaminoExpediente
+          expedienteId={selectedExpediente.id}
+          codigoExpediente={selectedExpediente.codigo_expediente}
+          onClose={handleCloseCaminoModal}
         />
       )}
 

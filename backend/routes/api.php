@@ -132,6 +132,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
     Route::prefix('flujo')->group(function () {
         Route::get('/expediente/{idExpediente}/actual', [FlujoController::class, 'obtenerFlujoActual']);
         Route::get('/expediente/{idExpediente}/listar', [FlujoController::class, 'listarFlujosPorExpediente']);
+        Route::get('/expediente/{idExpediente}/camino', [FlujoController::class, 'obtenerCaminoExpediente']);
     });
 
     // Rutas de perfil para usuarios autenticados

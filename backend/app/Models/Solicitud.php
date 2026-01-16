@@ -46,4 +46,16 @@ class Solicitud extends Model
     {
         return $this->hasOne(Expediente::class, 'id_solicitud', 'id_solicitud');
     }
+
+    public function demandante()
+    {
+        return $this->hasMany(SolicitudParte::class, 'id_solicitud', 'id_solicitud')
+                    ->where('tipo', 'demandante');
+    }
+
+    public function demandado()
+    {
+        return $this->hasMany(SolicitudParte::class, 'id_solicitud', 'id_solicitud')
+                    ->where('tipo', 'demandado');
+    }
 }

@@ -111,4 +111,27 @@ class MensajeRepository
 
         return false;
     }
+
+    public function obtenerMensajesPorExpediente(int $idExpediente): Collection
+    {
+        return Mensajes::with(['usuario.rol', 'adjuntos'])
+            ->whereHas('asunto', function($query) use ($idExpediente) {
+                $query->where('id_expediente', $idExpediente);
+            })
+            ->orderBy('fecha_envio', 'desc')
+            ->get();
+    }
+
+    public function obtenerMensajesAgrupadosPorFlujo(int $idExpediente): Collection
+    {
+        return Mensajes::with(['usuario.rol', 'adjuntos', 'asunto.flujo'])
+            ->whereHas('asunto', function($query) use ($idExpediente) {
+                $query->where('id_expediente', $idExpediente);
+            })
+            ->orderBy('fecha_envio', 'desc')
+            ->get()
+            ->groupBy(function($mensaje) {
+                return $mensaje->asunto?->id_flujo ?? 'sin_flujo';
+            });
+    }
 }

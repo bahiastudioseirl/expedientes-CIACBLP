@@ -66,7 +66,7 @@ const getMenuItems = (): MenuItem[] => {
                     link: '/administrator/plantilla',
                     roles: ['Administrador']
                 },
-                {
+               /*} {
                     titulo: 'Usuarios',
                     icon: Users,
                     roles: ['Administrador'],
@@ -103,6 +103,7 @@ const getMenuItems = (): MenuItem[] => {
                         }
                     ]
                 },
+                */
             ];
 
         case 'Secretario':

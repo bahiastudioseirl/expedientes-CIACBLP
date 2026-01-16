@@ -49,5 +49,16 @@ class ExpedienteRepository
         return $expediente ? $expediente->id_plantilla : null;
     }
 
+    public function obtenerExpedienteCompleto(int $idExpediente): ?Expediente
+    {
+        return Expediente::with([
+            'plantilla',
+            'solicitud.demandante',
+            'solicitud.demandado',
+            'participantes.usuario',
+            'asunto'
+        ])->find($idExpediente);
+    }
+
 }
     

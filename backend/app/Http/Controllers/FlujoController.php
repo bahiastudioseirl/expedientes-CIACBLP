@@ -6,6 +6,7 @@ use App\DTOs\Flujos\CambiarFlujoDTO;
 use App\DTOs\Flujos\ActualizarFlujoDTO;
 use App\Http\Requests\Flujos\ActualizarFlujoRequest;
 use App\Http\Requests\Flujos\CambiarFlujoRequest;
+use App\Http\Responses\CaminoFlujoResponse;
 use App\Http\Responses\FlujoResponse;
 use App\Services\FlujoService;
 
@@ -125,6 +126,22 @@ class FlujoController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener las etapas de la plantilla del expediente',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerCaminoExpediente(int $idExpediente)
+    {
+        try {
+            $camino = $this->flujoService->obtenerCaminoExpediente($idExpediente);
+            
+            return CaminoFlujoResponse::caminoExpediente($camino);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el camino del expediente',
                 'error' => $e->getMessage()
             ], 500);
         }

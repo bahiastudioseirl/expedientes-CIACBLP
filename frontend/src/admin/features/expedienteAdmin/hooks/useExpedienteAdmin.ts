@@ -13,6 +13,7 @@ export function useExpedienteAdmin() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isGestionFlujoModalOpen, setIsGestionFlujoModalOpen] = useState(false);
   const [isAgregarArbitroModalOpen, setIsAgregarArbitroModalOpen] = useState(false);
+  const [isCaminoModalOpen, setIsCaminoModalOpen] = useState(false);
   const [selectedExpediente, setSelectedExpediente] = useState<Expediente | null>(null);
   
   // Estados de datos
@@ -133,6 +134,16 @@ export function useExpedienteAdmin() {
     cargarExpedientes();
   }, [cargarExpedientes]);
 
+  const handleOpenCaminoModal = useCallback((expediente: Expediente) => {
+    setSelectedExpediente(expediente);
+    setIsCaminoModalOpen(true);
+  }, []);
+
+  const handleCloseCaminoModal = useCallback(() => {
+    setIsCaminoModalOpen(false);
+    setSelectedExpediente(null);
+  }, []);
+
   const handleCloseModalDesdeSolicitud = useCallback(() => {
     setIsModalDesdeSolicitud(false);
     setIdSolicitudParaExpediente(null);
@@ -167,6 +178,7 @@ export function useExpedienteAdmin() {
     isViewModalOpen,
     isGestionFlujoModalOpen,
     isAgregarArbitroModalOpen,
+    isCaminoModalOpen,
     
     // Paginación
     totalPages: paginationData.totalPages,
@@ -186,6 +198,8 @@ export function useExpedienteAdmin() {
     handleOpenAgregarArbitroModal,
     handleCloseAgregarArbitroModal,
     handleSuccessAgregarArbitro,
+    handleOpenCaminoModal,
+    handleCloseCaminoModal,
     handleCloseModalDesdeSolicitud,
     handleSuccessCrearExpediente,
     getNombreDemandante,
