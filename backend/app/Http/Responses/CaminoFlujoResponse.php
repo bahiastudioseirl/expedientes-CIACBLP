@@ -123,7 +123,7 @@ class CaminoFlujoResponse
                         'id_adjunto' => $adjunto->id_adjunto,
                         'nombre_archivo' => $adjunto->nombre_archivo,
                         'ruta_archivo' => $adjunto->ruta_archivo,
-                        'url_descarga' => url('public/' . $adjunto->ruta_archivo)
+                        'url_descarga' => url( $adjunto->ruta_archivo)
                     ];
                 })->toArray()
             ];

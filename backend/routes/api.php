@@ -13,6 +13,7 @@ use App\Http\Controllers\FlujoController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioSolicitanteController;
 use App\Http\Controllers\SolicitudController;
+use App\Http\Controllers\ExcelExportController;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 // Manejar solicitudes OPTIONS para CORS
@@ -134,6 +135,13 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         Route::get('/expediente/{idExpediente}/listar', [FlujoController::class, 'listarFlujosPorExpediente']);
         Route::get('/expediente/{idExpediente}/camino', [FlujoController::class, 'obtenerCaminoExpediente']);
     });
+
+    // Rutas de exportación Excel
+    Route::prefix('excel')->group(function () {
+        Route::get('/expediente/{idExpediente}/camino', [ExcelExportController::class, 'exportarCaminoExpediente']);
+    });
+
+
 
     // Rutas de perfil para usuarios autenticados
     Route::prefix('perfil')->group(function () {

@@ -25,6 +25,11 @@ class Cors
 
         $response = $next($request);
 
+        // No aplicar headers CORS a descargas de archivos
+        if ($response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse) {
+            return $response;
+        }
+
         // Aplicar headers CORS a la respuesta
         return $response
             ->header('Access-Control-Allow-Origin', 'http://expedientes.ciacblp.com, https://expedientes.ciacblp.com, http://localhost:3000, http://localhost:5173')
