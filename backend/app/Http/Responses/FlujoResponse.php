@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses;
 
+use App\Models\Flujo;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -31,6 +32,24 @@ class FlujoResponse
         ]);
     }
 
+    public static function etapaOsubEtapaCambiada(?Flujo $flujo): JsonResponse
+    {
+        if ($flujo) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Etapa y subetapa cambiadas exitosamente',
+                'data' => [
+                    'flujo' => self::formatFlujo($flujo)
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo crear el nuevo flujo',
+                'data' => null
+            ], 500);
+        }
+    }
 
     public static function formatFlujo($flujo): array
     {
@@ -70,4 +89,6 @@ class FlujoResponse
             ], 400);
         }
     }
+
+
 }

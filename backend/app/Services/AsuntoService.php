@@ -70,10 +70,6 @@ class AsuntoService
 
         $cerrar = $asunto->activo;
 
-        if ($cerrar && !$this->asuntoRepository->flujoCompletado($asunto)) {
-            throw new Exception("No se puede cerrar el asunto porque el flujo no está completado");
-        }
-
         $resultado = $this->asuntoRepository->cerrarOAbrirAsunto($asunto, $cerrar);
         $mensaje = '';
         if ($cerrar && $resultado) {

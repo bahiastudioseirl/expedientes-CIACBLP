@@ -2,18 +2,22 @@
 
 namespace App\Services;
 
-use App\DTOs\Flujos\CrearFlujoDTO;
-use App\Models\Asunto;
-use App\Models\Expediente;
-use App\Models\SubEtapa;
+use App\DTOs\Flujos\CambiarFlujoDTO;
+use App\DTOs\Flujos\ActualizarFlujoDTO;
+use App\Repositories\EtapaRepository;
+use App\Repositories\ExpedienteRepository;
 use App\Repositories\FlujoRepository;
-use Carbon\Carbon;
-use Exception;
+use App\Repositories\SubEtapaRepository;
+use App\Services\Expediente\CalculadorDiasHabilesService;
 
 class FlujoService
 {
     public function __construct(
-        private readonly FlujoRepository $flujoRepository
+        private readonly FlujoRepository $flujoRepository,
+        private readonly SubEtapaRepository $subEtapaRepository,
+        private readonly CalculadorDiasHabilesService $calculadorDiasHabiles,
+        private readonly ExpedienteRepository $expedienteRepository,
+        private readonly EtapaRepository $etapaRepository
     )
     {}
 
@@ -27,116 +31,86 @@ class FlujoService
         return $this->flujoRepository->obtenerFlujoActual($idExpediente);
     }
 
-
-    public function cambiarEtapaSubetapa(int $idExpediente, int $idEtapa, ?int $idSubetapa = null, string $asunto = ''): array
+    public function cambiarEtapaSubetapa(int $idExpediente, CambiarFlujoDTO $data): \App\Models\Flujo
     {
-        if (!$this->flujoRepository->validarEtapaEnPlantilla($idExpediente, $idEtapa, $idSubetapa)) {
-            throw new Exception('La etapa o subetapa seleccionada no pertenece a la plantilla del expediente');
+        if (!$this->flujoRepository->validarEtapaEnPlantilla($idExpediente, $data->id_etapa, $data->id_subetapa)) {
+            throw new \Exception('La etapa o subetapa seleccionada no pertenece a la plantilla del expediente');
         }
-
         $flujoActual = $this->flujoRepository->obtenerFlujoActual($idExpediente);
         if (!$flujoActual) {
-            throw new Exception('No se encontró un flujo activo para el expediente');
+            throw new \Exception('No se encontró un flujo activo para el expediente');
         }
+        $this->flujoRepository->completarFlujo($flujoActual);
 
-        if ($flujoActual->id_etapa == $idEtapa && $flujoActual->id_subetapa == $idSubetapa) {
-            throw new Exception('La etapa y subetapa seleccionadas son las mismas que las actuales. No se realizó ningún cambio.');
-        }
-
-        $flujoCompletado = $this->flujoRepository->completarFlujo($flujoActual);
-        if (!$flujoCompletado) {
-            throw new Exception('No se pudo completar el flujo actual');
-        }
-
-        $fechaFin = null;
-        if ($idSubetapa) {
-            $subetapa = SubEtapa::find($idSubetapa);
-            if ($subetapa && $subetapa->tiene_tiempo && $subetapa->duracion_dias > 0) {
-                $fechaFin = Carbon::now()->addDays($subetapa->duracion_dias);
+        $fechaLimite = null;
+        if ($data->id_subetapa) {
+            $subetapa = $this->subEtapaRepository->obtenerPorId($data->id_subetapa);
+            if ($subetapa && $subetapa->es_habil && $subetapa->dias_habiles > 0) {
+                $fechaLimite = $this->calculadorDiasHabiles->calcularFechaLimite(now(), $subetapa->dias_habiles);
             }
         }
-
-        $nuevoFlujoDTO = CrearFlujoDTO::fromArray([
-            'estado' => 'en proceso',
-            'fecha_inicio' => Carbon::now()->format('Y-m-d H:i:s'),
-            'fecha_fin' => $fechaFin ? $fechaFin->format('Y-m-d H:i:s') : null,
+        $nuevoFlujoData = [
             'id_expediente' => $idExpediente,
-            'id_etapa' => $idEtapa,
-            'id_subetapa' => $idSubetapa
-        ]);
-
-        $nuevoFlujo = $this->flujoRepository->crear($nuevoFlujoDTO->toArray());
-
-        $this->flujoRepository->crearAsuntoParaFlujo($idExpediente, $nuevoFlujo->id_flujo, $asunto);
-
-        return [
-            'success' => true,
-            'message' => 'Etapa, subetapa y asunto creados correctamente',
-            'data' => $this->flujoRepository->obtenerPorId($nuevoFlujo->id_flujo)
+            'id_etapa' => $data->id_etapa,
+            'id_subetapa' => $data->id_subetapa,
+            'estado' => 'en_proceso',
+            'fecha_inicio' => now(),
+            'fecha_limite' => $fechaLimite,
+            'fecha_fin' => null
         ];
+
+        return $this->flujoRepository->crear($nuevoFlujoData);
     }
 
-    public function actualizarFlujoYAsunto(int $idFlujo, int $idEtapa, ?int $idSubetapa = null, string $asunto = ''): array
+    public function actualizarFlujo(int $idExpediente, ActualizarFlujoDTO $data): \App\Models\Flujo
     {
-        $flujo = $this->flujoRepository->obtenerPorId($idFlujo);
+        if (!$this->flujoRepository->validarEtapaEnPlantilla($idExpediente, $data->id_etapa, $data->id_subetapa)) {
+            throw new \Exception('La etapa o subetapa seleccionada no pertenece a la plantilla del expediente');
+        }
+
+        $flujo = $this->flujoRepository->obtenerFlujoActual($idExpediente);
         if (!$flujo) {
-            throw new Exception('Flujo no encontrado');
+            throw new \Exception('No se encontró un flujo activo para el expediente');
         }
 
-        if ($flujo->estado !== 'en proceso') {
-            throw new Exception('Solo se pueden actualizar flujos que estén en proceso');
-        }
-
-        // Validar que la etapa y subetapa pertenezcan a la plantilla del expediente
-        if (!$this->flujoRepository->validarEtapaEnPlantilla($flujo->id_expediente, $idEtapa, $idSubetapa)) {
-            throw new Exception('La etapa o subetapa seleccionada no pertenece a la plantilla del expediente');
-        }
-
-        $fechaFin = $flujo->fecha_fin;
-        if ($idSubetapa && $idSubetapa != $flujo->id_subetapa) {
-            $subetapa = SubEtapa::find($idSubetapa);
-            if ($subetapa && $subetapa->tiene_tiempo && $subetapa->duracion_dias > 0) {
-                $fechaFin = Carbon::now()->addDays($subetapa->duracion_dias);
-            } else {
-                $fechaFin = null;
+        $fechaLimite = null;
+        if ($data->id_subetapa) {
+            $subetapa = $this->subEtapaRepository->obtenerPorId($data->id_subetapa);
+            if ($subetapa && $subetapa->es_habil && $subetapa->dias_habiles > 0) {
+                $fechaLimite = $this->calculadorDiasHabiles->calcularFechaLimite(now(), $subetapa->dias_habiles);
             }
         }
-        
+
         $datosActualizacion = [
-            'id_etapa' => $idEtapa,
-            'id_subetapa' => $idSubetapa,
-            'fecha_fin' => $fechaFin
+            'id_etapa' => $data->id_etapa,
+            'id_subetapa' => $data->id_subetapa,
+            'fecha_limite' => $fechaLimite
         ];
-        
-        $flujoActualizado = $this->flujoRepository->actualizar($flujo, $datosActualizacion);
-        if (!$flujoActualizado) {
-            throw new Exception('No se pudo actualizar el flujo');
-        }
 
-        $asuntoFlujo = Asunto::where('id_flujo', $idFlujo)->first();
-        if ($asuntoFlujo && !empty($asunto)) {
-            $expediente = Expediente::with('participantes.usuario')->find($flujo->id_expediente);
-            $demandante = null;
-            $demandado = null;
-            foreach ($expediente->participantes as $participante) {
-                if ($participante->rol_en_expediente === 'Demandante') {
-                    $demandante = $participante->usuario->nombre_empresa ?? 'Demandante';
-                } elseif ($participante->rol_en_expediente === 'Demandado') {
-                    $demandado = $participante->usuario->nombre_empresa ?? 'Demandado';
-                }
-            }
-            $nuevoTitulo = ($demandante ?? 'Demandante') . ' - ' . ($demandado ?? 'Demandado') .
-                          ' // Caso arbitral ' . $expediente->codigo_expediente .
-                          ' | ' . $asunto;
-            $asuntoFlujo->update(['titulo' => $nuevoTitulo]);
-        }
-
-        return [
-            'success' => true,
-            'message' => 'Flujo y asunto actualizados correctamente',
-            'data' => $this->flujoRepository->obtenerPorId($flujo->id_flujo)
-        ];
+        $this->flujoRepository->actualizar($flujo, $datosActualizacion);
+        return $flujo->fresh();
     }
+
+
+
+
+
+
+    
+    public function obtenerEtapasPlantillaExpediente(int $idExpediente)
+    {
+        $idPlantilla = $this->expedienteRepository->obtenerIdPlantillaPorExpediente($idExpediente);
+        if (!$idPlantilla) {
+            throw new \Exception('No se encontró la plantilla del expediente');
+        }
+        return $this->etapaRepository->obtenerEtapasPorPlantilla($idPlantilla);
+    }
+
+
+
+
+
+
 
     public function listarFlujosPorExpediente(int $idExpediente)
     {

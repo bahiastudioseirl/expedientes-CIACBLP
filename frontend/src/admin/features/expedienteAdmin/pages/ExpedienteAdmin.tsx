@@ -6,11 +6,13 @@ import {
   Calendar,
   Eye,
   UserPlus,
-  UserCheck
+  UserCheck,
+  Settings
 } from 'lucide-react';
 import ModalCrearExpedienteDesdeSolicitud from '../components/ModalCrearExpedienteDesdeSolicitud';
 import ModalVerExpediente from '../components/ModalVerExpediente';
 import ModalAgregarArbitro from '../components/ModalAgregarArbitro';
+import ModalGestionFlujo from '../components/ModalGestionFlujo';
 import { useExpedienteAdmin } from '../hooks/useExpedienteAdmin';
 
 export default function ExpedienteAdmin() {
@@ -28,6 +30,7 @@ export default function ExpedienteAdmin() {
     idSolicitudParaExpediente,
     isViewModalOpen,
     isAgregarArbitroModalOpen,
+    isGestionFlujoModalOpen,
     selectedExpediente,
     
     // Paginación
@@ -44,6 +47,9 @@ export default function ExpedienteAdmin() {
     handleOpenAgregarArbitroModal,
     handleCloseAgregarArbitroModal,
     handleSuccessAgregarArbitro,
+    handleOpenGestionFlujoModal,
+    handleCloseGestionFlujoModal,
+    handleSuccessGestionFlujo,
     handleCloseViewModal,
     getNombreDemandante,
     getNombreDemandado,
@@ -183,6 +189,13 @@ export default function ExpedienteAdmin() {
                             >
                               <Eye className="w-4 h-4" />
                             </button>
+                            <button
+                              onClick={() => handleOpenGestionFlujoModal(expediente)}
+                              className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                              title="Gestionar flujo del expediente"
+                            >
+                              <Settings className="w-4 h-4" />
+                            </button>
                             {expediente.arbitro ? (
                               <button
                                 disabled
@@ -279,6 +292,16 @@ export default function ExpedienteAdmin() {
           onClose={handleCloseAgregarArbitroModal}
           idExpediente={selectedExpediente.id}
           onSuccess={handleSuccessAgregarArbitro}
+        />
+      )}
+
+      {/* Modal Gestión de Flujo */}
+      {selectedExpediente && isGestionFlujoModalOpen && (
+        <ModalGestionFlujo
+          expedienteId={selectedExpediente.id}
+          codigoExpediente={selectedExpediente.codigo_expediente}
+          onClose={handleCloseGestionFlujoModal}
+          onSuccess={handleSuccessGestionFlujo}
         />
       )}
 

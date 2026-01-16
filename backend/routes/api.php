@@ -217,8 +217,12 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     });
 
     Route::prefix('flujo')->group(function () {
-        Route::post('/cambiar-etapa-subetapa', [FlujoController::class, 'cambiarEtapaSubetapa']);
-        Route::patch('/{idFlujo}/actualizar-flujo-asunto', [FlujoController::class, 'actualizarFlujoYAsunto']);
+        Route::post('/{idExpediente}/cambiar-etapa-subetapa', [FlujoController::class, 'cambiarEtapaSubetapa']);
+        Route::patch('/{idExpediente}/actualizar-flujo', [FlujoController::class, 'actualizarFlujo']);
+    });
+
+    Route::prefix('expedientes')->group(function () {
+        Route::get('/{idExpediente}/etapas-plantilla', [FlujoController::class, 'obtenerEtapasPlantillaExpediente']);
     });
 });
 

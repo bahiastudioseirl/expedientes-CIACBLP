@@ -11,7 +11,7 @@ export function useExpedienteAdmin() {
   const [isModalDesdeSolicitud, setIsModalDesdeSolicitud] = useState(false);
   const [idSolicitudParaExpediente, setIdSolicitudParaExpediente] = useState<number | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isFlujoModalOpen, setIsFlujoModalOpen] = useState(false);
+  const [isGestionFlujoModalOpen, setIsGestionFlujoModalOpen] = useState(false);
   const [isAgregarArbitroModalOpen, setIsAgregarArbitroModalOpen] = useState(false);
   const [selectedExpediente, setSelectedExpediente] = useState<Expediente | null>(null);
   
@@ -105,15 +105,19 @@ export function useExpedienteAdmin() {
     setSelectedExpediente(null);
   }, []);
 
-  const handleOpenFlujoModal = useCallback((expediente: Expediente) => {
+  const handleOpenGestionFlujoModal = useCallback((expediente: Expediente) => {
     setSelectedExpediente(expediente);
-    setIsFlujoModalOpen(true);
+    setIsGestionFlujoModalOpen(true);
   }, []);
 
-  const handleCloseFlujoModal = useCallback(() => {
-    setIsFlujoModalOpen(false);
+  const handleCloseGestionFlujoModal = useCallback(() => {
+    setIsGestionFlujoModalOpen(false);
     setSelectedExpediente(null);
   }, []);
+
+  const handleSuccessGestionFlujo = useCallback(() => {
+    cargarExpedientes();
+  }, [cargarExpedientes]);
 
   const handleOpenAgregarArbitroModal = useCallback((expediente: Expediente) => {
     setSelectedExpediente(expediente);
@@ -161,7 +165,8 @@ export function useExpedienteAdmin() {
     isModalDesdeSolicitud,
     idSolicitudParaExpediente,
     isViewModalOpen,
-    isFlujoModalOpen,
+    isGestionFlujoModalOpen,
+    isAgregarArbitroModalOpen,
     
     // Paginación
     totalPages: paginationData.totalPages,
@@ -175,11 +180,12 @@ export function useExpedienteAdmin() {
     cargarExpedientes,
     handleViewExpediente,
     handleCloseViewModal,
-    handleOpenFlujoModal,
+    handleOpenGestionFlujoModal,
+    handleCloseGestionFlujoModal,
+    handleSuccessGestionFlujo,
     handleOpenAgregarArbitroModal,
     handleCloseAgregarArbitroModal,
     handleSuccessAgregarArbitro,
-    handleCloseFlujoModal,
     handleCloseModalDesdeSolicitud,
     handleSuccessCrearExpediente,
     getNombreDemandante,

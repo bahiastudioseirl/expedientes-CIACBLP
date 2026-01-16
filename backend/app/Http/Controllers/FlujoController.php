@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Flujos\CambiarFlujoDTO;
+use App\DTOs\Flujos\ActualizarFlujoDTO;
 use App\Http\Requests\Flujos\ActualizarFlujoRequest;
-use App\Http\Requests\Flujos\CrearFlujoRequest;
+use App\Http\Requests\Flujos\CambiarFlujoRequest;
 use App\Http\Responses\FlujoResponse;
 use App\Services\FlujoService;
 
@@ -12,6 +14,7 @@ class FlujoController extends Controller
 
     public function __construct(
         private readonly FlujoService $flujoService
+        
     )
     {}
 
@@ -60,46 +63,6 @@ class FlujoController extends Controller
         }
     }
 
-    public function cambiarEtapaSubetapa(CrearFlujoRequest $request)
-    {
-        try {
-            $resultado = $this->flujoService->cambiarEtapaSubetapa(
-                $request->input('id_expediente'),
-                $request->input('id_etapa'),
-                $request->input('id_subetapa'),
-                $request->input('asunto')
-            );
-            
-            return FlujoResponse::cambioEtapaSubetapa($resultado);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 400);
-        }
-    }
-
-    public function actualizarFlujoYAsunto(int $idFlujo, ActualizarFlujoRequest $request)
-    {
-        try {
-            $resultado = $this->flujoService->actualizarFlujoYAsunto(
-                $idFlujo,
-                $request->input('id_etapa'),
-                $request->input('id_subetapa'),
-                $request->input('asunto', '')
-            );
-            
-            return FlujoResponse::cambioEtapaSubetapa($resultado);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 400);
-        }
-    }
-
     public function listarFlujosPorExpediente(int $idExpediente)
     {
         try {
@@ -116,4 +79,54 @@ class FlujoController extends Controller
     }
 
 
+
+
+
+
+    public function cambiarEtapaSubetapa(int $idExpediente, CambiarFlujoRequest $request)
+    {
+        try {
+            $data = CambiarFlujoDTO::fromRequest($request->all(), $idExpediente);
+            $nuevoFlujo = $this->flujoService->cambiarEtapaSubetapa($idExpediente, $data);
+            return FlujoResponse::etapaOsubEtapaCambiada($nuevoFlujo);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cambiar la etapa y subetapa',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function actualizarFlujo(int $idExpediente, ActualizarFlujoRequest $request)
+    {
+        try {
+            $data = ActualizarFlujoDTO::fromRequest($request->all());
+            $flujoActualizado = $this->flujoService->actualizarFlujo($idExpediente, $data);
+            return FlujoResponse::etapaOsubEtapaCambiada($flujoActualizado);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el flujo',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerEtapasPlantillaExpediente(int $idExpediente)
+    {
+        try {
+            $etapas = $this->flujoService->obtenerEtapasPlantillaExpediente($idExpediente);
+            return response()->json([
+                'success' => true,
+                'data' => $etapas
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las etapas de la plantilla del expediente',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

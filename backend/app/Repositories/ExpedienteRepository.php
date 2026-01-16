@@ -43,5 +43,11 @@ class ExpedienteRepository
         return $expediente ? $expediente->update($data) : false;
     }
 
+    public function obtenerIdPlantillaPorExpediente(int $idExpediente): ?int
+    {
+        $expediente = Expediente::find($idExpediente);
+        return $expediente ? $expediente->id_plantilla : null;
+    }
+
 }
     

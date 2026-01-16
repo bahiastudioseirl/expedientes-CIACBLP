@@ -15,13 +15,15 @@ import {
   listarFlujosPorExpediente,
   cambiarEtapaSubetapaExpediente,
   actualizarFlujoExpediente,
-  obtenerEtapasPlantillaExpediente,
-  type FlujoExpediente,
-  type CambiarEtapaExpedienteRequest,
-  type ActualizarFlujoExpedienteRequest,
-  type Etapa,
-  type Subetapa
+  obtenerEtapasPlantillaExpediente
 } from '../services/flujoExpedienteService';
+import type {
+  FlujoExpediente,
+  CambiarEtapaExpedienteRequest,
+  ActualizarFlujoExpedienteRequest,
+  Etapa,
+  Subetapa
+} from '../schemas/FlujoSchema';
 
 interface ModalGestionFlujoProps {
   expedienteId: number;
@@ -123,7 +125,6 @@ export default function ModalGestionFlujo({
     setShowCambiarEtapa(true);
     setNuevaEtapa('');
     setNuevaSubetapa('');
-    setAsunto('');
     setSubetapasDisponibles([]);
     setError('');
   };
@@ -134,7 +135,6 @@ export default function ModalGestionFlujo({
       setShowActualizarFlujo(true);
       setNuevaEtapa(flujoActual.etapa?.id_etapa?.toString() || '');
       setNuevaSubetapa(flujoActual.subetapa?.id_sub_etapa?.toString() || '');
-      setAsunto('');
       
       // Cargar subetapas de la etapa actual
       if (flujoActual.etapa?.id_etapa) {
@@ -151,8 +151,8 @@ export default function ModalGestionFlujo({
   };
 
   const handleCambiarEtapa = async () => {
-    if (!nuevaEtapa || !asunto.trim()) {
-      setError('Por favor completa la etapa y el asunto');
+    if (!nuevaEtapa) {
+      setError('Por favor selecciona una etapa');
       return;
     }
 
@@ -161,13 +161,11 @@ export default function ModalGestionFlujo({
 
     try {
       const data: CambiarEtapaExpedienteRequest = {
-        id_expediente: expedienteId,
         id_etapa: parseInt(nuevaEtapa),
-        id_subetapa: nuevaSubetapa ? parseInt(nuevaSubetapa) : undefined,
-        asunto: asunto.trim()
+        id_subetapa: nuevaSubetapa ? parseInt(nuevaSubetapa) : undefined
       };
 
-      const response = await cambiarEtapaSubetapaExpediente(data);
+      const response = await cambiarEtapaSubetapaExpediente(expedienteId, data);
 
       if (response.success) {
         await cargarDatos();
@@ -176,6 +174,8 @@ export default function ModalGestionFlujo({
         setNuevaSubetapa('');
         setAsunto('');
         onSuccess?.();
+      } else {
+        setError(response.message || 'Error al cambiar la etapa');
       }
     } catch (err: any) {
       console.error('Error al cambiar etapa:', err);
@@ -186,8 +186,8 @@ export default function ModalGestionFlujo({
   };
 
   const handleActualizarFlujo = async () => {
-    if (!flujoActual || !nuevaEtapa || !asunto.trim()) {
-      setError('Por favor completa la etapa y el asunto');
+    if (!flujoActual || !nuevaEtapa) {
+      setError('Por favor completa los campos requeridos');
       return;
     }
 
@@ -197,11 +197,10 @@ export default function ModalGestionFlujo({
     try {
       const data: ActualizarFlujoExpedienteRequest = {
         id_etapa: parseInt(nuevaEtapa),
-        id_subetapa: nuevaSubetapa ? parseInt(nuevaSubetapa) : undefined,
-        asunto: asunto.trim()
+        id_subetapa: nuevaSubetapa ? parseInt(nuevaSubetapa) : undefined
       };
 
-      const response = await actualizarFlujoExpediente(flujoActual.id_flujo, data);
+      const response = await actualizarFlujoExpediente(expedienteId, data);
 
       if (response.success) {
         await cargarDatos();
@@ -210,6 +209,8 @@ export default function ModalGestionFlujo({
         setNuevaSubetapa('');
         setAsunto('');
         onSuccess?.();
+      } else {
+        setError(response.message || 'Error al actualizar el flujo');
       }
     } catch (err: any) {
       console.error('Error al actualizar flujo:', err);
@@ -464,20 +465,6 @@ export default function ModalGestionFlujo({
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Asunto *
-                    </label>
-                    <textarea
-                      value={asunto}
-                      onChange={(e) => setAsunto(e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      placeholder="Describe el motivo del cambio..."
-                      required
-                    />
-                  </div>
-
                   <div className="flex space-x-3 pt-4">
                     <button
                       onClick={() => setShowCambiarEtapa(false)}
@@ -489,7 +476,7 @@ export default function ModalGestionFlujo({
                     <button
                       onClick={handleCambiarEtapa}
                       className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                      disabled={saving || !nuevaEtapa || !asunto.trim()}
+                      disabled={saving || !nuevaEtapa}
                     >
                       {saving ? 'Guardando...' : 'Cambiar'}
                     </button>
@@ -553,20 +540,6 @@ export default function ModalGestionFlujo({
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Asunto *
-                    </label>
-                    <textarea
-                      value={asunto}
-                      onChange={(e) => setAsunto(e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      placeholder="Describe la actualización..."
-                      required
-                    />
-                  </div>
-
                   <div className="flex space-x-3 pt-4">
                     <button
                       onClick={() => setShowActualizarFlujo(false)}
@@ -578,7 +551,7 @@ export default function ModalGestionFlujo({
                     <button
                       onClick={handleActualizarFlujo}
                       className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
-                      disabled={saving || !nuevaEtapa || !asunto.trim()}
+                      disabled={saving || !nuevaEtapa}
                     >
                       {saving ? 'Guardando...' : 'Actualizar'}
                     </button>

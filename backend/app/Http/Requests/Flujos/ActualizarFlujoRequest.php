@@ -16,7 +16,6 @@ class ActualizarFlujoRequest extends FormRequest
         return [
             'id_etapa' => 'required|integer|exists:etapas,id_etapa',
             'id_subetapa' => 'nullable|integer|exists:sub_etapas,id_sub_etapa',
-            'asunto' => 'nullable|string|max:500'
         ];
     }
 
@@ -26,7 +25,6 @@ class ActualizarFlujoRequest extends FormRequest
             'id_etapa.required' => 'La etapa es requerida',
             'id_etapa.exists' => 'La etapa no existe',
             'id_subetapa.exists' => 'La subetapa no existe',
-            'asunto.max' => 'El asunto no puede tener más de 500 caracteres'
         ];
     }
 }

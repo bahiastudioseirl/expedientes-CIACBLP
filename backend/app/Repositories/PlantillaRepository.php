@@ -37,4 +37,5 @@ class PlantillaRepository
         $plantilla->activo = $activo;
         return $plantilla->save();
     }
+
 }
