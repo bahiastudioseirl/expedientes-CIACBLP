@@ -94,6 +94,18 @@ export default function ModalCaminoExpediente({
     }
   };
 
+  // Función para formatear el estado de la etapa
+  const formatearEstadoEtapa = (estado: string) => {
+    switch (estado.toLowerCase()) {
+      case 'en_proceso': return 'En proceso';
+      case 'completado': return 'Completado';
+      case 'pendiente': return 'Pendiente';
+      case 'iniciado': return 'Iniciado';
+      case 'finalizado': return 'Finalizado';
+      default: return estado.charAt(0).toUpperCase() + estado.slice(1).replace(/_/g, ' ');
+    }
+  };
+
   // Función para agrupar flujos por etapa
   const agruparFlujosPorEtapa = (flujos: FlujoConMensajes[]) => {
     const grupos: { [key: string]: FlujoConMensajes[] } = {};
@@ -114,9 +126,9 @@ export default function ModalCaminoExpediente({
     if (!fechaInicio || !fechaLimite) return 'Sin datos';
     
     const ahora = new Date();
-    const inicio = new Date(fechaInicio);
-    const limite = new Date(fechaLimite);
-    const fin = fechaFin ? new Date(fechaFin) : null;
+    const inicio = new Date(fechaInicio + 'T00:00:00');
+    const limite = new Date(fechaLimite + 'T23:59:59'); // Usar fin del día para el límite
+    const fin = fechaFin ? new Date(fechaFin + 'T00:00:00') : null;
     
     // Si ya se completó la subetapa (tiene fecha_fin)
     if (fin) {
@@ -154,7 +166,9 @@ export default function ModalCaminoExpediente({
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Sin fecha';
     try {
-      return new Date(dateString).toLocaleDateString('es-PE', {
+      // Extraer los componentes de la fecha para evitar problemas de timezone
+      const fecha = new Date(dateString + 'T00:00:00');
+      return fecha.toLocaleDateString('es-PE', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
@@ -370,7 +384,7 @@ export default function ModalCaminoExpediente({
                             {/* Estado de la etapa basado en el primer flujo */}
                             <span className={`flex items-center px-3 py-1 text-sm font-medium rounded-full border ${getEstadoColor(flujosDeLaEtapa[0].estado_calculado)}`}>
                               {getEstadoIcon(flujosDeLaEtapa[0].estado_calculado)}
-                              <span className="ml-1">{flujosDeLaEtapa[0].estado_calculado}</span>
+                              <span className="ml-1">{formatearEstadoEtapa(flujosDeLaEtapa[0].estado_calculado)}</span>
                             </span>
                           </div>
                         </div>
@@ -418,7 +432,7 @@ export default function ModalCaminoExpediente({
                                   </div>
                                   <div className="text-center">
                                     <span className="text-xs font-medium text-slate-700 uppercase block mb-1">Estado Etapa</span>
-                                    <span className="text-sm text-slate-600">{flujo.estado}</span>
+                                    <span className="text-sm text-slate-600">{formatearEstadoEtapa(flujo.estado)}</span>
                                   </div>
                                   <div className="text-center">
                                     <span className="text-xs font-medium text-slate-700 uppercase block mb-1">Fecha Fin</span>

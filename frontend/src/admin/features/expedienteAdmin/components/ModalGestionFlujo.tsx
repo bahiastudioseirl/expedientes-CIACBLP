@@ -238,10 +238,24 @@ export default function ModalGestionFlujo({
     }
   };
 
+  // Función para formatear el estado de la etapa
+  const formatearEstadoEtapa = (estado: string) => {
+    switch (estado.toLowerCase()) {
+      case 'en_proceso': return 'En proceso';
+      case 'completado': return 'Completado';
+      case 'pendiente': return 'Pendiente';
+      case 'iniciado': return 'Iniciado';
+      case 'finalizado': return 'Finalizado';
+      default: return estado.charAt(0).toUpperCase() + estado.slice(1).replace(/_/g, ' ');
+    }
+  };
+
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Sin fecha';
     try {
-      return new Date(dateString).toLocaleDateString('es-PE', {
+      // Extraer los componentes de la fecha para evitar problemas de timezone
+      const fecha = new Date(dateString + 'T00:00:00');
+      return fecha.toLocaleDateString('es-PE', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
@@ -303,7 +317,7 @@ export default function ModalGestionFlujo({
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className={`px-3 py-1 text-sm font-medium rounded-full ${getEstadoColor(flujoActual.estado_calculado || flujoActual.estado)}`}>
-                      {flujoActual.estado_calculado || flujoActual.estado}
+                      {formatearEstadoEtapa(flujoActual.estado_calculado || flujoActual.estado)}
                     </span>
                     {getEstadoIcon(flujoActual.estado_calculado || flujoActual.estado)}
                   </div>
@@ -374,7 +388,7 @@ export default function ModalGestionFlujo({
                     <div key={flujo.id_flujo} className="bg-slate-50 border border-slate-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getEstadoColor(flujo.estado_calculado || flujo.estado)}`}>
-                          {flujo.estado_calculado || flujo.estado}
+                          {formatearEstadoEtapa(flujo.estado_calculado || flujo.estado)}
                         </span>
                         <div className="flex items-center space-x-1 text-xs text-slate-500">
                           <span>#{flujos.length - index}</span>
