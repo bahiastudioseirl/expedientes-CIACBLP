@@ -18,10 +18,21 @@ export interface VerificarCredencialesResponse {
     message: string;
 }
 
-export const enviarCredencialesDemandado = async (idExpediente: number, mensaje?: string, adjuntos?: File[]): Promise<CredencialesResponse> => {
+export interface DestinatariosCredencialesResponse {
+    success: boolean;
+    data: {
+        staff_ids: number[];
+        correos_demandados: string[];
+        total_destinatarios: number;
+    };
+    message: string;
+}
+
+export const enviarCredencialesDemandado = async (idExpediente: number, mensaje: string = '', adjuntos: File[] = []): Promise<CredencialesResponse> => {
     const formData = new FormData();
-    formData.append('mensaje', mensaje || '');
+    formData.append('mensaje', mensaje);
     
+    // Agregar adjuntos si existen
     if (adjuntos && adjuntos.length > 0) {
         adjuntos.forEach((archivo, index) => {
             formData.append(`adjuntos[${index}]`, archivo);
@@ -34,5 +45,10 @@ export const enviarCredencialesDemandado = async (idExpediente: number, mensaje?
 
 export const verificarPuedeEnviarCredenciales = async (idExpediente: number): Promise<VerificarCredencialesResponse> => {
     const response = await axiosWithoutMultipart.get(`/credenciales/expediente/${idExpediente}/puede-enviar`);
+    return response.data;
+};
+
+export const obtenerDestinatariosCredenciales = async (idExpediente: number): Promise<DestinatariosCredencialesResponse> => {
+    const response = await axiosWithoutMultipart.get(`/credenciales/expediente/${idExpediente}/destinatarios`);
     return response.data;
 };

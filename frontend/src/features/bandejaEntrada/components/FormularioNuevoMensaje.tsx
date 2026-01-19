@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, X, Mail } from 'lucide-react';
 import { getAllParticipanteIds } from '../utils/chatUtils';
 import { SelectorDestinatarios } from './SelectorDestinatarios';
-import { enviarCredencialesDemandado, verificarPuedeEnviarCredenciales } from '../services/credencialesService';
+import { enviarCredencialesDemandado, verificarPuedeEnviarCredenciales, obtenerDestinatariosCredenciales } from '../services/credencialesService';
 import type { ExpedienteAsignado } from '../schemas/BandejaEntradaSchema';
 
 interface FormularioNuevoMensajeProps {
@@ -24,15 +24,35 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
 }) => {
   // Función para obtener destinatarios iniciales según el rol del usuario
   const getDestinatariosIniciales = () => {
-    if (!currentUser) return getAllParticipanteIds(expediente);
+    if (!currentUser || !expediente?.participantes) return [];
 
-    // Para administradores, secretarios y árbitros: todos seleccionados por defecto
-    if (currentUser.id_rol === 1 || currentUser.id_rol === 2 || currentUser.id_rol === 3) {
-      return getAllParticipanteIds(expediente);
+    const participantesExpediente = expediente.participantes || [];
+    
+    // Para administradores, secretarios y árbitros: obtener su mismo rol
+    if (currentUser.id_rol === 1) {
+      // Admin: otros administradores
+      return participantesExpediente
+        .filter((p: any) => p.usuario?.rol?.nombre === 'Administrador')
+        .map((p: any) => p.usuario.id_usuario);
+    } else if (currentUser.id_rol === 3) {
+      // Secretario: otros secretarios y arbitros
+      return participantesExpediente
+        .filter((p: any) => {
+          const rol = p.usuario?.rol?.nombre;
+          return rol === 'Secretario' || rol === 'Arbitro';
+        })
+        .map((p: any) => p.usuario.id_usuario);
+    } else if (currentUser.id_rol === 4) {
+      // Arbitro: otros arbitros y secretarios
+      return participantesExpediente
+        .filter((p: any) => {
+          const rol = p.usuario?.rol?.nombre;
+          return rol === 'Arbitro' || rol === 'Secretario';
+        })
+        .map((p: any) => p.usuario.id_usuario);
     }
 
-    // Para demandados y demandantes: todos seleccionados por defecto
-    // (Las restricciones se aplicarán en el selector pero el estado inicial incluye a todos)
+    // Para otros roles: retornar todos
     return getAllParticipanteIds(expediente);
   };
 
@@ -53,16 +73,6 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
   useEffect(() => {
     verificarCredenciales();
   }, [expediente.id, currentUser]);
-
-  // Desmarcar todos los destinatarios cuando se marca el checkbox de credenciales
-  useEffect(() => {
-    if (enviarCredencialesDemandados) {
-      setDestinatariosSeleccionados([]);
-    } else {
-      // Restaurar destinatarios por defecto cuando se desmarca
-      setDestinatariosSeleccionados(getDestinatariosIniciales());
-    }
-  }, [enviarCredencialesDemandados]);
 
   const verificarCredenciales = async () => {
     if (!expediente?.id || !currentUser) {
@@ -88,6 +98,7 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
     setEnviandoCredenciales(true);
 
     try {
+      // Enviar credenciales con el mensaje y adjuntos redactados
       const response = await enviarCredencialesDemandado(expediente.id, mensaje, adjuntos);
 
       if (response.success) {
@@ -151,20 +162,39 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
 
     let destinatariosFinales = destinatariosSeleccionados;
 
-    // Si el checkbox está marcado, enviar credenciales primero y obtener los IDs de usuarios creados
+    // Si el checkbox está marcado, primero obtener destinatarios y enviar credenciales
     if (enviarCredencialesDemandados && puedeEnviarCredenciales) {
-      const idsUsuariosCreados = await handleEnviarCredenciales();
-      // Limpiar y cerrar ya que las credenciales incluyen el mensaje y adjuntos
-      setMensaje('');
-      setAdjuntos([]);
-      setDestinatariosSeleccionados([]);
-      setEnviarCredencialesDemandados(false);
-      setSending(false);
-      onCancelar();
-      return;
+      try {
+        // 1. Obtener destinatarios correctos del backend
+        const destinatariosResponse = await obtenerDestinatariosCredenciales(expediente.id);
+        if (!destinatariosResponse.success) {
+          console.error('Error al obtener destinatarios:', destinatariosResponse.message);
+          setSending(false);
+          return;
+        }
+
+        // 2. Enviar credenciales primero
+        const idsUsuariosCreados = await handleEnviarCredenciales();
+        if (idsUsuariosCreados.length === 0) {
+          console.error('No se pudieron crear usuarios demandados');
+          setSending(false);
+          return;
+        }
+
+        // 3. Combinar staff existente + usuarios recién creados
+        const staffIds = destinatariosResponse.data.staff_ids;
+        destinatariosFinales = [...new Set([...staffIds, ...idsUsuariosCreados])];
+        
+        console.log('Destinatarios finales para mensaje:', destinatariosFinales);
+
+      } catch (error) {
+        console.error('Error en el proceso de credenciales:', error);
+        setSending(false);
+        return;
+      }
     }
 
-    // Si NO se envían credenciales pero hay mensaje o adjuntos, enviar el mensaje a la bandeja
+    // Enviar el mensaje normal si hay contenido (se guarda en BD)
     if ((mensaje.trim() || adjuntos.length > 0) && destinatariosFinales.length > 0) {
       const success = await onEnviar(mensaje, adjuntos, destinatariosFinales);
       if (!success) {

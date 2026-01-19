@@ -121,9 +121,9 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
     });
 
     Route::prefix('credenciales')->group(function () {
-        Route::post('/expediente/{idExpediente}/enviar-demandado', [MensajeController::class, 'enviarCredencialesDemandado']);
-        Route::get('/expediente/{idExpediente}/verificar', [MensajeController::class, 'verificarCredencialesDisponibles']);
+        Route::post('/expediente/{idExpediente}/enviar-demandado', [CredencialesController::class, 'enviarCredencialesDemandado']);
         Route::get('/expediente/{idExpediente}/puede-enviar', [CredencialesController::class, 'puedeEnviarCredenciales']);
+        Route::get('/expediente/{idExpediente}/destinatarios', [CredencialesController::class, 'obtenerDestinatariosCredenciales']);
     });
 
     Route::prefix('asuntos')->group(function () {

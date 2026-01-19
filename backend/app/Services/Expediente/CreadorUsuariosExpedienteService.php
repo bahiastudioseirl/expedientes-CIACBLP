@@ -10,6 +10,7 @@ use App\Repositories\ExpedienteRepository;
 use App\Mail\CredencialesExpediente;
 use App\Mail\AsignacionExpediente;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class CreadorUsuariosExpedienteService
@@ -22,9 +23,9 @@ class CreadorUsuariosExpedienteService
         private readonly ExpedienteRepository $expedienteRepository
     ) {}
 
-    public function crearUsuariosPorCorreos(array $correos, int $idExpediente, string $rolNombre, string $mensaje = '', string $asuntoTitulo = '', bool $enviarCorreo = true): array
+    public function crearUsuariosPorCorreos(array $correos, int $idExpediente, string $rolNombre, string $mensaje = '', string $asuntoTitulo = '', array $adjuntos = [], bool $enviarCorreo = true): array
     {
-        return DB::transaction(function () use ($correos, $idExpediente, $rolNombre, $mensaje, $asuntoTitulo, $enviarCorreo) {
+        return DB::transaction(function () use ($correos, $idExpediente, $rolNombre, $mensaje, $asuntoTitulo, $adjuntos, $enviarCorreo) {
             $rol = $this->obtenerRolOFallar($rolNombre);
             $credenciales = [];
             
@@ -33,6 +34,8 @@ class CreadorUsuariosExpedienteService
             if (!$expediente) {
                 throw new \Exception('Expediente no encontrado');
             }
+
+            Log::info("CreadorUsuariosExpedienteService::crearUsuariosPorCorreos - Correos: " . count($correos) . ", Mensaje: " . (strlen($mensaje) > 0 ? 'SÍ' : 'NO') . ", Adjuntos: " . count($adjuntos));
 
             foreach ($correos as $correo) {
                 $contrasenaGenerada = $this->generadorCredenciales->generarContrasena();
@@ -49,15 +52,23 @@ class CreadorUsuariosExpedienteService
 
                 $this->vincularUsuarioExpediente($usuario->id_usuario, $idExpediente);
                 
+                Log::info("Usuario creado: {$usuario->id_usuario} para correo: {$correo}");
+                
                 // Enviar credenciales por email solo si está habilitado
                 if ($enviarCorreo) {
-                    Mail::to($correo)->send(new CredencialesExpediente(
+                    Log::info("Enviando credenciales a: {$correo}");
+                    
+                    $email = new CredencialesExpediente(
                         correo: $correo,
                         contrasena: $contrasenaGenerada,
                         codigoExpediente: $expediente->codigo_expediente,
                         asuntoTitulo: $asuntoTitulo ?: 'Asunto',
-                        mensaje: $mensaje
-                    ));
+                        mensaje: $mensaje,
+                        adjuntos: $adjuntos // Pasar adjuntos a la plantilla de correo
+                    );
+                    
+                    Mail::to($correo)->send($email);
+                    Log::info("Credenciales enviadas a: {$correo}");
                 }
 
                 $credenciales[$correo] = [

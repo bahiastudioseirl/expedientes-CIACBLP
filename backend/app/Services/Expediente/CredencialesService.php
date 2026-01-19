@@ -9,7 +9,6 @@ use App\Repositories\AsuntoRepository;
 use App\Repositories\UsuarioExpedienteRepository;
 use App\Services\MensajeService;
 use App\DTOs\Mensajes\CrearMensajeDTO;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -25,10 +24,15 @@ class CredencialesService
         private readonly MensajeService $mensajeService
     ) {}
 
-
-    public function enviarCredencialesDemandado(int $idExpediente, string $mensaje = '', int $idUsuarioRemitente = null, ?array $adjuntos = null): array
+    public function enviarCredencialesDemandado(int $idExpediente, string $mensaje = '', array $adjuntos = [], ?int $idUsuarioRemitente = null): array
     {
         try {
+            Log::info("=== CredencialesService::enviarCredencialesDemandado ===");
+            Log::info("ID Expediente: {$idExpediente}");
+            Log::info("Mensaje: " . (strlen($mensaje) > 0 ? "SÍ ({$mensaje})" : "NO"));
+            Log::info("Adjuntos: " . count($adjuntos) . " archivo(s)");
+            Log::info("Usuario Remitente: {$idUsuarioRemitente}");
+            
             $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
             
             if (!$expediente) {
@@ -53,14 +57,19 @@ class CredencialesService
                 throw new Exception('No se encontró ningún asunto activo del expediente');
             }
             
-            // Usar el servicio existente para crear usuarios y enviar credenciales
+            Log::info("Enviando credenciales a " . count($correosDemandados) . " demandado(s)");
+            
+            // Crear usuarios y enviar credenciales CON mensaje y adjuntos
             $credencialesEnviadas = $this->creadorUsuarios->crearUsuariosPorCorreos(
                 $correosDemandados, 
                 $idExpediente, 
                 'Demandado',
-                $mensaje,
-                'Credenciales de Acceso - Expediente ' . $expediente->codigo_expediente
+                $mensaje, // Incluir el mensaje
+                $asunto->titulo, // Usar el título del asunto actual
+                $adjuntos // Incluir adjuntos
             );
+            
+            Log::info("Usuarios creados: " . count($credencialesEnviadas));
             
             // Marcar credenciales como enviadas
             $this->expedienteRepository->actualizar($idExpediente, ['credenciales_demandado_enviadas' => true]);
@@ -68,28 +77,36 @@ class CredencialesService
             // Extraer los IDs de los usuarios creados
             $idsUsuariosCreados = array_map(fn($cred) => $cred['id_usuario'], $credencialesEnviadas);
             
-            // Si hay usuario remitente, guardar el mensaje en la BD (incluso si el mensaje está vacío)
-            if ($idUsuarioRemitente) {
+            Log::info("IDs usuarios creados: " . implode(', ', $idsUsuariosCreados));
+            
+            // Si hay mensaje, guardarlo en la BD
+            if (strlen($mensaje) > 0 && $idUsuarioRemitente) {
+                Log::info("Guardando mensaje en BD...");
+                
                 try {
-                    $contenidoMensaje = !empty($mensaje) ? $mensaje : 'Credenciales de acceso enviadas al demandado';
-                    
-                    $mensajeDTO = new CrearMensajeDTO(
-                        contenido: $contenidoMensaje,
+                    // Crear DTO para guardar el mensaje
+                    $crearMensajeDTO = new CrearMensajeDTO(
                         id_usuario: $idUsuarioRemitente,
-                        id_asunto: $asunto->id_asunto
+                        id_asunto: $asunto->id_asunto,
+                        contenido: $mensaje
                     );
                     
-                    // Guardar mensaje dirigido a los usuarios recién creados
-                    $mensajeGuardado = $this->mensajeService->crearMensaje($mensajeDTO, $idsUsuariosCreados, $adjuntos);
-                    Log::info('Mensaje de credenciales guardado exitosamente', ['mensaje_id' => $mensajeGuardado->id_mensaje]);
+                    // Los destinatarios son: staff del expediente + usuarios recién creados
+                    $usuariosDestinatarios = array_merge(
+                        $idsUsuariosCreados,
+                        $this->obtenerUsuariosStaff($idExpediente)
+                    );
+                    
+                    Log::info("Destinatarios del mensaje: " . implode(', ', $usuariosDestinatarios));
+                    
+                    // Guardar el mensaje con adjuntos
+                    $this->mensajeService->crearMensaje($crearMensajeDTO, $usuariosDestinatarios, $adjuntos);
+                    
+                    Log::info("Mensaje guardado exitosamente en BD");
+                    
                 } catch (Exception $e) {
-                    // Log el error completo
-                    Log::error('Error al guardar mensaje de credenciales en BD: ' . $e->getMessage(), [
-                        'idExpediente' => $idExpediente,
-                        'idUsuarioRemitente' => $idUsuarioRemitente,
-                        'mensaje' => $mensaje,
-                        'trace' => $e->getTraceAsString()
-                    ]);
+                    Log::error("Error al guardar mensaje en BD: " . $e->getMessage());
+                    // No fallar el flujo de credenciales si hay error al guardar mensaje
                 }
             }
             
@@ -104,6 +121,9 @@ class CredencialesService
             ];
             
         } catch (Exception $e) {
+            Log::error("ERROR en CredencialesService: " . $e->getMessage());
+            Log::error("Stack: " . $e->getTraceAsString());
+            
             return [
                 'success' => false,
                 'message' => 'Error al enviar credenciales: ' . $e->getMessage()
@@ -129,6 +149,52 @@ class CredencialesService
         
         return true;
     }
+
+    public function obtenerDestinatariosParaCredenciales(int $idExpediente): array
+    {
+        $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
+        
+        if (!$expediente) {
+            throw new Exception('Expediente no encontrado');
+        }
+
+        // Obtener participantes del expediente (staff: admin, secretario, árbitro)
+        $participantesExpediente = $this->usuarioExpedienteRepository->obtenerPorExpediente($idExpediente);
+        $staffIds = $participantesExpediente
+            ->filter(function($participante) {
+                return $participante->usuario && 
+                       $participante->usuario->rol && 
+                       in_array($participante->usuario->rol->nombre, ['Administrador', 'Secretario', 'Arbitro']);
+            })
+            ->pluck('id_usuario')
+            ->toArray();
+
+        // Obtener correos de demandados que se van a crear (para que el frontend los muestre)
+        $correosDemandados = $this->obtenerCorreosDemandados($expediente->id_solicitud);
+        
+        return [
+            'staff_ids' => $staffIds,
+            'correos_demandados' => $correosDemandados,
+            'total_destinatarios' => count($staffIds) + count($correosDemandados)
+        ];
+    }
+    
+    private function obtenerUsuariosStaff(int $idExpediente): array
+    {
+        $participantesExpediente = $this->usuarioExpedienteRepository->obtenerPorExpediente($idExpediente);
+        
+        $staffIds = $participantesExpediente
+            ->filter(function($participante) {
+                return $participante->usuario && 
+                       $participante->usuario->rol && 
+                       in_array($participante->usuario->rol->nombre, ['Administrador', 'Secretario', 'Arbitro']);
+            })
+            ->pluck('id_usuario')
+            ->toArray();
+        
+        return $staffIds;
+    }
+    
 
     private function obtenerCorreosDemandados(int $idSolicitud): array
     {
