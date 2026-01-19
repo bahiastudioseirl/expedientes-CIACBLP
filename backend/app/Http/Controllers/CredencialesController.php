@@ -15,8 +15,8 @@ class CredencialesController extends Controller
     public function enviarCredencialesDemandado(int $idExpediente, Request $request): JsonResponse
     {
         try {
-            $mensaje = $request->input('mensaje', '');
-            $resultado = $this->credencialesService->enviarCredencialesDemandado($idExpediente, $mensaje);
+            // Solo enviar credenciales, no manejar mensajes aquí
+            $resultado = $this->credencialesService->enviarCredencialesDemandado($idExpediente);
             
             return response()->json($resultado);
             

@@ -35,7 +35,7 @@ class CredencialesExpediente extends Mailable
                 'correo' => $this->correo,
                 'contrasena' => $this->contrasena,
                 'mensaje' => $this->mensaje,
-                'codigo_expediente' => $this->codigoExpediente,
+                'codigoExpediente' => $this->codigoExpediente,
                 'asunto_titulo' => $this->asuntoTitulo
             ]
         );

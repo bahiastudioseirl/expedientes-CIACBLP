@@ -1,4 +1,4 @@
-import { axiosWithoutMultipart } from '../../../api/axiosInstance';
+import { axiosWithoutMultipart, axiosInstance } from '../../../api/axiosInstance';
 
 export interface CredencialesResponse {
     success: boolean;
@@ -18,10 +18,17 @@ export interface VerificarCredencialesResponse {
     message: string;
 }
 
-export const enviarCredencialesDemandado = async (idExpediente: number, mensaje?: string): Promise<CredencialesResponse> => {
-    const response = await axiosWithoutMultipart.post(`/credenciales/expediente/${idExpediente}/enviar-demandado`, {
-        mensaje: mensaje || ''
-    });
+export const enviarCredencialesDemandado = async (idExpediente: number, mensaje?: string, adjuntos?: File[]): Promise<CredencialesResponse> => {
+    const formData = new FormData();
+    formData.append('mensaje', mensaje || '');
+    
+    if (adjuntos && adjuntos.length > 0) {
+        adjuntos.forEach((archivo, index) => {
+            formData.append(`adjuntos[${index}]`, archivo);
+        });
+    }
+    
+    const response = await axiosInstance.post(`/credenciales/expediente/${idExpediente}/enviar-demandado`, formData);
     return response.data;
 };
 

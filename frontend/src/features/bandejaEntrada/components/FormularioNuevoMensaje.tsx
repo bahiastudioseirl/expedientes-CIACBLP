@@ -88,7 +88,7 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
     setEnviandoCredenciales(true);
 
     try {
-      const response = await enviarCredencialesDemandado(expediente.id, mensaje);
+      const response = await enviarCredencialesDemandado(expediente.id, mensaje, adjuntos);
 
       if (response.success) {
         setPuedeEnviarCredenciales(false);
@@ -154,13 +154,17 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
     // Si el checkbox está marcado, enviar credenciales primero y obtener los IDs de usuarios creados
     if (enviarCredencialesDemandados && puedeEnviarCredenciales) {
       const idsUsuariosCreados = await handleEnviarCredenciales();
-      // Usar los IDs de usuarios recién creados como destinatarios
-      if (idsUsuariosCreados.length > 0) {
-        destinatariosFinales = idsUsuariosCreados;
-      }
+      // Limpiar y cerrar ya que las credenciales incluyen el mensaje y adjuntos
+      setMensaje('');
+      setAdjuntos([]);
+      setDestinatariosSeleccionados([]);
+      setEnviarCredencialesDemandados(false);
+      setSending(false);
+      onCancelar();
+      return;
     }
 
-    // Si hay mensaje o adjuntos, enviar el mensaje a la bandeja
+    // Si NO se envían credenciales pero hay mensaje o adjuntos, enviar el mensaje a la bandeja
     if ((mensaje.trim() || adjuntos.length > 0) && destinatariosFinales.length > 0) {
       const success = await onEnviar(mensaje, adjuntos, destinatariosFinales);
       if (!success) {

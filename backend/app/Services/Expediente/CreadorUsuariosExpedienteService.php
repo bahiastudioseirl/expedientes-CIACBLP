@@ -70,7 +70,6 @@ class CreadorUsuariosExpedienteService
             return $credenciales;
         });
     }
-
     public function crearUsuarioSecretario(
         string $nombreCompleto,
         string $correo,

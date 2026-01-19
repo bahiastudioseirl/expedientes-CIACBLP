@@ -7,7 +7,11 @@ use App\Repositories\Solicitud\SolicitudParteRepository;
 use App\Repositories\Solicitud\SolicitudCorreoRepository;
 use App\Repositories\AsuntoRepository;
 use App\Repositories\UsuarioExpedienteRepository;
+use App\Services\MensajeService;
+use App\DTOs\Mensajes\CrearMensajeDTO;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class CredencialesService
 {
@@ -17,11 +21,12 @@ class CredencialesService
         private readonly SolicitudCorreoRepository $solicitudCorreoRepository,
         private readonly AsuntoRepository $asuntoRepository,
         private readonly CreadorUsuariosExpedienteService $creadorUsuarios,
-        private readonly UsuarioExpedienteRepository $usuarioExpedienteRepository
+        private readonly UsuarioExpedienteRepository $usuarioExpedienteRepository,
+        private readonly MensajeService $mensajeService
     ) {}
 
 
-    public function enviarCredencialesDemandado(int $idExpediente, string $mensaje = ''): array
+    public function enviarCredencialesDemandado(int $idExpediente, string $mensaje = '', int $idUsuarioRemitente = null, ?array $adjuntos = null): array
     {
         try {
             $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
@@ -54,7 +59,7 @@ class CredencialesService
                 $idExpediente, 
                 'Demandado',
                 $mensaje,
-                $asunto->titulo
+                'Credenciales de Acceso - Expediente ' . $expediente->codigo_expediente
             );
             
             // Marcar credenciales como enviadas
@@ -62,6 +67,31 @@ class CredencialesService
             
             // Extraer los IDs de los usuarios creados
             $idsUsuariosCreados = array_map(fn($cred) => $cred['id_usuario'], $credencialesEnviadas);
+            
+            // Si hay usuario remitente, guardar el mensaje en la BD (incluso si el mensaje está vacío)
+            if ($idUsuarioRemitente) {
+                try {
+                    $contenidoMensaje = !empty($mensaje) ? $mensaje : 'Credenciales de acceso enviadas al demandado';
+                    
+                    $mensajeDTO = new CrearMensajeDTO(
+                        contenido: $contenidoMensaje,
+                        id_usuario: $idUsuarioRemitente,
+                        id_asunto: $asunto->id_asunto
+                    );
+                    
+                    // Guardar mensaje dirigido a los usuarios recién creados
+                    $mensajeGuardado = $this->mensajeService->crearMensaje($mensajeDTO, $idsUsuariosCreados, $adjuntos);
+                    Log::info('Mensaje de credenciales guardado exitosamente', ['mensaje_id' => $mensajeGuardado->id_mensaje]);
+                } catch (Exception $e) {
+                    // Log el error completo
+                    Log::error('Error al guardar mensaje de credenciales en BD: ' . $e->getMessage(), [
+                        'idExpediente' => $idExpediente,
+                        'idUsuarioRemitente' => $idUsuarioRemitente,
+                        'mensaje' => $mensaje,
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
+            }
             
             return [
                 'success' => true,
