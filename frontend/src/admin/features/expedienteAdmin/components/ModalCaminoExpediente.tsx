@@ -17,7 +17,7 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { obtenerCaminoExpediente } from '../services/obtenerCaminoExpediente';
-import { exportarCaminoExpedienteExcel } from '../services/exportarCaminoExpedienteExcel';
+import { descargarHtmlCamino } from '../utils/generarHtmlCamino';
 import type { CaminoExpedienteData, FlujoConMensajes } from '../schemas/CaminoExpedienteSchema';
 
 interface ModalCaminoExpedienteProps {
@@ -34,7 +34,7 @@ export default function ModalCaminoExpediente({
   const [camino, setCamino] = useState<CaminoExpedienteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingHtml, setExportingHtml] = useState(false);
 
   useEffect(() => {
     cargarCamino();
@@ -60,17 +60,19 @@ export default function ModalCaminoExpediente({
     }
   };
 
-  const handleExportarExcel = async () => {
-    setExportingExcel(true);
+  const handleExportarHtml = async () => {
+    if (!camino) return;
+    
+    setExportingHtml(true);
     setError('');
     
     try {
-      await exportarCaminoExpedienteExcel(expedienteId);
+      descargarHtmlCamino(camino, codigoExpediente);
     } catch (err: any) {
-      console.error('Error al exportar Excel:', err);
-      setError('Error al exportar Excel: ' + (err.message || err));
+      console.error('Error al exportar HTML:', err);
+      setError('Error al exportar HTML: ' + (err.message || err));
     } finally {
-      setExportingExcel(false);
+      setExportingHtml(false);
     }
   };
 
@@ -304,20 +306,20 @@ export default function ModalCaminoExpediente({
             </div>
             <div className="flex items-center space-x-2">
               <button
-                onClick={handleExportarExcel}
-                disabled={exportingExcel}
+                onClick={handleExportarHtml}
+                disabled={exportingHtml}
                 className="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Exportar a Excel"
+                title="Descargar"
               >
-                {exportingExcel ? (
+                {exportingHtml ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm">Exportando...</span>
+                    <span className="text-sm">Generando...</span>
                   </>
                 ) : (
                   <>
-                    <FileSpreadsheet className="w-4 h-4" />
-                    <span className="text-sm">Exportar Excel</span>
+                    <FileText className="w-4 h-4" />
+                    <span className="text-sm">Descargar</span>
                   </>
                 )}
               </button>
