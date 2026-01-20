@@ -176,6 +176,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         // Rutas para gestionar participantes de expedientes
         Route::get('/expediente/{idExpediente}/participantes/partes', [UsuarioController::class, 'listarParticipantesPartesExpediente']);
         Route::get('/expediente/{idExpediente}/staff', [UsuarioController::class, 'listarArbitroYSecretarioExpediente']);
+        Route::delete('/{idUsuario}/expediente/{idExpediente}', [UsuarioController::class, 'desvincularUsuarioDeExpediente']);
     });
 
     Route::prefix('solicitudes')->group(function () {

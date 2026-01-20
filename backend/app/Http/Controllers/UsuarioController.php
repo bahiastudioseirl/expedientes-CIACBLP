@@ -236,7 +236,6 @@ class UsuarioController extends Controller
         try {
             $data = $request->validated();
             
-            // Crear DTO con los datos del request
             $dto = CrearUsuarioDTO::fromArray([
                 'nombre_completo' => $data['nombre_completo'],
                 'numero_documento' => null,
@@ -325,6 +324,23 @@ class UsuarioController extends Controller
             );
 
             return UsuarioResponse::staffVinculado($resultado);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function desvincularUsuarioDeExpediente(int $idUsuario, int $idExpediente): JsonResponse
+    {
+        try {
+            $this->usuarioService->desvincularUsuarioDeExpediente($idUsuario, $idExpediente);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario desvinculado del expediente exitosamente'
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

@@ -327,4 +327,10 @@ class UsuarioService
 
         return $this->usuarioRepository->actualizar($id, $dto->toArray());
     }
+
+
+    public function desvincularUsuarioDeExpediente(int $idUsuario, int $idExpediente): bool
+    {
+        return $this->usuarioExpedienteRepository->eliminar($idUsuario, $idExpediente);
+    }
 }

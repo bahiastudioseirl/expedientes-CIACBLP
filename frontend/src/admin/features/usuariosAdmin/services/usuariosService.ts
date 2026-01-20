@@ -139,3 +139,9 @@ export const obtenerStaffExpediente = async (idExpediente: number) => {
   const response = await axiosWithoutMultipart.get(`/usuarios/expediente/${idExpediente}/staff`);
   return response.data;
 };
+
+// Desvincular staff de un expediente
+export const desvincularStaffDeExpediente = async (idUsuario: number, idExpediente: number) => {
+  const response = await axiosWithoutMultipart.delete(`/usuarios/${idUsuario}/expediente/${idExpediente}`);
+  return response.data;
+};

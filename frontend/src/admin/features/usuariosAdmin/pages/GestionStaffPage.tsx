@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Eye, 
   Plus, 
   Settings,
   AlertCircle, 
-  Users,
   Search,
-  UserCheck
+  UserCheck,
+  Trash2
 } from 'lucide-react';
 import { 
   obtenerExpedientes, 
-  obtenerStaffExpediente
+  obtenerStaffExpediente,
+  desvincularStaffDeExpediente
 } from '../services/usuariosService';
 import type { 
   Expediente
@@ -25,6 +25,8 @@ export default function GestionStaffPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mostrarModalStaff, setMostrarModalStaff] = useState(false);
+  const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false);
+  const [usuarioADesvincular, setUsuarioADesvincular] = useState<any | null>(null);
   
   // Estados para el buscador y paginación
   const [searchTerm, setSearchTerm] = useState("");
@@ -80,6 +82,31 @@ export default function GestionStaffPage() {
     if (expedienteSeleccionado) {
       await cargarStaff(expedienteSeleccionado);
     }
+  };
+
+  const abrirModalDesvincular = (usuario: any) => {
+    setUsuarioADesvincular(usuario);
+    setMostrarModalConfirmacion(true);
+  };
+
+  const confirmarDesvinculacion = async () => {
+    if (usuarioADesvincular && expedienteSeleccionado) {
+      try {
+        await desvincularStaffDeExpediente(usuarioADesvincular.id_usuario, expedienteSeleccionado.id);
+        setMostrarModalConfirmacion(false);
+        setUsuarioADesvincular(null);
+        // Recargar el staff
+        await cargarStaff(expedienteSeleccionado);
+      } catch (error) {
+        setError('Error al desvincular el usuario');
+        console.error('Error:', error);
+      }
+    }
+  };
+
+  const cancelarDesvinculacion = () => {
+    setMostrarModalConfirmacion(false);
+    setUsuarioADesvincular(null);
   };
 
   const volverAExpedientes = () => {
@@ -203,6 +230,13 @@ export default function GestionStaffPage() {
                             {miembro.rol}
                           </span>
                         </div>
+                        <button
+                          onClick={() => abrirModalDesvincular(miembro)}
+                          className="ml-2 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Desvincular usuario"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -218,6 +252,39 @@ export default function GestionStaffPage() {
           onSave={manejarVincularStaff}
           expedienteId={expedienteSeleccionado?.id || 0}
         />
+
+        {/* Modal de confirmación para desvincular */}
+        {mostrarModalConfirmacion && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-red-50 rounded-lg mr-3">
+                  <Trash2 className="h-5 w-5 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Confirmar Desvinculación</h3>
+              </div>
+              
+              <p className="text-gray-600 mb-6">
+                ¿Estás seguro de que quieres desvincular a <span className="font-semibold">{usuarioADesvincular?.nombre_completo}</span> del expediente <span className="font-semibold">{expedienteSeleccionado?.codigo_expediente}</span>?
+              </p>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={cancelarDesvinculacion}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmarDesvinculacion}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                >
+                  Sí, Desvincular
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
