@@ -178,6 +178,26 @@ export default function ModalCaminoExpediente({
     }
   };
 
+  const formatDateTime = (dateTimeString: string | null) => {
+    if (!dateTimeString) return 'Sin fecha';
+    try {
+      // Para timestamps completos (con fecha y hora)
+      const fecha = new Date(dateTimeString);
+      if (isNaN(fecha.getTime())) {
+        return 'Fecha inválida';
+      }
+      return fecha.toLocaleString('es-PE', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Fecha inválida';
+    }
+  };
+
   const renderParticipante = (participante: any, tipo: string) => (
     <div key={participante.numero_documento} className="bg-slate-50 rounded-lg p-3">
       <div className="flex items-center space-x-2 mb-2">
@@ -457,7 +477,7 @@ export default function ModalCaminoExpediente({
                                             </span>
                                           </div>
                                           <span className="text-xs text-slate-500">
-                                            {formatDate(mensaje.fecha_envio)}
+                                            {formatDateTime(mensaje.fecha_envio)}
                                           </span>
                                         </div>
                                         
