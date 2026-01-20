@@ -19,6 +19,10 @@ const ChatAsuntoPage = lazy(() =>
     import('../../features/bandejaEntrada/pages/ChatAsuntoPage').then((module) => ({ default: module.default }))
 );
 
+const DocumentosAdjuntosPage = lazy(() =>
+  import('../../features/documentosAdjuntos/pages/DocumentosAdjuntosPage').then((module) => ({ default: module.default }))
+);
+
 const ExpedienteAdmin = lazy(() =>
     import('../../admin/features/expedienteAdmin/pages/ExpedienteAdmin').then((module) => ({ default: module.default }))
 );
@@ -151,6 +155,26 @@ export const routes = [
             },
         ],
     },
+
+        // RUTA DE DOCUMENTOS ADJUNTOS (para todos los usuarios autenticados)
+        {
+          path: '/documentos-adjuntos',
+          element: (
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          ),
+          children: [
+            {
+              index: true,
+              element: (
+                <LazyWrapper>
+                  <DocumentosAdjuntosPage />
+                </LazyWrapper>
+              ),
+            },
+          ],
+        },
 
     // RUTAS ADMINISTRATIVAS
  {

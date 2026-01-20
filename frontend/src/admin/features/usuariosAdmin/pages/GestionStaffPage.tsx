@@ -373,7 +373,6 @@ export default function GestionStaffPage() {
                         className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       >
                         <Settings className="w-3 h-3 mr-1" />
-                        Gestionar Staff
                       </button>
                     </td>
                   </tr>

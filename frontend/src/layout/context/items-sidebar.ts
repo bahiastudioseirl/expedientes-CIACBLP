@@ -10,6 +10,7 @@ import {
     User,
     ClipboardList,
     Settings,
+    Paperclip,
     type LucideIcon
 } from 'lucide-react';
 import { AuthStore } from '../../core/components/auth/services/AuthStore';
@@ -47,6 +48,12 @@ const getMenuItems = (): MenuItem[] => {
                     titulo: 'Bandeja de Entrada',
                     icon: Inbox,
                     link: '/bandeja-entrada',
+                    roles: ['Administrador']
+                },
+                {
+                    titulo: 'Documentos',
+                    icon: Paperclip,
+                    link: '/documentos-adjuntos',
                     roles: ['Administrador']
                 },
                 {
@@ -117,6 +124,12 @@ const getMenuItems = (): MenuItem[] => {
                     roles: ['Secretario', 'Arbitro']
                 },
                 {
+                    titulo: 'Documentos',
+                    icon: Paperclip,
+                    link: '/documentos-adjuntos',
+                    roles: ['Secretario', 'Arbitro']
+                },
+                {
                     titulo: 'Expedientes',
                     icon: FileText,
                     link: '/expedientes',
@@ -131,6 +144,12 @@ const getMenuItems = (): MenuItem[] => {
                     titulo: 'Bandeja de Entrada',
                     icon: Inbox,
                     link: '/bandeja-entrada',
+                    roles: ['Demandado', 'Demandante']
+                },
+                {
+                    titulo: 'Documentos',
+                    icon: Paperclip,
+                    link: '/documentos-adjuntos',
                     roles: ['Demandado', 'Demandante']
                 }
             ];
