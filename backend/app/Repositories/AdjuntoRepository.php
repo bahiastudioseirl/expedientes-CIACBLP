@@ -31,4 +31,15 @@ class AdjuntoRepository
     {
         return Adjuntos::where('id_mensaje', $idMensaje)->delete();
     }
+
+    public function obtenerAdjuntosPorExpediente(int $idExpediente): Collection
+    {
+        return Adjuntos::whereHas('mensaje', function($query) use ($idExpediente) {
+            $query->whereHas('asunto', function($subQuery) use ($idExpediente) {
+                $subQuery->where('id_expediente', $idExpediente);
+            });
+        })
+        ->orderBy('created_at', 'asc')
+        ->get();
+    }
 }

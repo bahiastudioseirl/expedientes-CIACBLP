@@ -143,6 +143,10 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class])
         Route::get('/expediente/{idExpediente}/camino', [ExcelExportController::class, 'exportarCaminoExpediente']);
     });
 
+    Route::prefix('documentos')->group(function () {
+        Route::get('/expediente/{idExpediente}/adjuntos', [MensajeController::class, 'listarDocumentosAdjuntosPorExpediente']);
+    });
+
 
 
     // Rutas de perfil para usuarios autenticados

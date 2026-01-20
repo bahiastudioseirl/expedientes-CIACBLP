@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class MensajeController extends Controller
 {
-    
+
     public function __construct(
         private readonly MensajeService $mensajeService,
         private readonly CredencialesService $credencialesService
@@ -24,16 +24,15 @@ class MensajeController extends Controller
     {
         try {
             $idUsuario = auth('api')->user()->id_usuario;
-            
+
             $datos = CrearMensajeDTO::fromRequest($request->validated(), $idUsuario);
-            
+
             $usuariosDestinatarios = $request->input('usuarios_destinatarios', []);
             $adjuntos = $request->file('adjuntos', []);
 
             $mensaje = $this->mensajeService->crearMensaje($datos, $usuariosDestinatarios, $adjuntos);
 
             return MensajeResponse::mensajeCreado($mensaje);
-
         } catch (\Exception $e) {
             return $this->handleGeneralError('Error al enviar el mensaje', $e);
         }
@@ -52,7 +51,6 @@ class MensajeController extends Controller
             }
 
             return MensajeResponse::mensajes($mensajes);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -71,7 +69,6 @@ class MensajeController extends Controller
                 return MensajeResponse::marcarComoLeido(true);
             }
             return MensajeResponse::marcarComoLeido(false);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -84,16 +81,15 @@ class MensajeController extends Controller
     {
         try {
             $idUsuario = auth('api')->user()->id_usuario;
-            
+
             $datos = CrearMensajeDTO::fromRequest($request->validated(), $idUsuario);
-            
+
             $usuariosDestinatarios = $request->input('usuarios_destinatarios', []);
             $adjuntos = $request->file('adjuntos', []);
 
             $respuesta = $this->mensajeService->responderMensaje($idMensajePadre, $datos, $usuariosDestinatarios, $adjuntos);
 
             return MensajeResponse::mensajeCreado($respuesta);
-
         } catch (\Exception $e) {
             return $this->handleGeneralError('Error al responder el mensaje', $e);
         }
@@ -103,7 +99,7 @@ class MensajeController extends Controller
     {
         try {
             $hiloCompleto = $this->mensajeService->obtenerHiloCompleto($idMensaje);
-            
+
             $mensajesFormateados = $hiloCompleto->map(function ($mensaje) {
                 if (!$mensaje->relationLoaded('usuario')) {
                     $mensaje->load('usuario');
@@ -114,7 +110,7 @@ class MensajeController extends Controller
                 if (!$mensaje->relationLoaded('asunto')) {
                     $mensaje->load('asunto');
                 }
-                
+
                 return MensajeResponse::formatMensaje($mensaje);
             });
 
@@ -122,7 +118,6 @@ class MensajeController extends Controller
                 'success' => true,
                 'data' => $mensajesFormateados
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -138,7 +133,7 @@ class MensajeController extends Controller
             'user_id' => auth('api')->id(),
             'trace' => $exception->getTraceAsString()
         ]);
-        
+
         return response()->json([
             'success' => false,
             'message' => $baseMessage . ': ' . $exception->getMessage()
@@ -149,7 +144,7 @@ class MensajeController extends Controller
     {
         try {
             $usuario = auth('api')->user();
-            
+
             // Solo secretarios, administradores y árbitros pueden enviar credenciales
             if (!in_array($usuario->rol->nombre, ['Administrador', 'Secretario', 'Arbitro'])) {
                 return response()->json([
@@ -168,7 +163,6 @@ class MensajeController extends Controller
             } else {
                 return response()->json($resultado, 400);
             }
-
         } catch (\Exception $e) {
             return $this->handleGeneralError('Error al enviar credenciales', $e);
         }
@@ -178,7 +172,7 @@ class MensajeController extends Controller
     {
         try {
             $usuario = auth('api')->user();
-            
+
             // Solo secretarios, administradores y árbitros pueden verificar
             if (!in_array($usuario->rol->nombre, ['Administrador', 'Secretario', 'Arbitro'])) {
                 return response()->json([
@@ -195,9 +189,18 @@ class MensajeController extends Controller
                     'puede_enviar_credenciales' => $puedeEnviar
                 ]
             ]);
-
         } catch (\Exception $e) {
             return $this->handleGeneralError('Error al verificar credenciales', $e);
+        }
+    }
+
+    public function listarDocumentosAdjuntosPorExpediente(int $idExpediente): JsonResponse
+    {
+        try {
+            $adjuntos = $this->mensajeService->obtenerAdjuntosPorExpediente($idExpediente);
+            return MensajeResponse::documentosAdjuntos($adjuntos);
+        } catch (\Exception $e) {
+            return $this->handleGeneralError('Error al obtener documentos adjuntos', $e);
         }
     }
 }

@@ -134,4 +134,6 @@ class MensajeRepository
                 return $mensaje->asunto?->id_flujo ?? 'sin_flujo';
             });
     }
+
+
 }

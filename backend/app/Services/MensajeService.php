@@ -117,7 +117,7 @@ class MensajeService
 
         // Si es una respuesta, obtener el mensaje principal
         $idMensajePrincipal = $mensaje->esMensajePrincipal() ? $idMensaje : $mensaje->mensaje_padre_id;
-        
+
         return $this->mensajeRepository->obtenerHiloCompleto($idMensajePrincipal);
     }
 
@@ -126,12 +126,12 @@ class MensajeService
         // Obtener todos los administradores para asegurar que siempre reciban los mensajes
         $administradores = $this->usuarioRepository->obtenerAdministradores();
         $idsAdministradores = $administradores->pluck('id_usuario')->toArray();
-        
+
         // Combinar destinatarios seleccionados con administradores (eliminar duplicados)
         $todosDestinatarios = array_unique(array_merge($usuariosDestinatarios, $idsAdministradores));
-        
+
         $relacionesData = [];
-        
+
         foreach ($todosDestinatarios as $idUsuario) {
             $relacionesData[] = [
                 'id_mensaje' => $idMensaje,
@@ -149,19 +149,19 @@ class MensajeService
     {
         $asunto = Asunto::with('expediente')->find($idAsunto);
         $codigoExpediente = $asunto->expediente->codigo_expediente ?? 'sin-codigo';
-        
+
         $archivosGuardados = [];
 
         foreach ($adjuntos as $archivo) {
             if ($archivo instanceof UploadedFile) {
                 $rutaArchivo = $this->guardarArchivo($archivo, $codigoExpediente);
-                
+
                 $this->adjuntoRepository->crear([
                     'id_mensaje' => $idMensaje,
                     'nombre_archivo' => $archivo->getClientOriginalName(),
                     'ruta_archivo' => $rutaArchivo
                 ]);
-                
+
                 // Guardar información del archivo para adjuntar en correos
                 $archivosGuardados[] = [
                     'nombre' => $archivo->getClientOriginalName(),
@@ -169,7 +169,7 @@ class MensajeService
                 ];
             }
         }
-        
+
         return $archivosGuardados;
     }
 
@@ -215,8 +215,8 @@ class MensajeService
 
             // Crear lista de destinatarios únicos, incluyendo al remitente y al administrador
             $todosDestinatarios = array_unique(array_merge(
-                $usuariosDestinatarios, 
-                [$idRemitente], 
+                $usuariosDestinatarios,
+                [$idRemitente],
                 $this->obtenerAdministradores()
             ));
 
@@ -247,5 +247,10 @@ class MensajeService
         // Obtener todos los usuarios con rol de administrador
         $administradores = $this->usuarioRepository->obtenerAdministradores();
         return $administradores->pluck('id_usuario')->toArray();
+    }
+
+    public function obtenerAdjuntosPorExpediente(int $idExpediente): Collection
+    {
+        return $this->adjuntoRepository->obtenerAdjuntosPorExpediente($idExpediente);
     }
 }

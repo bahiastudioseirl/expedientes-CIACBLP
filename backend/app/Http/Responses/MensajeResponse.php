@@ -86,4 +86,21 @@ class MensajeResponse
             'updated_at' => $mensaje->updated_at?->format('Y-m-d H:i:s')
         ];
     }
+
+    public static function documentosAdjuntos(Collection $adjuntos): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Documentos adjuntos obtenidos exitosamente',
+            'data' => [
+                'documentos' => $adjuntos->map(function ($adjunto, $index) {
+                    return [
+                        'id_adjunto' => $adjunto->id_adjunto,
+                        'ruta_archivo' => url($adjunto->ruta_archivo),
+                        'nombre_archivo' => ($index + 1) . ' - ' . ($adjunto->nombre_archivo ?? basename($adjunto->ruta_archivo))
+                    ];
+                })
+            ]
+        ]);
+    }
 }
