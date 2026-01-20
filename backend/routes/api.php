@@ -160,11 +160,9 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
 
     Route::prefix('usuarios')->group(function () {
         Route::post('/', [UsuarioController::class, 'crearUsuario']);
-        Route::post('/administradores', [UsuarioController::class, 'crearAdministrador']);
-        Route::post('/secretarios', [UsuarioController::class, 'crearSecretario']);
-        Route::post('/demandantes', [UsuarioController::class, 'crearDemandante']);
-        Route::post('/demandados', [UsuarioController::class, 'crearDemandado']);
-        Route::post('/arbitros', [UsuarioController::class, 'crearArbitro']);
+        Route::post('/secretarios', [UsuarioController::class, 'crearUsuarioSecretario']);
+        Route::post('/arbitros', [UsuarioController::class, 'crearUsuarioArbitro']);
+        Route::post('partes/agregar-a-expediente/{idExpediente}', [UsuarioController::class, 'agregarCrearUsuarioParteExpediente']);
         Route::get('/', [UsuarioController::class, 'listarUsuarios']);
         Route::get('/administradores', [UsuarioController::class, 'listarAdministradores']);
         Route::get('/arbitros', [UsuarioController::class, 'listarArbitros']);
@@ -174,6 +172,10 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::get('/{id}', [UsuarioController::class, 'obtenerUsuarioPorId']);
         Route::patch('/{id}', [UsuarioController::class, 'actualizarUsuario']);
         Route::put('/{id}/estado', [UsuarioController::class, 'cambiarEstadoUsuario']);
+        
+        // Rutas para gestionar participantes de expedientes
+        Route::get('/expediente/{idExpediente}/participantes/partes', [UsuarioController::class, 'listarParticipantesPartesExpediente']);
+        Route::get('/expediente/{idExpediente}/staff', [UsuarioController::class, 'listarArbitroYSecretarioExpediente']);
     });
 
     Route::prefix('solicitudes')->group(function () {
@@ -210,6 +212,12 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     });
 
     Route::get('/arbitros/buscar', [ArbitroController::class, 'buscar']);
+    Route::get('/arbitros/buscar-bd-primaria', [ArbitroController::class, 'buscarBDPrimaria']);
+    Route::get('/secretarios/buscar', [UsuarioController::class, 'buscarSecretarios']);
+    
+    Route::prefix('expedientes')->group(function () {
+        Route::post('/{id}/vincular-staff', [UsuarioController::class, 'vincularStaffAExpediente']);
+    });
 });
 
 

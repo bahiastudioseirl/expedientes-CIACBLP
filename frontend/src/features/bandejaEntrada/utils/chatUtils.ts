@@ -66,7 +66,7 @@ export const canManageAsunto = (currentUser: any): boolean => {
 
 export const getValidParticipantes = (expediente: any) => {
   return expediente?.participantes?.filter((p: any) => 
-    p?.usuario?.id_usuario
+    p?.usuario?.id_usuario && p?.usuario?.activo !== false
   ) || [];
 };
 

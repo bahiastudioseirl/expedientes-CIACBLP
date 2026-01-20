@@ -37,6 +37,25 @@ class ArbitroController extends Controller
         }
     }
 
+    public function buscarBDPrimaria(Request $request): JsonResponse
+    {
+        try {
+            $nombre = $request->query('nombre', '');
+            $arbitros = $this->usuarioService->buscarArbitrosEnBDPrimariaPorNombre($nombre);
+
+            return response()->json([
+                'success' => true,
+                'data' => $arbitros
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al buscar árbitros en BD primaria: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al buscar árbitros en BD primaria'
+            ], 500);
+        }
+    }
+
     public function crearEnExpediente(CrearArbitroEnExpedienteRequest $request, int $idExpediente): JsonResponse
     {
         try {

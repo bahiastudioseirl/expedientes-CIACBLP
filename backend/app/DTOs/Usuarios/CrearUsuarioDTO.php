@@ -6,7 +6,7 @@ class CrearUsuarioDTO
 {
     public function __construct(
         public ?string $nombre_completo,
-        public string $numero_documento,
+        public ?string $numero_documento,
         public string $correo,
         public ?string $contrasena = null,
         public ?string $telefono,
@@ -19,10 +19,10 @@ class CrearUsuarioDTO
     {
         return new self(
             nombre_completo: $data['nombre_completo'] ?? null,
-            numero_documento: $data['numero_documento'],
+            numero_documento: $data['numero_documento'] ?? null,
             correo: $data['correo'],
             contrasena: $data['contrasena'] ?? null,
-            telefono: $data['telefono'],
+            telefono: $data['telefono'] ?? null,
             activo: $data['activo'] ?? true,
             id_rol: $data['id_rol'] ?? 0,
         );
@@ -32,7 +32,7 @@ class CrearUsuarioDTO
     {
         return new self(
             nombre_completo: $data['nombre_completo'] ?? null,
-            numero_documento: $data['numero_documento'],
+            numero_documento: $data['numero_documento'] ?? null,
             correo: $data['correo'],
             contrasena: $data['contrasena'] ?? null,
             telefono: $data['telefono'] ?? null,

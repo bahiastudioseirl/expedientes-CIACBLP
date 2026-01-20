@@ -21,25 +21,16 @@ class UsuarioRepository
         return Usuarios::create($data);
     }
 
-    public function actualizar(Usuarios $usuario, array $data): bool
+    public function actualizar(int $id, array $data): Usuarios
     {
-        return $usuario->update($data);
+        $usuario = Usuarios::findOrFail($id);
+        $usuario->update($data);
+        $usuario->refresh();
+        $usuario->load(['rol']);
+        return $usuario;
     }
 
-    
-    public function listarUsuarios(): Collection
-    {
-        return Usuarios::with(['rol', 'correos'])->where('activo', true)->get();
-    }
 
-    public function listarAdministradores(): Collection
-    {
-        return Usuarios::with(['rol', 'correos'])
-                        ->whereHas('rol', function ($query) {
-                            $query->where('nombre', 'Administrador');
-                        })
-                      ->get();
-    }
 
     public function obtenerAdministradores(): Collection
     {
@@ -67,45 +58,33 @@ class UsuarioRepository
         return Usuarios::where('activo', true)->count();
     }
 
-    public function listarUsuariosArbitros(): Collection
-    {
-        return Usuarios::with(['rol', 'correos'])
-                        ->whereHas('rol', function ($query) {
-                            $query->where('nombre', 'Arbitro');
-                        })
-                      ->get();
-    }
-
-
-
 
     public function listarUsuariosSecretarios(): Collection
     {
-        return Usuarios::with(['rol', 'correos'])
+        return Usuarios::with(['rol'])
                         ->whereHas('rol', function ($query) {
                             $query->where('nombre', 'Secretario');
                         })
                       ->get();
     }
 
-    public function listarUsuariosDemandantes(): Collection
+    public function listarUsuariosArbitros(): Collection
     {
-        return Usuarios::with(['rol', 'correos'])
+        return Usuarios::with(['rol'])
                         ->whereHas('rol', function ($query) {
-                            $query->where('nombre', 'Demandante');
+                            $query->where('nombre', 'Arbitro');
                         })
                       ->get();
     }
 
-    public function listarUsuariosDemandados(): Collection
+    public function listarUsuariosAdministradores(): Collection
     {
-        return Usuarios::with(['rol', 'correos'])
+        return Usuarios::with(['rol'])
                         ->whereHas('rol', function ($query) {
-                            $query->where('nombre', 'Demandado');
+                            $query->where('nombre', 'Administrador');
                         })
                       ->get();
     }
-    
 
     public function obtenerUsuarioPorRolYEstado(int $rolId, bool $activo): ?Usuarios
     {
@@ -133,6 +112,28 @@ class UsuarioRepository
         $resultados = Usuarios::with(['rol'])
             ->whereHas('rol', function ($query) {
                 $query->where('nombre', 'Arbitro');
+            })
+            ->where('nombre_completo', 'like', '%' . $nombre . '%')
+            ->limit($limite)
+            ->get();
+
+        return $resultados->map(function ($usuario) {
+            return [
+                'id' => $usuario->id_usuario,
+                'nombre_completo' => $usuario->nombre_completo,
+                'numero_documento' => $usuario->numero_documento,
+                'telefono' => $usuario->telefono,
+                'correo' => $usuario->correo,
+                'origen' => 'bd_principal'
+            ];
+        })->toArray();
+    }
+
+    public function buscarSecretariosPorNombre(string $nombre, int $limite = 10): array
+    {
+        $resultados = Usuarios::with(['rol'])
+            ->whereHas('rol', function ($query) {
+                $query->where('nombre', 'Secretario');
             })
             ->where('nombre_completo', 'like', '%' . $nombre . '%')
             ->limit($limite)

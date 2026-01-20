@@ -14,7 +14,7 @@ class UsuarioExpedienteRepository
 
     public function obtenerPorExpediente(int $idExpediente): Collection
     {
-        return UsuarioExpediente::with('usuario')
+        return UsuarioExpediente::with(['usuario.rol'])
             ->where('id_expediente', $idExpediente)
             ->get();
     }
@@ -48,4 +48,6 @@ class UsuarioExpedienteRepository
             })
             ->exists();
     }
+
+    
 }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Services\Expediente\CredencialesService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class CredencialesController extends Controller
@@ -18,12 +17,6 @@ class CredencialesController extends Controller
     {
         try {
             $usuarioAutenticado = Auth::user();
-            
-            Log::info("=== INICIO ENVÍO CREDENCIALES ===");
-            Log::info("ID Expediente: {$idExpediente}");
-            Log::info("Usuario autenticado: " . ($usuarioAutenticado ? $usuarioAutenticado->id_usuario : 'NO AUTENTICADO'));
-            Log::info("Datos recibidos - Mensaje: " . (strlen($request->input('mensaje', '')) > 0 ? 'SÍ' : 'NO'));
-            Log::info("Datos recibidos - Adjuntos: " . ($request->hasFile('adjuntos') ? count($request->file('adjuntos', [])) : 0) . ' archivo(s)');
             
             if (!$usuarioAutenticado) {
                 return response()->json([
@@ -44,15 +37,9 @@ class CredencialesController extends Controller
                 $idUsuarioRemitente
             );
             
-            Log::info("Resultado: " . ($resultado['success'] ? 'EXITOSO' : 'FALLÓ'));
-            Log::info("=== FIN ENVÍO CREDENCIALES ===");
-            
             return response()->json($resultado);
             
         } catch (\Exception $e) {
-            Log::error("ERROR en enviarCredencialesDemandado: " . $e->getMessage());
-            Log::error("Stack trace: " . $e->getTraceAsString());
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Error al enviar credenciales: ' . $e->getMessage()

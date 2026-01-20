@@ -35,8 +35,6 @@ class CreadorUsuariosExpedienteService
                 throw new \Exception('Expediente no encontrado');
             }
 
-            Log::info("CreadorUsuariosExpedienteService::crearUsuariosPorCorreos - Correos: " . count($correos) . ", Mensaje: " . (strlen($mensaje) > 0 ? 'SÍ' : 'NO') . ", Adjuntos: " . count($adjuntos));
-
             foreach ($correos as $correo) {
                 $contrasenaGenerada = $this->generadorCredenciales->generarContrasena();
                 
@@ -52,12 +50,8 @@ class CreadorUsuariosExpedienteService
 
                 $this->vincularUsuarioExpediente($usuario->id_usuario, $idExpediente);
                 
-                Log::info("Usuario creado: {$usuario->id_usuario} para correo: {$correo}");
-                
                 // Enviar credenciales por email solo si está habilitado
                 if ($enviarCorreo) {
-                    Log::info("Enviando credenciales a: {$correo}");
-                    
                     $email = new CredencialesExpediente(
                         correo: $correo,
                         contrasena: $contrasenaGenerada,
@@ -68,7 +62,6 @@ class CreadorUsuariosExpedienteService
                     );
                     
                     Mail::to($correo)->send($email);
-                    Log::info("Credenciales enviadas a: {$correo}");
                 }
 
                 $credenciales[$correo] = [
@@ -143,7 +136,7 @@ class CreadorUsuariosExpedienteService
         return $rol;
     }
 
-    private function vincularUsuarioExpediente(int $idUsuario, int $idExpediente): void
+    public function vincularUsuarioExpediente(int $idUsuario, int $idExpediente): void
     {
         $this->usuarioExpedienteRepository->crear([
             'id_usuario' => $idUsuario,

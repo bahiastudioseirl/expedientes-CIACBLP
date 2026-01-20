@@ -40,16 +40,16 @@ const SecretariosPage = lazy(() =>
     import('../../admin/features/usuariosAdmin/pages/SecretariosPage').then((module) => ({ default: module.default }))
 );
 
-const DemandantesPage = lazy(() =>
-    import('../../admin/features/usuariosAdmin/pages/DemandantesPage').then((module) => ({ default: module.default }))
-);
-
-const DemandadosPage = lazy(() =>
-    import('../../admin/features/usuariosAdmin/pages/DemandadosPage').then((module) => ({ default: module.default }))
-);
-
 const ArbitrosPage = lazy(() =>
     import('../../admin/features/usuariosAdmin/pages/ArbitrosPage').then((module) => ({ default: module.default }))
+);
+
+const GestionParticipantesPage = lazy(() =>
+    import('../../admin/features/usuariosAdmin/pages/GestionParticipantesPage').then((module) => ({ default: module.default }))
+);
+
+const GestionStaffPage = lazy(() =>
+    import('../../admin/features/usuariosAdmin/pages/GestionStaffPage').then((module) => ({ default: module.default }))
 );
 
 const RegistroSolicitantePage = lazy(() =>
@@ -210,26 +210,26 @@ export const routes = [
         ),
       },
       {
-        path: 'usuarios/demandantes',
-        element: (
-          <LazyWrapper>
-            <DemandantesPage />
-          </LazyWrapper>
-        ),
-      },
-      {
-        path: 'usuarios/demandados',
-        element: (
-          <LazyWrapper>
-            <DemandadosPage />
-          </LazyWrapper>
-        ),
-      },
-      {
         path: 'usuarios/arbitros',
         element: (
           <LazyWrapper>
             <ArbitrosPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'usuarios/participantes',
+        element: (
+          <LazyWrapper>
+            <GestionParticipantesPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'usuarios/staff',
+        element: (
+          <LazyWrapper>
+            <GestionStaffPage />
           </LazyWrapper>
         ),
       },

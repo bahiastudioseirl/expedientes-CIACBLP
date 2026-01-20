@@ -2,17 +2,20 @@ import { useState } from 'react';
 import { User } from 'lucide-react';
 import ListaUsuarios from '../components/ListaUsuarios';
 import ModalUsuarioPersona from '../components/ModalUsuarioPersona';
-import { obtenerArbitros, crearArbitro, actualizarUsuarioPersona } from '../services/usuariosService';
-import type { ActualizarUsuarioPersonaRequest, CrearUsuarioPersonaRequest, Usuario } from '../schemas/UsuarioSchema';
+import ModalCrearArbitro from '../components/ModalCrearArbitro';
+import { obtenerArbitros, crearArbitro, actualizarUsuario } from '../services/usuariosService';
+import type { CrearUsuarioRequest, ActualizarUsuarioRequest, Usuario } from '../schemas/UsuarioSchema';
 
 export default function ArbitrosPage() {
   const [isCrearModalOpen, setIsCrearModalOpen] = useState(false);
+  const [isCrearAdvancedModalOpen, setIsCrearAdvancedModalOpen] = useState(false);
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [saving, setSaving] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleCrear = () => {
-    setIsCrearModalOpen(true);
+    setIsCrearAdvancedModalOpen(true);
   };
 
   const handleEditar = (usuario: Usuario) => {
@@ -20,13 +23,14 @@ export default function ArbitrosPage() {
     setIsEditarModalOpen(true);
   };
 
-  const handleSave = async (data: CrearUsuarioPersonaRequest) => {
+  const handleSave = async (data: CrearUsuarioRequest) => {
     setSaving(true);
     try {
       const response = await crearArbitro(data);
       
       if (response.success) {
         setIsCrearModalOpen(false);
+        setRefreshTrigger(prev => prev + 1); // Forzar refresh
       }
     } catch (err: any) {
       console.error('Error al crear árbitro:', err);
@@ -37,13 +41,19 @@ export default function ArbitrosPage() {
     }
   };
 
-  const handleUpdate = async (data: ActualizarUsuarioPersonaRequest) => {
+  const handleSuccessAdvanced = () => {
+    setIsCrearAdvancedModalOpen(false);
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleUpdate = async (data: ActualizarUsuarioRequest) => {
     if (!selectedUsuario) return;
     
     try {
-      await actualizarUsuarioPersona(selectedUsuario.id_usuario, data);
+      await actualizarUsuario(selectedUsuario.id_usuario, data);
       setIsEditarModalOpen(false);
       setSelectedUsuario(null);
+      setRefreshTrigger(prev => prev + 1); 
     } catch (err: any) {
       console.error('Error al actualizar árbitro:', err);
       throw err;
@@ -58,6 +68,7 @@ export default function ArbitrosPage() {
   return (
     <div className="space-y-6">
       <ListaUsuarios
+        key={refreshTrigger}
         titulo="Árbitros"
         tipoUsuario="arbitros"
         icono={User}
@@ -84,6 +95,13 @@ export default function ArbitrosPage() {
             />
           )
         }
+      />
+
+      {/* Modal avanzado con búsqueda */}
+      <ModalCrearArbitro
+        open={isCrearAdvancedModalOpen}
+        onClose={() => setIsCrearAdvancedModalOpen(false)}
+        onSuccess={handleSuccessAdvanced}
       />
     </div>
   );

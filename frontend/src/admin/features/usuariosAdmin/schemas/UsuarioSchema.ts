@@ -1,12 +1,10 @@
 export interface Usuario {
   id_usuario: number;
+  nombre_completo: string;
   numero_documento: string;
-  nombre?: string;
-  apellido?: string;
-  nombre_empresa?: string;
+  correo: string;
   telefono: string;
   activo: boolean;
-  id_rol: number;
   created_at: string;
   updated_at: string;
   rol: {
@@ -15,10 +13,6 @@ export interface Usuario {
     created_at: string;
     updated_at: string;
   };
-  correos: Array<{
-    id_correo: number;
-    direccion: string;
-  }>;
 }
 
 export interface ListarUsuariosResponse {
@@ -45,34 +39,72 @@ export interface CambiarEstadoUsuarioResponse {
   };
 }
 
-// Request types para crear usuarios por tipo
-export interface CrearUsuarioPersonaRequest {
-  numero_documento: string;
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  correos: string[];
+// Interfaces para gestión de participantes en expedientes
+export interface Expediente {
+  id: number;
+  codigo_expediente: string;
+  activo: boolean;
+  created_at: string;
+  updated_at?: string;
 }
 
-export interface CrearUsuarioEmpresaRequest {
-  numero_documento: string;
-  nombre_empresa: string;
+export interface ListarExpedientesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    expedientes: Expediente[];
+  };
+}
+
+export interface ParticipanteExpediente {
+  id_usuario: number;
+  nombre_completo: string;
+  correo: string;
+  activo: boolean;
+  rol: {
+    id_rol: number;
+    nombre: string;
+  };
+}
+
+export interface ParticipantesExpedienteResponse {
+  success: boolean;
+  message: string;
+  data: {
+    demandantes: ParticipanteExpediente[];
+    demandados: ParticipanteExpediente[];
+    total: number;
+  };
+}
+
+export interface AgregarParticipanteRequest {
+  correo: string;
+  tipo: 'demandante' | 'demandado';
+}
+
+export interface AgregarParticipanteResponse {
+  success: boolean;
+  message: string;
+  data: {
+    usuario_creado: any;
+    correo_agregado: string;
+    tipo_parte: string;
+    solicitud_parte_id: number;
+  };
+}
+
+// Request types para crear usuarios por tipo
+export interface CrearUsuarioRequest {
+  nombre_completo: string;
+  correo: string;
   telefono: string;
-  correos: string[];
 }
 
 // Request types para actualizar usuarios por tipo
-export interface ActualizarUsuarioPersonaRequest {
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  correos: string[];
-}
-
-export interface ActualizarUsuarioEmpresaRequest {
-  nombre_empresa: string;
-  telefono: string;
-  correos: string[];
+export interface ActualizarUsuarioRequest {
+  nombre_completo?: string;
+  correo?: string;
+  telefono?: string;
 }
 
 // Response para crear usuarios

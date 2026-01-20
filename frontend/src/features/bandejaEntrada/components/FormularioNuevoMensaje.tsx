@@ -26,16 +26,16 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
   const getDestinatariosIniciales = () => {
     if (!currentUser || !expediente?.participantes) return [];
 
-    const participantesExpediente = expediente.participantes || [];
+    // Filtrar solo participantes activos
+    const participantesExpediente = expediente.participantes?.filter((p: any) => 
+      p?.usuario?.activo !== false
+    ) || [];
     
-    // Para administradores, secretarios y árbitros: obtener su mismo rol
     if (currentUser.id_rol === 1) {
-      // Admin: otros administradores
       return participantesExpediente
         .filter((p: any) => p.usuario?.rol?.nombre === 'Administrador')
         .map((p: any) => p.usuario.id_usuario);
     } else if (currentUser.id_rol === 3) {
-      // Secretario: otros secretarios y arbitros
       return participantesExpediente
         .filter((p: any) => {
           const rol = p.usuario?.rol?.nombre;
@@ -43,7 +43,6 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
         })
         .map((p: any) => p.usuario.id_usuario);
     } else if (currentUser.id_rol === 4) {
-      // Arbitro: otros arbitros y secretarios
       return participantesExpediente
         .filter((p: any) => {
           const rol = p.usuario?.rol?.nombre;
@@ -52,7 +51,6 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
         .map((p: any) => p.usuario.id_usuario);
     }
 
-    // Para otros roles: retornar todos
     return getAllParticipanteIds(expediente);
   };
 
@@ -79,7 +77,6 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
       return;
     }
 
-    // Solo mostrar para administradores (rol 1), secretarios (rol 2) y árbitros (rol 3)
     if (currentUser.id_rol !== 1 && currentUser.id_rol !== 2 && currentUser.id_rol !== 3) {
       return;
     }
@@ -98,7 +95,6 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
     setEnviandoCredenciales(true);
 
     try {
-      // Enviar credenciales con el mensaje y adjuntos redactados
       const response = await enviarCredencialesDemandado(expediente.id, mensaje, adjuntos);
 
       if (response.success) {
@@ -137,7 +133,6 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
   };
 
   const toggleRol = (rol: string, seleccionar: boolean) => {
-    // Obtener participantes válidos y agrupar por rol
     const participantesValidos = getAllParticipanteIds(expediente);
     const participantesExpediente = expediente.participantes || [];
 
@@ -147,11 +142,9 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
 
     setDestinatariosSeleccionados(prev => {
       if (seleccionar) {
-        // Agregar todos los del rol que no estén ya seleccionados
         const nuevos = participantesDelRol.filter((id: number) => !prev.includes(id));
         return [...prev, ...nuevos];
       } else {
-        // Quitar todos los del rol
         return prev.filter(id => !participantesDelRol.includes(id));
       }
     });

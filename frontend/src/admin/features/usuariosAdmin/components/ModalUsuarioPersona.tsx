@@ -1,12 +1,12 @@
-import { X, User, Phone, Mail, FileText, Plus, Trash2 } from "lucide-react";
+import { X, User, Phone, Mail, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { CrearUsuarioPersonaRequest, ActualizarUsuarioPersonaRequest, Usuario } from "../schemas/UsuarioSchema";
+import type { CrearUsuarioRequest, ActualizarUsuarioRequest, Usuario } from "../schemas/UsuarioSchema";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSave?: (data: CrearUsuarioPersonaRequest) => Promise<void> | void;
-  onUpdate?: (data: ActualizarUsuarioPersonaRequest) => Promise<void> | void;
+  onSave?: (data: CrearUsuarioRequest) => Promise<void> | void;
+  onUpdate?: (data: ActualizarUsuarioRequest) => Promise<void> | void;
   loading?: boolean;
   usuario?: Usuario | null; // Para editar
   tipoUsuario: 'administrador' | 'secretario' | 'arbitro';
@@ -23,12 +23,10 @@ export default function ModalUsuarioPersona({
 }: Props) {
   const isEditing = !!usuario;
   
-  const [formData, setFormData] = useState<CrearUsuarioPersonaRequest>({
-    numero_documento: "",
-    nombre: "",
-    apellido: "",
+  const [formData, setFormData] = useState<CrearUsuarioRequest>({
+    nombre_completo: "",
     telefono: "",
-    correos: [""]
+    correo: ""
   });
   
   const [error, setError] = useState<string>("");
@@ -53,21 +51,16 @@ export default function ModalUsuarioPersona({
   useEffect(() => {
     if (open) {
       if (isEditing && usuario) {
-        const correos = usuario.correos?.map(c => c.direccion) || [''];
         setFormData({
-          numero_documento: usuario.numero_documento || "",
-          nombre: usuario.nombre || "",
-          apellido: usuario.apellido || "",
-          telefono: usuario.telefono || "",
-          correos: correos.length > 0 ? correos : [""]
+          nombre_completo: usuario.nombre_completo,
+          telefono: usuario.telefono,
+          correo: usuario.correo
         });
       } else {
         setFormData({
-          numero_documento: "",
-          nombre: "",
-          apellido: "",
+          nombre_completo: "",
           telefono: "",
-          correos: [""]
+          correo: ""
         });
       }
       setError("");
@@ -83,82 +76,31 @@ export default function ModalUsuarioPersona({
     return () => document.removeEventListener("keydown", onEsc);
   }, [open, onClose]);
 
-  const handleCorreoChange = (index: number, valor: string) => {
-    const nuevosCorreos = [...formData.correos];
-    nuevosCorreos[index] = valor;
-    setFormData({ ...formData, correos: nuevosCorreos });
-  };
-
-  const agregarCorreo = () => {
-    setFormData({ ...formData, correos: [...formData.correos, ""] });
-  };
-
-  const eliminarCorreo = (index: number) => {
-    if (formData.correos.length > 1) {
-      const nuevosCorreos = formData.correos.filter((_, i) => i !== index);
-      setFormData({ ...formData, correos: nuevosCorreos });
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.nombre.trim()) {
-      setError("El nombre es requerido");
+    if(!formData.nombre_completo.trim()) {
+      setError("El nombre completo es obligatorio");
       return;
     }
-
-    if (!formData.apellido.trim()) {
-      setError("El apellido es requerido");
-      return;
-    }
-
-    if (!isEditing && !formData.numero_documento.trim()) {
-      setError("El número de documento es requerido");
-      return;
-    }
-
-    if (!formData.telefono.trim()) {
-      setError("El teléfono es requerido");
-      return;
-    }
-
-    const correosValidos = formData.correos.filter(correo => correo.trim() !== "");
-    if (correosValidos.length === 0) {
-      setError("Al menos un correo es requerido");
+    if(!formData.correo.trim()) {
+      setError("El correo electrónico es obligatorio");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    for (const correo of correosValidos) {
-      if (!emailRegex.test(correo)) {
-        setError(`El correo "${correo}" no tiene un formato válido`);
-        return;
-      }
+    if (!emailRegex.test(formData.correo)) {
+      setError(`El correo \"${formData.correo}\" no tiene un formato válido`);
+      return;
     }
-
     try {
-      const dataToSend = {
-        ...formData,
-        correos: correosValidos
-      };
-
       if (isEditing && onUpdate) {
-        const { numero_documento, ...updateData } = dataToSend;
-        await onUpdate(updateData as ActualizarUsuarioPersonaRequest);
+        await onUpdate(formData as ActualizarUsuarioRequest);
+        // Cerrar modal después de actualización exitosa
+        onClose();
       } else if (!isEditing && onSave) {
-        await onSave(dataToSend);
-      }
-      
-      // Reset form solo si no estamos editando
-      if (!isEditing) {
-        setFormData({
-          numero_documento: "",
-          nombre: "",
-          apellido: "",
-          telefono: "",
-          correos: [""]
-        });
+        await onSave(formData);
+        // Solo limpiar formulario si es creación
+        setFormData({ nombre_completo: "", telefono: "", correo: "" });
       }
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || `Error al ${isEditing ? 'actualizar' : 'crear'} el ${tipoUsuario}`;
@@ -167,8 +109,6 @@ export default function ModalUsuarioPersona({
   };
 
   if (!open) return null;
-
-  const showDocumento = !isEditing && tipoUsuario !== 'arbitro';
 
   return (
     <div 
@@ -206,57 +146,23 @@ export default function ModalUsuarioPersona({
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {showDocumento && (
-              <div className="sm:col-span-2">
-                <label htmlFor="numero_documento" className="block mb-2 text-sm font-medium text-slate-700">
-                  <FileText className="inline w-4 h-4 mr-1" />
-                  Número de Documento
-                </label>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  id="numero_documento"
-                  value={formData.numero_documento}
-                  onChange={(e) => setFormData({ ...formData, numero_documento: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Ingresa el número de documento"
-                />
-              </div>
-            )}
-
+          <div className="grid grid-cols-1 gap-6">
             <div>
               <label htmlFor="nombre" className="block mb-2 text-sm font-medium text-slate-700">
                 <User className="inline w-4 h-4 mr-1" />
-                Nombre
+                Nombre Completo
               </label>
               <input
-                ref={!showDocumento ? inputRef : undefined}
+                ref={inputRef}
                 type="text"
                 id="nombre"
-                value={formData.nombre}
-                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                value={formData.nombre_completo}
+                onChange={(e) => setFormData({ ...formData, nombre_completo: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Ingresa el nombre"
+                placeholder="Ingresa el nombre completo"
               />
             </div>
-
             <div>
-              <label htmlFor="apellido" className="block mb-2 text-sm font-medium text-slate-700">
-                <User className="inline w-4 h-4 mr-1" />
-                Apellido
-              </label>
-              <input
-                type="text"
-                id="apellido"
-                value={formData.apellido}
-                onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Ingresa el apellido"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
               <label htmlFor="telefono" className="block mb-2 text-sm font-medium text-slate-700">
                 <Phone className="inline w-4 h-4 mr-1" />
                 Teléfono
@@ -270,42 +176,19 @@ export default function ModalUsuarioPersona({
                 placeholder="Ingresa el teléfono"
               />
             </div>
-
-            <div className="sm:col-span-2">
-              <label className="block mb-2 text-sm font-medium text-slate-700">
+            <div>
+              <label htmlFor="correo" className="block mb-2 text-sm font-medium text-slate-700">
                 <Mail className="inline w-4 h-4 mr-1" />
-                Correos Electrónicos
+                Correo
               </label>
-              <div className="space-y-2">
-                {formData.correos.map((correo, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <input
-                      type="email"
-                      value={correo}
-                      onChange={(e) => handleCorreoChange(index, e.target.value)}
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="correo@ejemplo.com"
-                    />
-                    {formData.correos.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => eliminarCorreo(index)}
-                        className="p-2 text-red-600 transition-colors hover:text-red-800"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={agregarCorreo}
-                  className="flex items-center px-3 py-2 text-sm text-purple-600 transition-colors hover:text-purple-800"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Agregar otro correo
-                </button>
-              </div>
+              <input
+                type="email"
+                id="correo"
+                value={formData.correo}
+                onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="correo@ejemplo.com"
+              />
             </div>
           </div>
 

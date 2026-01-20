@@ -54,7 +54,7 @@ export default function ListaUsuarios({
 
   const filteredData = useMemo(() => {
     const filtered = usuarios.filter((usuario) => {
-      const nombreCompleto = usuario.nombre_empresa || `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim();
+      const nombreCompleto = usuario.nombre_completo;
       return nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
              usuario.numero_documento.toLowerCase().includes(searchTerm.toLowerCase());
     });
@@ -196,7 +196,7 @@ export default function ListaUsuarios({
             <thead className="border-b bg-slate-50 border-slate-200">
               <tr>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600 text-left">Usuario</th>
-                <th className="px-6 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600 text-center">Número Documento</th>
+                <th className="px-6 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600 text-center">Correo</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600 text-center">Estado</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600 text-center">Creado</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider uppercase text-slate-600 text-center">Acciones</th>
@@ -222,13 +222,13 @@ export default function ListaUsuarios({
                       <div className="flex items-center">
                         <div>
                           <p className="font-medium text-slate-900">
-                            {usuario.nombre_empresa || `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim()}
+                            {usuario.nombre_completo}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-900 text-center font-mono">
-                      {usuario.numero_documento}
+                      {usuario.correo}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${

@@ -4,11 +4,13 @@ import type {
   CambiarEstadoUsuarioResponse, 
   CrearUsuarioResponse, 
   ActualizarUsuarioResponse,
-  CrearUsuarioPersonaRequest,
-  CrearUsuarioEmpresaRequest,
-  ActualizarUsuarioPersonaRequest,
-  ActualizarUsuarioEmpresaRequest,
-  UsuarioResponse
+  CrearUsuarioRequest,
+  ActualizarUsuarioRequest,
+  UsuarioResponse,
+  ListarExpedientesResponse,
+  ParticipantesExpedienteResponse,
+  AgregarParticipanteRequest,
+  AgregarParticipanteResponse
 } from '../schemas/UsuarioSchema';
 
 // Obtener administradores
@@ -48,49 +50,92 @@ export const obtenerUsuarioPorId = async (idUsuario: number): Promise<UsuarioRes
 };
 
 // Crear administrador
-export const crearAdministrador = async (data: CrearUsuarioPersonaRequest): Promise<CrearUsuarioResponse> => {
+export const crearAdministrador = async (data: CrearUsuarioRequest): Promise<CrearUsuarioResponse> => {
   const response = await axiosWithoutMultipart.post<CrearUsuarioResponse>('/usuarios/administradores', data);
   return response.data;
 };
 
 // Crear secretario
-export const crearSecretario = async (data: CrearUsuarioPersonaRequest): Promise<CrearUsuarioResponse> => {
+export const crearSecretario = async (data: CrearUsuarioRequest): Promise<CrearUsuarioResponse> => {
   const response = await axiosWithoutMultipart.post<CrearUsuarioResponse>('/usuarios/secretarios', data);
   return response.data;
 };
 
+// Crear árbitro
+export const crearArbitro = async (data: CrearUsuarioRequest): Promise<CrearUsuarioResponse> => {
+  const response = await axiosWithoutMultipart.post<CrearUsuarioResponse>('/usuarios/arbitros', data);
+  return response.data;
+};
+
 // Crear demandante
-export const crearDemandante = async (data: CrearUsuarioEmpresaRequest): Promise<CrearUsuarioResponse> => {
+export const crearDemandante = async (data: CrearUsuarioRequest): Promise<CrearUsuarioResponse> => {
   const response = await axiosWithoutMultipart.post<CrearUsuarioResponse>('/usuarios/demandantes', data);
   return response.data;
 };
 
 // Crear demandado
-export const crearDemandado = async (data: CrearUsuarioEmpresaRequest): Promise<CrearUsuarioResponse> => {
+export const crearDemandado = async (data: CrearUsuarioRequest): Promise<CrearUsuarioResponse> => {
   const response = await axiosWithoutMultipart.post<CrearUsuarioResponse>('/usuarios/demandados', data);
   return response.data;
 };
 
-// Crear árbitro
-export const crearArbitro = async (data: CrearUsuarioPersonaRequest): Promise<CrearUsuarioResponse> => {
-  const response = await axiosWithoutMultipart.post<CrearUsuarioResponse>('/usuarios/arbitros', data);
-  return response.data;
-};
-
-// Actualizar usuario persona (administrador, secretario, arbitro)
-export const actualizarUsuarioPersona = async (idUsuario: number, data: ActualizarUsuarioPersonaRequest): Promise<ActualizarUsuarioResponse> => {
+// Actualizar usuario
+export const actualizarUsuario = async (idUsuario: number, data: ActualizarUsuarioRequest): Promise<ActualizarUsuarioResponse> => {
   const response = await axiosWithoutMultipart.patch<ActualizarUsuarioResponse>(`/usuarios/${idUsuario}`, data);
   return response.data;
 };
 
-// Actualizar usuario empresa (demandante, demandado)
-export const actualizarUsuarioEmpresa = async (idUsuario: number, data: ActualizarUsuarioEmpresaRequest): Promise<ActualizarUsuarioResponse> => {
-  const response = await axiosWithoutMultipart.patch<ActualizarUsuarioResponse>(`/usuarios/${idUsuario}`, data);
-  return response.data;
-};
+
+
+
+
 
 // Cambiar estado de usuario
 export const cambiarEstadoUsuario = async (idUsuario: number): Promise<CambiarEstadoUsuarioResponse> => {
   const response = await axiosWithoutMultipart.put<CambiarEstadoUsuarioResponse>(`/usuarios/${idUsuario}/estado`);
+  return response.data;
+};
+
+// Servicios para gestión de participantes en expedientes
+
+// Obtener todos los expedientes
+export const obtenerExpedientes = async (): Promise<ListarExpedientesResponse> => {
+  const response = await axiosWithoutMultipart.get<ListarExpedientesResponse>('/expedientes');
+  return response.data;
+};
+
+// Obtener participantes de un expediente específico
+export const obtenerParticipantesExpediente = async (idExpediente: number): Promise<ParticipantesExpedienteResponse> => {
+  const response = await axiosWithoutMultipart.get<ParticipantesExpedienteResponse>(`/usuarios/expediente/${idExpediente}/participantes/partes`);
+  return response.data;
+};
+
+// Agregar participante a expediente
+export const agregarParticipanteExpediente = async (idExpediente: number, data: AgregarParticipanteRequest): Promise<AgregarParticipanteResponse> => {
+  const response = await axiosWithoutMultipart.post<AgregarParticipanteResponse>(`/usuarios/partes/agregar-a-expediente/${idExpediente}`, data);
+  return response.data;
+};
+
+// Buscar árbitros por nombre
+export const buscarArbitros = async (nombre: string) => {
+  const response = await axiosWithoutMultipart.get(`/arbitros/buscar-bd-primaria?nombre=${encodeURIComponent(nombre)}`);
+  return response.data;
+};
+
+// Buscar secretarios por nombre
+export const buscarSecretarios = async (nombre: string) => {
+  const response = await axiosWithoutMultipart.get(`/secretarios/buscar?nombre=${encodeURIComponent(nombre)}`);
+  return response.data;
+};
+
+// Vincular staff (árbitro o secretario) a expediente
+export const vincularStaffAExpediente = async (idExpediente: number, data: { id_usuario: number }) => {
+  const response = await axiosWithoutMultipart.post(`/expedientes/${idExpediente}/vincular-staff`, data);
+  return response.data;
+};
+
+// Obtener staff (árbitros y secretarios) de un expediente
+export const obtenerStaffExpediente = async (idExpediente: number) => {
+  const response = await axiosWithoutMultipart.get(`/usuarios/expediente/${idExpediente}/staff`);
   return response.data;
 };

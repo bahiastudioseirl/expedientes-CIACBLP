@@ -27,12 +27,6 @@ class CredencialesService
     public function enviarCredencialesDemandado(int $idExpediente, string $mensaje = '', array $adjuntos = [], ?int $idUsuarioRemitente = null): array
     {
         try {
-            Log::info("=== CredencialesService::enviarCredencialesDemandado ===");
-            Log::info("ID Expediente: {$idExpediente}");
-            Log::info("Mensaje: " . (strlen($mensaje) > 0 ? "SÍ ({$mensaje})" : "NO"));
-            Log::info("Adjuntos: " . count($adjuntos) . " archivo(s)");
-            Log::info("Usuario Remitente: {$idUsuarioRemitente}");
-            
             $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
             
             if (!$expediente) {
@@ -57,8 +51,6 @@ class CredencialesService
                 throw new Exception('No se encontró ningún asunto activo del expediente');
             }
             
-            Log::info("Enviando credenciales a " . count($correosDemandados) . " demandado(s)");
-            
             // Crear usuarios y enviar credenciales CON mensaje y adjuntos
             $credencialesEnviadas = $this->creadorUsuarios->crearUsuariosPorCorreos(
                 $correosDemandados, 
@@ -69,19 +61,14 @@ class CredencialesService
                 $adjuntos // Incluir adjuntos
             );
             
-            Log::info("Usuarios creados: " . count($credencialesEnviadas));
-            
             // Marcar credenciales como enviadas
             $this->expedienteRepository->actualizar($idExpediente, ['credenciales_demandado_enviadas' => true]);
             
             // Extraer los IDs de los usuarios creados
             $idsUsuariosCreados = array_map(fn($cred) => $cred['id_usuario'], $credencialesEnviadas);
             
-            Log::info("IDs usuarios creados: " . implode(', ', $idsUsuariosCreados));
-            
             // Si hay mensaje, guardarlo en la BD
             if (strlen($mensaje) > 0 && $idUsuarioRemitente) {
-                Log::info("Guardando mensaje en BD...");
                 
                 try {
                     // Crear DTO para guardar el mensaje
@@ -97,15 +84,10 @@ class CredencialesService
                         $this->obtenerUsuariosStaff($idExpediente)
                     );
                     
-                    Log::info("Destinatarios del mensaje: " . implode(', ', $usuariosDestinatarios));
-                    
                     // Guardar el mensaje con adjuntos
                     $this->mensajeService->crearMensaje($crearMensajeDTO, $usuariosDestinatarios, $adjuntos);
                     
-                    Log::info("Mensaje guardado exitosamente en BD");
-                    
                 } catch (Exception $e) {
-                    Log::error("Error al guardar mensaje en BD: " . $e->getMessage());
                     // No fallar el flujo de credenciales si hay error al guardar mensaje
                 }
             }
@@ -121,9 +103,6 @@ class CredencialesService
             ];
             
         } catch (Exception $e) {
-            Log::error("ERROR en CredencialesService: " . $e->getMessage());
-            Log::error("Stack: " . $e->getTraceAsString());
-            
             return [
                 'success' => false,
                 'message' => 'Error al enviar credenciales: ' . $e->getMessage()

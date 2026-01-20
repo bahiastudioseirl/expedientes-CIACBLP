@@ -9,6 +9,7 @@ import {
     UserX,
     User,
     ClipboardList,
+    Settings,
     type LucideIcon
 } from 'lucide-react';
 import { AuthStore } from '../../core/components/auth/services/AuthStore';
@@ -66,7 +67,7 @@ const getMenuItems = (): MenuItem[] => {
                     link: '/administrator/plantilla',
                     roles: ['Administrador']
                 },
-               /*} {
+                {
                     titulo: 'Usuarios',
                     icon: Users,
                     roles: ['Administrador'],
@@ -84,26 +85,26 @@ const getMenuItems = (): MenuItem[] => {
                             roles: ['Administrador']
                         },
                         {
-                            titulo: 'Demandantes',
-                            link: '/administrator/usuarios/demandantes',
-                            icon: UserCheck,
-                            roles: ['Administrador']
-                        },
-                        {
-                            titulo: 'Demandados',
-                            link: '/administrator/usuarios/demandados',
-                            icon: UserX,
-                            roles: ['Administrador']
-                        },
-                        {
                             titulo: 'Árbitros',
                             link: '/administrator/usuarios/arbitros',
                             icon: User,
                             roles: ['Administrador']
+                        },
+                        {
+                            titulo: 'Gestión de Participantes',
+                            link: '/administrator/usuarios/participantes',
+                            icon: UserCheck,
+                            roles: ['Administrador']
+                        },
+                        {
+                            titulo: 'Gestión de Staff',
+                            link: '/administrator/usuarios/staff',
+                            icon: Settings,
+                            roles: ['Administrador']
                         }
                     ]
                 },
-                */
+                
             ];
 
         case 'Secretario':

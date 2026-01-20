@@ -8,7 +8,6 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 class CredencialesExpediente extends Mailable
 {
@@ -48,18 +47,12 @@ class CredencialesExpediente extends Mailable
 
     public function attachments(): array
     {
-        Log::info("CredencialesExpediente::attachments - Adjuntos a procesar: " . count($this->adjuntos));
-        
         $attachments = [];
         
-        foreach ($this->adjuntos as $index => $archivo) {
-            Log::info("Procesando adjunto {$index}: " . $archivo->getClientOriginalName());
-            
+        foreach ($this->adjuntos as $archivo) {
             $attachments[] = Attachment::fromPath($archivo->getPathname())
                 ->as($archivo->getClientOriginalName());
         }
-        
-        Log::info("Total adjuntos añadidos: " . count($attachments));
         
         return $attachments;
     }
