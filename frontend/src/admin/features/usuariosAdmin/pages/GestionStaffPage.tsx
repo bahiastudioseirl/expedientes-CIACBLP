@@ -154,7 +154,7 @@ export default function GestionStaffPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Gestión de Staff - {expedienteSeleccionado.codigo_expediente}
+              Gestión de Autoridades - {expedienteSeleccionado.codigo_expediente}
             </h1>
             <p className="text-gray-600">
               Administra árbitros y secretarios del expediente
@@ -301,8 +301,8 @@ export default function GestionStaffPage() {
                 <Settings className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Gestión de Staff</h1>
-                <p className="mt-1 text-slate-600">Administra los árbitros y secretarios de los expedientes</p>
+                <h1 className="text-2xl font-bold text-slate-900">Gestión de Autoridades</h1>
+                <p className="mt-1 text-slate-600">Administra los árbitros, secretarios y contadores de los expedientes</p>
               </div>
             </div>
           </div>

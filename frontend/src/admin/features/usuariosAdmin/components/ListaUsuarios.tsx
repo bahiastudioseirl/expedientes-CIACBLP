@@ -13,7 +13,7 @@ import { cambiarEstadoUsuario } from '../services/usuariosService';
 
 interface ListaUsuariosProps {
   titulo: string;
-  tipoUsuario: 'administradores' | 'secretarios' | 'demandantes' | 'demandados' | 'arbitros';
+  tipoUsuario: 'administradores' | 'secretarios' | 'demandantes' | 'demandados' | 'arbitros' | 'contadores';
   icono: React.ComponentType<any>;
   obtenerUsuarios: () => Promise<ListarUsuariosResponse>;
   onCrear?: () => void;

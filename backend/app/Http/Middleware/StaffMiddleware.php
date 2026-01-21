@@ -12,8 +12,8 @@ class StaffMiddleware
     {
         $user = auth('api')->user();
         
-        // Staff: Administrador(1), Árbitro(2), Secretario(3)
-        if (!$user || !in_array($user->id_rol, [1, 2, 3])) {
+        // Staff: Administrador(1), Árbitro(2), Secretario(3), Contador(6)
+        if (!$user || !in_array($user->id_rol, [1, 2, 3, 6])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Acceso denegado. Se requieren permisos de staff.'

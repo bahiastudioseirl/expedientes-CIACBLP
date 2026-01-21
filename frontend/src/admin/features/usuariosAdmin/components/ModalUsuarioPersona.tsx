@@ -9,7 +9,7 @@ type Props = {
   onUpdate?: (data: ActualizarUsuarioRequest) => Promise<void> | void;
   loading?: boolean;
   usuario?: Usuario | null; // Para editar
-  tipoUsuario: 'administrador' | 'secretario' | 'arbitro';
+  tipoUsuario: 'administrador' | 'secretario' | 'arbitro' | 'contador';
 };
 
 export default function ModalUsuarioPersona({ 
@@ -39,6 +39,7 @@ export default function ModalUsuarioPersona({
       case 'administrador': return `${accion} Administrador`;
       case 'secretario': return `${accion} Secretario`;
       case 'arbitro': return `${accion} Árbitro`;
+      case 'contador': return `${accion} Contador`;
     }
   };
 

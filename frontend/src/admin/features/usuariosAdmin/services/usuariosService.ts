@@ -25,6 +25,12 @@ export const obtenerSecretarios = async (): Promise<ListarUsuariosResponse> => {
   return response.data;
 };
 
+// Obtener contadores
+export const obtenerContadores = async (): Promise<ListarUsuariosResponse> => {
+  const response = await axiosWithoutMultipart.get<ListarUsuariosResponse>('/usuarios/contadores');
+  return response.data;
+};
+
 // Obtener demandantes
 export const obtenerDemandantes = async (): Promise<ListarUsuariosResponse> => {
   const response = await axiosWithoutMultipart.get<ListarUsuariosResponse>('/usuarios/demandantes');
@@ -58,6 +64,12 @@ export const crearAdministrador = async (data: CrearUsuarioRequest): Promise<Cre
 // Crear secretario
 export const crearSecretario = async (data: CrearUsuarioRequest): Promise<CrearUsuarioResponse> => {
   const response = await axiosWithoutMultipart.post<CrearUsuarioResponse>('/usuarios/secretarios', data);
+  return response.data;
+};
+
+//Crear contador
+export const crearContador = async (data: CrearUsuarioRequest): Promise<CrearUsuarioResponse> => {
+  const response = await axiosWithoutMultipart.post<CrearUsuarioResponse>('/usuarios/contadores', data);
   return response.data;
 };
 

@@ -11,7 +11,9 @@ import {
     ClipboardList,
     Settings,
     Paperclip,
-    type LucideIcon
+    type LucideIcon,
+    ShieldCheck,
+    Briefcase
 } from 'lucide-react';
 import { AuthStore } from '../../core/components/auth/services/AuthStore';
 
@@ -94,19 +96,25 @@ const getMenuItems = (): MenuItem[] => {
                         {
                             titulo: 'Árbitros',
                             link: '/administrator/usuarios/arbitros',
-                            icon: User,
+                            icon: UserCog,
+                            roles: ['Administrador']
+                        },
+                        {
+                            titulo: 'Contadores',
+                            link: '/administrator/usuarios/contadores',
+                            icon: UserCog,
                             roles: ['Administrador']
                         },
                         {
                             titulo: 'Gestión de Participantes',
                             link: '/administrator/usuarios/participantes',
-                            icon: UserCheck,
+                            icon: Users,
                             roles: ['Administrador']
                         },
                         {
-                            titulo: 'Gestión de Staff',
+                            titulo: 'Gestión de Autoridades',
                             link: '/administrator/usuarios/staff',
-                            icon: Settings,
+                            icon: Briefcase,
                             roles: ['Administrador']
                         }
                     ]
@@ -116,24 +124,25 @@ const getMenuItems = (): MenuItem[] => {
 
         case 'Secretario':
         case 'Arbitro':
+        case 'Contador':
             return [
                 {
                     titulo: 'Bandeja de Entrada',
                     icon: Inbox,
                     link: '/bandeja-entrada',
-                    roles: ['Secretario', 'Arbitro']
+                    roles: ['Secretario', 'Arbitro', 'Contador']
                 },
                 {
                     titulo: 'Documentos',
                     icon: Paperclip,
                     link: '/documentos-adjuntos',
-                    roles: ['Secretario', 'Arbitro']
+                    roles: ['Secretario', 'Arbitro', 'Contador']
                 },
                 {
                     titulo: 'Expedientes',
                     icon: FileText,
                     link: '/expedientes',
-                    roles: ['Secretario', 'Arbitro']
+                    roles: ['Secretario', 'Arbitro', 'Contador']
                 }
             ];
 

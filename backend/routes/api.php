@@ -166,6 +166,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::post('/', [UsuarioController::class, 'crearUsuario']);
         Route::post('/secretarios', [UsuarioController::class, 'crearUsuarioSecretario']);
         Route::post('/arbitros', [UsuarioController::class, 'crearUsuarioArbitro']);
+        Route::post('/contadores', [UsuarioController::class, 'crearUsuarioContador']);
         Route::post('partes/agregar-a-expediente/{idExpediente}', [UsuarioController::class, 'agregarCrearUsuarioParteExpediente']);
         Route::get('/', [UsuarioController::class, 'listarUsuarios']);
         Route::get('/administradores', [UsuarioController::class, 'listarAdministradores']);
@@ -173,6 +174,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::get('/secretarios', [UsuarioController::class, 'listarSecretarios']);
         Route::get('/demandantes', [UsuarioController::class, 'listarDemandantes']);
         Route::get('/demandados', [UsuarioController::class, 'listarDemandados']);
+        Route::get('/contadores', [UsuarioController::class, 'listarContadores']);
         Route::get('/{id}', [UsuarioController::class, 'obtenerUsuarioPorId']);
         Route::patch('/{id}', [UsuarioController::class, 'actualizarUsuario']);
         Route::put('/{id}/estado', [UsuarioController::class, 'cambiarEstadoUsuario']);

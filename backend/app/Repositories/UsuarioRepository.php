@@ -77,6 +77,15 @@ class UsuarioRepository
                       ->get();
     }
 
+    public function listarUsuariosContadores(): Collection
+    {
+        return Usuarios::with(['rol'])
+                        ->whereHas('rol', function ($query) {
+                            $query->where('nombre', 'Contador');
+                        })
+                      ->get();
+    }
+
     public function listarUsuariosAdministradores(): Collection
     {
         return Usuarios::with(['rol'])

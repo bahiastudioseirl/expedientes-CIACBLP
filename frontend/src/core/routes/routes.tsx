@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { LazyWrapper } from './components/LazyWrapper';
 import { ProtectedRoute } from './guard/ProtectedRoute';
 import { AdminLayout } from '../../layout/components/AdminLayout';
+import path from 'path';
 
 // LOGIN FORMS
 const LoginForm = lazy(() =>
@@ -46,6 +47,10 @@ const SecretariosPage = lazy(() =>
 
 const ArbitrosPage = lazy(() =>
     import('../../admin/features/usuariosAdmin/pages/ArbitrosPage').then((module) => ({ default: module.default }))
+);
+
+const ContadoresPage = lazy(() =>
+    import('../../admin/features/usuariosAdmin/pages/ContadoresPages').then((module) => ({ default: module.default }))
 );
 
 const GestionParticipantesPage = lazy(() =>
@@ -238,6 +243,14 @@ export const routes = [
         element: (
           <LazyWrapper>
             <ArbitrosPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'usuarios/contadores',
+        element: (
+          <LazyWrapper>
+            <ContadoresPage />
           </LazyWrapper>
         ),
       },

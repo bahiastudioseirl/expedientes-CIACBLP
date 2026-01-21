@@ -117,6 +117,33 @@ class UsuarioService
         ];
     }
 
+    public function crearUsuarioContador(CrearUsuarioDTO $dto): array
+    {
+        $contrasenaGenerada = $this->generarContrasena();
+
+        $usuario = $this->usuarioRepository->crear([
+            'correo' => $dto->correo,
+            'contrasena' => bcrypt($contrasenaGenerada),
+            'nombre_completo' => $dto->nombre_completo,
+            'numero_documento' => $dto->numero_documento,
+            'telefono' => $dto->telefono,
+            'activo' => true,
+            'id_rol' => 6,
+        ]);
+
+        Mail::to($usuario->correo)->send(new CredencialesUsuario(
+            $usuario->nombre_completo,
+            $usuario->correo,
+            $contrasenaGenerada
+        ));
+
+        return [
+            'usuario' => $usuario,
+            'contrasena' => $contrasenaGenerada
+        ];
+    }
+
+
     private function generarContrasena(): string
     {
         return Str::random(8);
@@ -130,6 +157,11 @@ class UsuarioService
     public function listarUsuariosArbitros(): Collection
     {
         return $this->usuarioRepository->listarUsuariosArbitros();
+    }
+
+    public function listarUsuariosContadores(): Collection
+    {
+        return $this->usuarioRepository->listarUsuariosContadores();
     }
 
     public function listarUsuariosAdministradores(): Collection

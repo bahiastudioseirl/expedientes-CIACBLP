@@ -70,6 +70,16 @@ class PlantillaArbitrajeSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'nombre' => 'Sub etapa 5',
+                'orden' => 5,
+                'dias_habiles' => 10,
+                'es_habil' => true,
+                'es_obligatorio' => true,
+                'id_etapa' => $etapa1Id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
 
         // Etapa 2: Designación de árbitro único

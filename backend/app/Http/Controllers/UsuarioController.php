@@ -85,6 +85,19 @@ class UsuarioController extends Controller
         }
     }
 
+    public function listarContadores(): JsonResponse
+    {
+        try {
+            $contadores = $this->usuarioService->listarUsuariosContadores();
+            return UsuarioResponse::usuarios($contadores);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al listar usuarios contadores',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function listarAdministradores(): JsonResponse
     {
         try {
@@ -295,6 +308,42 @@ class UsuarioController extends Controller
             ], 500);
         }
     }
+
+    public function crearUsuarioContador(CrearUsuarioRequest $request): JsonResponse
+    {
+        try {
+            $data = $request->validated();
+            
+            // Crear DTO con los datos del request
+            $dto = CrearUsuarioDTO::fromArray([
+                'nombre_completo' => $data['nombre_completo'],
+                'numero_documento' => null,
+                'correo' => $data['correo'],
+                'telefono' => $data['telefono'] ?? null,
+                'id_rol' => 6, // Rol contador
+                'activo' => true
+            ]);
+            
+            $usuarioCreado = $this->usuarioService->crearUsuarioContador($dto);
+
+            return UsuarioResponse::usuarioCreado($usuarioCreado['usuario']);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos inválidos',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear el usuario contador',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
 
     public function buscarSecretarios(Request $request): JsonResponse
     {
