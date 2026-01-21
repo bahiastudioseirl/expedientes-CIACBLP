@@ -195,6 +195,11 @@ class UsuarioService
         return $this->usuarioRepository->buscarSecretariosPorNombre($nombre, $limite);
     }
 
+    public function buscarContadoresPorNombre(string $nombre, int $limite = 10): array
+    {
+        return $this->usuarioRepository->buscarContadoresPorNombre($nombre, $limite);
+    }
+
     public function actualizarPerfil(ActualizarPerfilDTO $dto): Usuarios
     {
         $usuario = $this->usuarioRepository->obtenerPorId($dto->id_usuario);
@@ -326,7 +331,7 @@ class UsuarioService
         }
     }
 
-    public function obtenerArbitroYSecretarioExpediente(int $idExpediente)
+    public function obtenerArbitroYSecretarioYContadorExpediente(int $idExpediente)
     {
         try {
             $participantesExpediente = $this->usuarioExpedienteRepository->obtenerPorExpediente($idExpediente);
@@ -336,14 +341,14 @@ class UsuarioService
             }
             $staff = $participantesExpediente->filter(function ($vinculo) {
                 $rolNombre = $vinculo->usuario->rol?->nombre;
-                return in_array($rolNombre, ['Arbitro', 'Secretario']);
+                return in_array($rolNombre, ['Arbitro', 'Secretario', 'Contador']);
             })->map(function ($vinculo) {
                 return $vinculo->usuario;
             })->values();
 
             return $staff;
         } catch (Exception $e) {
-            throw new Exception('Error al obtener árbitro y secretario: ' . $e->getMessage());
+            throw new Exception('Error al obtener árbitro, secretario y contador: ' . $e->getMessage());
         }
     }
 

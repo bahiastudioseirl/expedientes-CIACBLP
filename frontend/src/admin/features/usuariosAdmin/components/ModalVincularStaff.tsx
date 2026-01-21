@@ -1,6 +1,6 @@
 import { X, Search, Users } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { buscarArbitros, buscarSecretarios, vincularStaffAExpediente } from "../services/usuariosService";
+import { buscarArbitros, buscarContadores, buscarSecretarios, vincularStaffAExpediente } from "../services/usuariosService";
 
 type Props = {
   open: boolean;
@@ -25,7 +25,7 @@ export default function ModalVincularStaff({
 }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  const [tipoSeleccionado, setTipoSeleccionado] = useState<'arbitro' | 'secretario'>('arbitro');
+  const [tipoSeleccionado, setTipoSeleccionado] = useState<'arbitro' | 'secretario' | 'contador'>('arbitro');
   const [busqueda, setBusqueda] = useState("");
   const [resultados, setResultados] = useState<Usuario[]>([]);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<Usuario | null>(null);
@@ -60,7 +60,9 @@ export default function ModalVincularStaff({
     try {
       const response = tipoSeleccionado === 'arbitro' 
         ? await buscarArbitros(busqueda.trim())
-        : await buscarSecretarios(busqueda.trim());
+        : tipoSeleccionado === 'secretario'
+        ? await buscarSecretarios(busqueda.trim())
+        : await buscarContadores (busqueda.trim());
       setResultados(response.data || []);
     } catch (error) {
       console.error("Error en la búsqueda:", error);
@@ -85,12 +87,6 @@ export default function ModalVincularStaff({
       return;
     }
 
-    console.log('Usuario seleccionado:', usuarioSeleccionado);
-    console.log('ID específico:', usuarioSeleccionado.id);
-    console.log('Tipo de ID:', typeof usuarioSeleccionado.id);
-    console.log('Expediente ID:', expedienteId);
-    console.log('Tipo seleccionado:', tipoSeleccionado);
-
     setIsLoading(true);
     setError("");
 
@@ -98,8 +94,6 @@ export default function ModalVincularStaff({
       id_usuario: usuarioSeleccionado.id
     };
     
-    console.log('Payload final a enviar:', payload);
-    console.log('Payload como JSON:', JSON.stringify(payload));
 
     try {
       await vincularStaffAExpediente(expedienteId, payload);
@@ -118,7 +112,7 @@ export default function ModalVincularStaff({
     setResultados([]);
   };
 
-  const cambiarTipo = (nuevoTipo: 'arbitro' | 'secretario') => {
+  const cambiarTipo = (nuevoTipo: 'arbitro' | 'secretario' | 'contador') => {
     setTipoSeleccionado(nuevoTipo);
     setBusqueda("");
     setResultados([]);
@@ -144,7 +138,7 @@ export default function ModalVincularStaff({
             </div>
             <div>
               <h2 className="text-xl font-semibold text-slate-900">
-                Vincular {tipoSeleccionado === 'arbitro' ? 'Árbitro' : 'Secretario'}
+                Vincular {tipoSeleccionado === 'arbitro' ? 'Árbitro' : tipoSeleccionado === 'secretario' ? 'Secretario' : 'Contador'}
               </h2>
               <p className="text-sm text-slate-600">
                 Busca y selecciona el {tipoSeleccionado} para vincular
@@ -199,6 +193,18 @@ export default function ModalVincularStaff({
                 />
                 <span className="text-sm font-medium text-slate-700">Secretario</span>
               </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="tipo"
+                  value="contador"
+                  checked={tipoSeleccionado === 'contador'}
+                  onChange={() => cambiarTipo('contador')}
+                  disabled={isLoading}
+                  className="mr-2"
+                />
+                <span className="text-sm font-medium text-slate-700">Contador</span>
+              </label>
             </div>
           </div>
 
@@ -206,7 +212,7 @@ export default function ModalVincularStaff({
           <div>
             <label className="block mb-2 text-sm font-medium text-slate-700">
               <Search className="inline w-4 h-4 mr-1" />
-              Buscar {tipoSeleccionado === 'arbitro' ? 'Árbitro' : 'Secretario'}
+              Buscar {tipoSeleccionado === 'arbitro' ? 'Árbitro' : tipoSeleccionado === 'secretario' ? 'Secretario' : 'Contador'}
             </label>
             <div className="space-y-3">
               <input
@@ -291,7 +297,7 @@ export default function ModalVincularStaff({
                   <span>Vinculando...</span>
                 </div>
               ) : (
-                `Vincular ${tipoSeleccionado === 'arbitro' ? 'Árbitro' : 'Secretario'}`
+                `Vincular ${tipoSeleccionado === 'arbitro' ? 'Árbitro' : tipoSeleccionado === 'secretario' ? 'Secretario' : 'Contador'}`
               )}
             </button>
           </div>

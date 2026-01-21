@@ -181,7 +181,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         
         // Rutas para gestionar participantes de expedientes
         Route::get('/expediente/{idExpediente}/participantes/partes', [UsuarioController::class, 'listarParticipantesPartesExpediente']);
-        Route::get('/expediente/{idExpediente}/staff', [UsuarioController::class, 'listarArbitroYSecretarioExpediente']);
+        Route::get('/expediente/{idExpediente}/staff', [UsuarioController::class, 'listarArbitroYSecretarioYContadorExpediente']);
         Route::delete('/{idUsuario}/expediente/{idExpediente}', [UsuarioController::class, 'desvincularUsuarioDeExpediente']);
     });
 
@@ -221,6 +221,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     Route::get('/arbitros/buscar', [ArbitroController::class, 'buscar']);
     Route::get('/arbitros/buscar-bd-primaria', [ArbitroController::class, 'buscarBDPrimaria']);
     Route::get('/secretarios/buscar', [UsuarioController::class, 'buscarSecretarios']);
+    Route::get('/contadores/buscar', [UsuarioController::class, 'buscarContadores']);
     
     Route::prefix('expedientes')->group(function () {
         Route::post('/{id}/vincular-staff', [UsuarioController::class, 'vincularStaffAExpediente']);

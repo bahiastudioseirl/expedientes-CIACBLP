@@ -171,10 +171,10 @@ class UsuarioController extends Controller
         }
     }
 
-    public function listarArbitroYSecretarioExpediente(int $idExpediente): JsonResponse
+    public function listarArbitroYSecretarioYContadorExpediente(int $idExpediente): JsonResponse
     {
         try {
-            $staff = $this->usuarioService->obtenerArbitroYSecretarioExpediente($idExpediente);
+            $staff = $this->usuarioService->obtenerArbitroYSecretarioYContadorExpediente($idExpediente);
             
             return UsuarioResponse::staffExpediente($staff);
         } catch (\Exception $e) {
@@ -359,6 +359,24 @@ class UsuarioController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al buscar secretarios'
+            ], 500);
+        }
+    }
+
+    public function buscarContadores(Request $request): JsonResponse
+    {
+        try {
+            $nombre = $request->query('nombre', '');
+            $contadores = $this->usuarioService->buscarContadoresPorNombre($nombre);
+
+            return response()->json([
+                'success' => true,
+                'data' => $contadores
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al buscar contadores'
             ], 500);
         }
     }

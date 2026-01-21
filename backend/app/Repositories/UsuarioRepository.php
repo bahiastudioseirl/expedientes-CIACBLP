@@ -160,6 +160,28 @@ class UsuarioRepository
         })->toArray();
     }
 
+    public function buscarContadoresPorNombre(string $nombre, int $limite = 10): array
+    {
+        $resultados = Usuarios::with(['rol'])
+            ->whereHas('rol', function ($query) {
+                $query->where('nombre', 'Contador');
+            })
+            ->where('nombre_completo', 'like', '%' . $nombre . '%')
+            ->limit($limite)
+            ->get();
+
+        return $resultados->map(function ($usuario) {
+            return [
+                'id' => $usuario->id_usuario,
+                'nombre_completo' => $usuario->nombre_completo,
+                'numero_documento' => $usuario->numero_documento,
+                'telefono' => $usuario->telefono,
+                'correo' => $usuario->correo,
+                'origen' => 'bd_principal'
+            ];
+        })->toArray();
+    }
+
     public function actualizarPerfil(\App\DTOs\Usuarios\ActualizarPerfilDTO $dto): Usuarios
     {
         $usuario = Usuarios::with('rol')->findOrFail($dto->id_usuario);

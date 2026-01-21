@@ -140,7 +140,12 @@ export const buscarSecretarios = async (nombre: string) => {
   return response.data;
 };
 
-// Vincular staff (árbitro o secretario) a expediente
+export const buscarContadores = async (nombre: string) => {
+  const response = await axiosWithoutMultipart.get(`/contadores/buscar?nombre=${encodeURIComponent(nombre)}`);
+  return response.data;
+}
+
+// Vincular staff (árbitro, secretario o contador) a expediente
 export const vincularStaffAExpediente = async (idExpediente: number, data: { id_usuario: number }) => {
   const response = await axiosWithoutMultipart.post(`/expedientes/${idExpediente}/vincular-staff`, data);
   return response.data;
