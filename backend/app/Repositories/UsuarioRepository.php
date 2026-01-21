@@ -191,5 +191,14 @@ class UsuarioRepository
         
         return $usuario->fresh(['rol']);
     }
+
+    public function obtenerPorRol(string $nombreRol): ?Usuarios
+    {
+        return Usuarios::with('rol')
+            ->whereHas('rol', function ($query) use ($nombreRol) {
+                $query->where('nombre', $nombreRol);
+            })
+            ->first();
+    }
 }
 

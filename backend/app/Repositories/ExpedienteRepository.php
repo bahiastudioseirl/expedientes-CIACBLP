@@ -60,5 +60,15 @@ class ExpedienteRepository
         ])->find($idExpediente);
     }
 
+    public function finalizarExpediente(int $idExpediente): bool
+    {
+        $expediente = Expediente::find($idExpediente);
+        if ($expediente) {
+            $expediente->activo = false;
+            return $expediente->save();
+        }
+        return false;
+    }
+
 }
     

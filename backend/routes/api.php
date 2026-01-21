@@ -248,6 +248,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
 
     Route::prefix('expedientes')->group(function () {
         Route::get('/{idExpediente}/etapas-plantilla', [FlujoController::class, 'obtenerEtapasPlantillaExpediente']);
+        Route::patch('/{idExpediente}/finalizar', [ExpedienteController::class, 'finalizarExpediente']);
     });
 });
 

@@ -113,5 +113,27 @@ class ExpedienteController extends Controller
         }
     }
 
+    public function finalizarExpediente(int $idExpediente): JsonResponse
+    {
+        try {
+            $exito = $this->expedienteService->finalizarExpediente($idExpediente);
+            
+            if ($exito) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Expediente finalizado exitosamente'
+                ]);
+            } else {
+                return ExpedienteResponse::error('No se pudo finalizar el expediente', 400);
+            }
+            
+        } catch (\Exception $e) {
+            return ExpedienteResponse::error(
+                'Error al finalizar el expediente: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
 
 }

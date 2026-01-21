@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { obtenerExpedientes, obtenerMisExpedientes } from '../services/obtenerExpedientes';
+import { finalizarExpediente } from '../services/finalizarExpediente';
 import { AuthStore } from '../../../../core/components/auth/services/AuthStore';
 import type { Expediente } from '../schemas/ExpedienteSchema';
 
@@ -161,6 +162,26 @@ export function useExpedienteAdmin() {
     return expediente.demandado[0]?.nombre_razon || 'N/A';
   }, []);
 
+  const handleFinalizarExpediente = useCallback(async (idExpediente: number) => {
+    if (!confirm('¿Está seguro de que desea finalizar este expediente? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await finalizarExpediente(idExpediente);
+      
+      if (response.success) {
+        await cargarExpedientes();
+      }
+    } catch (error: any) {
+      console.error('Error al finalizar expediente:', error);
+      setError('Error al finalizar el expediente');
+    } finally {
+      setLoading(false);
+    }
+  }, [cargarExpedientes]);
+
   return {
     isAgregarArbitroModalOpen,
     // Estados
@@ -202,6 +223,7 @@ export function useExpedienteAdmin() {
     handleCloseCaminoModal,
     handleCloseModalDesdeSolicitud,
     handleSuccessCrearExpediente,
+    handleFinalizarExpediente,
     getNombreDemandante,
     getNombreDemandado,
   };

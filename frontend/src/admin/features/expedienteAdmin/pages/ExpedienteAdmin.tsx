@@ -8,7 +8,8 @@ import {
   UserPlus,
   UserCheck,
   Settings,
-  MapPin
+  MapPin,
+  Power
 } from 'lucide-react';
 import ModalCrearExpedienteDesdeSolicitud from '../components/ModalCrearExpedienteDesdeSolicitud';
 import ModalVerExpediente from '../components/ModalVerExpediente';
@@ -56,6 +57,7 @@ export default function ExpedienteAdmin() {
     handleOpenCaminoModal,
     handleCloseCaminoModal,
     handleCloseViewModal,
+    handleFinalizarExpediente,
     getNombreDemandante,
     getNombreDemandado,
   } = useExpedienteAdmin();
@@ -163,12 +165,12 @@ export default function ExpedienteAdmin() {
                             {expediente.activo ? (
                               <>
                                 <CheckCircle className="w-3 h-3 mr-1" />
-                                Activo
+                                En curso
                               </>
                             ) : (
                               <>
-                                <XCircle className="w-3 h-3 mr-1" />
-                                Inactivo
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Finalizado
                               </>
                             )}
                           </span>
@@ -223,6 +225,15 @@ export default function ExpedienteAdmin() {
                                 title="Agregar árbitro"
                               >
                                 <UserPlus className="w-4 h-4" />
+                              </button>
+                            )}
+                            {expediente.activo && (
+                              <button
+                                onClick={() => handleFinalizarExpediente(expediente.id)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Finalizar expediente"
+                              >
+                                <Power className="w-4 h-4" />
                               </button>
                             )}
                           </div>

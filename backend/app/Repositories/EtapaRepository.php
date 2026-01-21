@@ -60,4 +60,9 @@ class EtapaRepository
             $orden++;
         }
     }
+
+    public function obtenerEtapaPorId(int $idEtapa): ?Etapa
+    {
+        return Etapa::find($idEtapa);
+    }
 }

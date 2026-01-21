@@ -150,7 +150,10 @@ class ExpedienteService
     }
 
 
-
+    public function finalizarExpediente(int $idExpediente): bool
+    {
+        return $this->expedienteRepository->finalizarExpediente($idExpediente);
+    }
 
     /**
      * Envía las notificaciones por correo

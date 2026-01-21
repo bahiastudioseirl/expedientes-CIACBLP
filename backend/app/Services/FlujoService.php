@@ -9,7 +9,12 @@ use App\Repositories\ExpedienteRepository;
 use App\Repositories\FlujoRepository;
 use App\Repositories\MensajeRepository;
 use App\Repositories\SubEtapaRepository;
+use App\Repositories\UsuarioRepository;
 use App\Services\Expediente\CalculadorDiasHabilesService;
+use App\Models\Usuarios;
+use App\Mail\NotificacionContador;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class FlujoService
 {
@@ -18,6 +23,7 @@ class FlujoService
         private readonly SubEtapaRepository $subEtapaRepository,
         private readonly CalculadorDiasHabilesService $calculadorDiasHabiles,
         private readonly ExpedienteRepository $expedienteRepository,
+        private readonly UsuarioRepository $usuarioRepository,
         private readonly EtapaRepository $etapaRepository,
         private readonly MensajeRepository $mensajeRepository
     )
@@ -61,7 +67,12 @@ class FlujoService
             'fecha_fin' => null
         ];
 
-        return $this->flujoRepository->crear($nuevoFlujoData);
+        $nuevoFlujo = $this->flujoRepository->crear($nuevoFlujoData);
+        
+        // Notificar al contador si se llega a la sub etapa 5 de la etapa 1
+        $this->notificarContadorSiEsNecesario($idExpediente, $data->id_etapa, $data->id_subetapa);
+        
+        return $nuevoFlujo;
     }
 
     public function actualizarFlujo(int $idExpediente, ActualizarFlujoDTO $data): \App\Models\Flujo
@@ -130,6 +141,45 @@ class FlujoService
             'flujos' => $flujos,
             'mensajes_agrupados' => $mensajesAgrupados
         ];
+    }
+
+    private function notificarContadorSiEsNecesario(int $idExpediente, int $idEtapa, ?int $idSubetapa): void
+    {
+        if (!$idSubetapa) {
+            return;
+        }
+
+        // Verificar si es la etapa 1
+        $etapa = $this->etapaRepository->obtenerEtapaPorId($idEtapa);
+        if (!$etapa || $etapa->orden !== 1) {
+            return;
+        }
+
+        // Verificar si es la sub etapa 5
+        $subetapa = $this->subEtapaRepository->obtenerPorId($idSubetapa);
+        if (!$subetapa || $subetapa->orden !== 5) {
+            return;
+        }
+
+        $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
+        if (!$expediente) {
+            return;
+        }
+
+        $contador = $this->usuarioRepository->obtenerPorRol('Contador');
+        if (!$contador) {
+            Log::warning("No se encontró usuario con rol Contador para notificar en expediente {$expediente->codigo_expediente}");
+            return;
+        }
+
+        try {
+            Mail::to($contador->correo)->send(new NotificacionContador(
+                codigoExpediente: $expediente->codigo_expediente,
+                nombreContador: $contador->nombre_completo
+            ));
+        } catch (\Exception $e) {
+            Log::error("Error al enviar notificación al contador: " . $e->getMessage());
+        }
     }
 
 }
