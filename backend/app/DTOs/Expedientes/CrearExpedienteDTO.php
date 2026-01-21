@@ -6,8 +6,9 @@ class CrearExpedienteDTO
 {
     public function __construct(
         public readonly int $id_solicitud,
-        public readonly string $nombre_secretario,
-        public readonly string $correo_secretario,
+        public readonly ?int $id_secretario_existente = null,
+        public readonly ?string $nombre_secretario = null,
+        public readonly ?string $correo_secretario = null,
         public readonly ?string $telefono_secretario = null,
     ) {}
 
@@ -15,8 +16,9 @@ class CrearExpedienteDTO
     {
         return new self(
             id_solicitud: $data['id_solicitud'],
-            nombre_secretario: $data['nombre_secretario'],
-            correo_secretario: $data['correo_secretario'],
+            id_secretario_existente: $data['id_secretario_existente'] ?? null,
+            nombre_secretario: $data['nombre_secretario'] ?? null,
+            correo_secretario: $data['correo_secretario'] ?? null,
             telefono_secretario: $data['telefono_secretario'] ?? null,
         );
     }

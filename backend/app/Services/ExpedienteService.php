@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SolicitudAdmitidaDemandante;
 use App\Mail\CredencialesSecretario;
+use App\Models\Usuarios;
 use App\Repositories\ExpedienteRepository;
 use App\Repositories\Solicitud\SolicitudRepository;
 use App\Services\Expediente\CreadorUsuariosExpedienteService;
@@ -17,6 +18,7 @@ use App\Services\Expediente\DuplicadorPlantillaService;
 use App\Services\Expediente\GeneradorCodigoExpedienteService;
 use App\Services\Expediente\InicializadorFlujoService;
 use Illuminate\Database\Eloquent\Collection;
+use App\Mail\AsignacionSecretarioExistente;
 
 class ExpedienteService
 {
@@ -68,13 +70,33 @@ class ExpedienteService
                 enviarCorreo: false  // No enviar correo aquí porque se envía SolicitudAdmitidaDemandante después
             );
 
-            // 7. Crear usuario secretario
-            $credencialesSecretario = $this->creadorUsuarios->crearUsuarioSecretario(
-                nombreCompleto: $dto->nombre_secretario,
-                correo: $dto->correo_secretario,
-                telefono: $dto->telefono_secretario,
-                idExpediente: $expediente->id_expediente
-            );
+            // 7. Crear o vincular usuario secretario
+            if ($dto->id_secretario_existente) {
+                // Vincular secretario existente al expediente
+                $this->creadorUsuarios->vincularUsuarioExpediente(
+                    idUsuario: $dto->id_secretario_existente,
+                    idExpediente: $expediente->id_expediente
+                );
+                
+                // Obtener datos del secretario para las notificaciones
+                $secretario = Usuarios::find($dto->id_secretario_existente);
+                $credencialesSecretario = [
+                    'nombre_completo' => $secretario->nombre_completo,
+                    'correo' => $secretario->correo,
+                    'telefono' => $secretario->telefono,
+                    'contrasena' => null, // No hay contraseña nueva para secretarios existentes
+                    'es_existente' => true, // Bandera para saber que es un secretario existente
+                ];
+            } else {
+                // Crear nuevo usuario secretario
+                $credencialesSecretario = $this->creadorUsuarios->crearUsuarioSecretario(
+                    nombreCompleto: $dto->nombre_secretario,
+                    correo: $dto->correo_secretario,
+                    telefono: $dto->telefono_secretario,
+                    idExpediente: $expediente->id_expediente
+                );
+                $credencialesSecretario['es_existente'] = false;
+            }
 
             // 8. Inicializar el primer flujo
             $this->inicializadorFlujo->inicializarFlujo(
@@ -87,7 +109,8 @@ class ExpedienteService
                 correosDemandante: $correosDemandante,
                 credencialesDemandantes: $credencialesDemandantes,
                 credencialesSecretario: $credencialesSecretario,
-                codigoExpediente: $codigoExpediente
+                codigoExpediente: $codigoExpediente,
+                datosPartes: $datosPartes
             );
 
             return $this->expedienteRepository->obtenerPorId($expediente->id_expediente);
@@ -136,7 +159,8 @@ class ExpedienteService
         array $correosDemandante,
         array $credencialesDemandantes,
         array $credencialesSecretario,
-        string $codigoExpediente
+        string $codigoExpediente,
+        array $datosPartes = []
     ): void {
         // Enviar correos a demandantes
         foreach ($correosDemandante as $correo) {
@@ -150,9 +174,18 @@ class ExpedienteService
         }
 
         // Enviar correo al secretario
-        Mail::to($credencialesSecretario['correo'])->send(new CredencialesSecretario(
-            codigoExpediente: $codigoExpediente,
-            credenciales: $credencialesSecretario
-        ));
+        if ($credencialesSecretario['es_existente'] ?? false) {
+            // Es un secretario existente: enviar notificación de asignación
+            Mail::to($credencialesSecretario['correo'])->send(new AsignacionSecretarioExistente(
+                codigoExpediente: $codigoExpediente,
+                nombreUsuario: $credencialesSecretario['nombre_completo']
+            ));
+        } else if (isset($credencialesSecretario['contrasena']) && $credencialesSecretario['contrasena']) {
+            // Es un secretario nuevo: enviar credenciales
+            Mail::to($credencialesSecretario['correo'])->send(new CredencialesSecretario(
+                codigoExpediente: $codigoExpediente,
+                credenciales: $credencialesSecretario
+            ));
+        }
     }
 }

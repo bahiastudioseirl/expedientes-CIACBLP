@@ -1,8 +1,19 @@
 import { useState, useEffect } from 'react';
-import { X, FileText, Save, AlertCircle, Mail, Phone, User, Building2, CheckCircle } from 'lucide-react';
+import { X, FileText, Save, AlertCircle, Mail, Phone, User, Building2, CheckCircle, Search, UserPlus } from 'lucide-react';
 import { obtenerDatosPartes } from '../../solicitudAdmin/services/obtenerDatosPartes';
 import { crearExpedienteDesdeAdmitida, type AdmitirYCrearExpedienteRequest } from '../services/admitirYCrearExpediente';
 import type { DatosPartesExpediente, DatosParteSolicitud } from '../schemas/ExpedienteSchema';
+import { buscarSecretarios } from '../../../features/usuariosAdmin/services/usuariosService';
+
+// Interface para los secretarios devueltos por buscarSecretarios
+interface SecretarioEncontrado {
+  id: number;
+  nombre_completo: string;
+  numero_documento: string;
+  telefono: string;
+  correo: string;
+  origen: string;
+}
 
 interface ModalCrearExpedienteDesdeSolicitudProps {
   open: boolean;
@@ -23,7 +34,16 @@ export default function ModalCrearExpedienteDesdeSolicitud({
   const [datosPartes, setDatosPartes] = useState<DatosPartesExpediente | null>(null);
   const [error, setError] = useState('');
 
-  // Datos del secretario
+  // Modo de agregar secretario: 'buscar' o 'crear'
+  const [modoSecretario, setModoSecretario] = useState<'buscar' | 'crear'>('buscar');
+
+  // Para buscar secretario existente
+  const [busquedaSecretario, setBusquedaSecretario] = useState('');
+  const [secretariosEncontrados, setSecretariosEncontrados] = useState<SecretarioEncontrado[]>([]);
+  const [secretarioSeleccionado, setSecretarioSeleccionado] = useState<SecretarioEncontrado | null>(null);
+  const [buscando, setBuscando] = useState(false);
+
+  // Datos del secretario (para crear nuevo)
   const [nombreSecretario, setNombreSecretario] = useState('');
   const [correoSecretario, setCorreoSecretario] = useState('');
   const [telefonoSecretario, setTelefonoSecretario] = useState('');
@@ -61,6 +81,10 @@ export default function ModalCrearExpedienteDesdeSolicitud({
   const resetForm = () => {
     setCodigoExpediente('');
     setDatosPartes(null);
+    setModoSecretario('buscar');
+    setBusquedaSecretario('');
+    setSecretariosEncontrados([]);
+    setSecretarioSeleccionado(null);
     setNombreSecretario('');
     setCorreoSecretario('');
     setTelefonoSecretario('');
@@ -72,16 +96,22 @@ export default function ModalCrearExpedienteDesdeSolicitud({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!nombreSecretario.trim()) {
-      newErrors.nombre_secretario = 'El nombre del secretario es obligatorio';
-    }
-
-    if (!correoSecretario.trim()) {
-      newErrors.correo_secretario = 'El correo del secretario es obligatorio';
+    if (modoSecretario === 'buscar') {
+      if (!secretarioSeleccionado) {
+        newErrors.secretario = 'Debes seleccionar un secretario';
+      }
     } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(correoSecretario)) {
-        newErrors.correo_secretario = 'El correo no es válido';
+      if (!nombreSecretario.trim()) {
+        newErrors.nombre_secretario = 'El nombre del secretario es obligatorio';
+      }
+
+      if (!correoSecretario.trim()) {
+        newErrors.correo_secretario = 'El correo del secretario es obligatorio';
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(correoSecretario)) {
+          newErrors.correo_secretario = 'El correo no es válido';
+        }
       }
     }
 
@@ -96,11 +126,15 @@ export default function ModalCrearExpedienteDesdeSolicitud({
     setError('');
 
     try {
-      const requestData: AdmitirYCrearExpedienteRequest = {
-        nombre_secretario: nombreSecretario.trim(),
-        correo_secretario: correoSecretario.trim(),
-        telefono_secretario: telefonoSecretario.trim() || undefined
-      };
+      const requestData: AdmitirYCrearExpedienteRequest = modoSecretario === 'buscar'
+        ? {
+            id_secretario_existente: secretarioSeleccionado!.id
+          }
+        : {
+            nombre_secretario: nombreSecretario.trim(),
+            correo_secretario: correoSecretario.trim(),
+            telefono_secretario: telefonoSecretario.trim() || undefined
+          };
 
       const response = await crearExpedienteDesdeAdmitida(idSolicitud, requestData);
 
@@ -117,6 +151,34 @@ export default function ModalCrearExpedienteDesdeSolicitud({
   };
 
   if (!open) return null;
+
+  const handleBuscarSecretario = async () => {
+    if (!busquedaSecretario.trim()) {
+      setSecretariosEncontrados([]);
+      return;
+    }
+
+    setBuscando(true);
+    setError('');
+    try {
+      const response = await buscarSecretarios(busquedaSecretario);
+      if (response.success) {
+        setSecretariosEncontrados(response.data || []);
+      }
+    } catch (err: any) {
+      console.error('Error al buscar secretarios:', err);
+      setError('Error al buscar secretarios');
+    } finally {
+      setBuscando(false);
+    }
+  };
+
+  const seleccionarSecretario = (secretario: SecretarioEncontrado) => {
+    setSecretarioSeleccionado(secretario);
+    setSecretariosEncontrados([]);
+    setBusquedaSecretario('');
+    setErrors({});
+  };
 
   const renderDatosParte = (parte: DatosParteSolicitud, tipo: 'Demandante' | 'Demandado') => (
     <div className={`p-4 rounded-xl border-2 ${
@@ -263,64 +325,211 @@ export default function ModalCrearExpedienteDesdeSolicitud({
                   <User className="w-5 h-5 mr-2 text-blue-600" />
                   Datos del Secretario Arbitral
                 </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Nombre */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Nombre Completo <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={nombreSecretario}
-                      onChange={(e) => setNombreSecretario(e.target.value)}
-                      placeholder="Ej: Juan Pérez García"
-                      disabled={loading}
-                      className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50"
-                    />
-                    {errors.nombre_secretario && (
-                      <p className="text-xs text-red-600 mt-1 flex items-center space-x-1">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>{errors.nombre_secretario}</span>
-                      </p>
-                    )}
-                  </div>
 
-                  {/* Correo */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Correo Electrónico <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      value={correoSecretario}
-                      onChange={(e) => setCorreoSecretario(e.target.value)}
-                      placeholder="secretario@example.com"
-                      disabled={loading}
-                      className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50"
-                    />
-                    {errors.correo_secretario && (
-                      <p className="text-xs text-red-600 mt-1 flex items-center space-x-1">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>{errors.correo_secretario}</span>
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Teléfono */}
-                  <div className="lg:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Teléfono (Opcional)
-                    </label>
-                    <input
-                      type="text"
-                      value={telefonoSecretario}
-                      onChange={(e) => setTelefonoSecretario(e.target.value)}
-                      placeholder="987654321"
-                      disabled={loading}
-                      className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50"
-                    />
-                  </div>
+                {/* Toggle de Modo */}
+                <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModoSecretario('buscar');
+                      setErrors({});
+                      setNombreSecretario('');
+                      setCorreoSecretario('');
+                      setTelefonoSecretario('');
+                    }}
+                    disabled={loading}
+                    className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 border-2 rounded-lg font-medium transition-all ${
+                      modoSecretario === 'buscar'
+                        ? 'bg-blue-50 border-blue-500 text-blue-700'
+                        : 'bg-white border-slate-300 text-slate-600 hover:border-slate-400'
+                    } disabled:opacity-50`}
+                  >
+                    <Search className="w-4 h-4" />
+                    <span>Buscar Existente</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModoSecretario('crear');
+                      setErrors({});
+                      setSecretarioSeleccionado(null);
+                      setBusquedaSecretario('');
+                      setSecretariosEncontrados([]);
+                    }}
+                    disabled={loading}
+                    className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 border-2 rounded-lg font-medium transition-all ${
+                      modoSecretario === 'crear'
+                        ? 'bg-green-50 border-green-500 text-green-700'
+                        : 'bg-white border-slate-300 text-slate-600 hover:border-slate-400'
+                    } disabled:opacity-50`}
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    <span>Crear Nuevo</span>
+                  </button>
                 </div>
+
+                {/* Modo Buscar */}
+                {modoSecretario === 'buscar' && (
+                  <div className="space-y-4">
+                    {/* Secretario Seleccionado */}
+                    {secretarioSeleccionado ? (
+                      <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+                              <User className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-green-900">{secretarioSeleccionado.nombre_completo}</p>
+                              <p className="text-sm text-green-700">{secretarioSeleccionado.correo}</p>
+                              {secretarioSeleccionado.telefono && (
+                                <p className="text-sm text-green-700">{secretarioSeleccionado.telefono}</p>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSecretarioSeleccionado(null)}
+                            disabled={loading}
+                            className="text-green-700 hover:text-green-900 disabled:opacity-50"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Buscador */}
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Buscar Secretario por Nombre <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={busquedaSecretario}
+                              onChange={(e) => setBusquedaSecretario(e.target.value)}
+                              onKeyUp={handleBuscarSecretario}
+                              placeholder="Escribe el nombre del secretario..."
+                              disabled={loading}
+                              className="w-full py-2.5 pl-10 pr-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50"
+                            />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                          </div>
+                          {errors.secretario && (
+                            <p className="text-xs text-red-600 mt-1 flex items-center space-x-1">
+                              <AlertCircle className="w-3 h-3" />
+                              <span>{errors.secretario}</span>
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Resultados de Búsqueda */}
+                        {buscando && (
+                          <div className="flex items-center justify-center py-4">
+                            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                          </div>
+                        )}
+
+                        {!buscando && secretariosEncontrados.length > 0 && (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {secretariosEncontrados.map((secretario) => (
+                              <button
+                                key={secretario.id}
+                                type="button"
+                                onClick={() => seleccionarSecretario(secretario)}
+                                disabled={loading}
+                                className="w-full text-left p-4 bg-white border-2 border-slate-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all disabled:opacity-50"
+                              >
+                                <div className="flex items-start space-x-3">
+                                  <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <User className="w-5 h-5 text-blue-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-slate-900">{secretario.nombre_completo}</p>
+                                    <p className="text-sm text-slate-600 truncate">{secretario.correo}</p>
+                                    {secretario.telefono && (
+                                      <p className="text-sm text-slate-500">{secretario.telefono}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {!buscando && busquedaSecretario && secretariosEncontrados.length === 0 && (
+                          <div className="text-center py-6 text-slate-500">
+                            <User className="w-12 h-12 mx-auto mb-2 text-slate-300" />
+                            <p className="text-sm">No se encontraron secretarios con ese nombre</p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Modo Crear */}
+                {modoSecretario === 'crear' && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Nombre */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Nombre Completo <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={nombreSecretario}
+                        onChange={(e) => setNombreSecretario(e.target.value)}
+                        placeholder="Ej: Juan Pérez García"
+                        disabled={loading}
+                        className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50"
+                      />
+                      {errors.nombre_secretario && (
+                        <p className="text-xs text-red-600 mt-1 flex items-center space-x-1">
+                          <AlertCircle className="w-3 h-3" />
+                          <span>{errors.nombre_secretario}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Correo */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Correo Electrónico <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={correoSecretario}
+                        onChange={(e) => setCorreoSecretario(e.target.value)}
+                        placeholder="secretario@example.com"
+                        disabled={loading}
+                        className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50"
+                      />
+                      {errors.correo_secretario && (
+                        <p className="text-xs text-red-600 mt-1 flex items-center space-x-1">
+                          <AlertCircle className="w-3 h-3" />
+                          <span>{errors.correo_secretario}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Teléfono */}
+                    <div className="lg:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Teléfono (Opcional)
+                      </label>
+                      <input
+                        type="text"
+                        value={telefonoSecretario}
+                        onChange={(e) => setTelefonoSecretario(e.target.value)}
+                        placeholder="987654321"
+                        disabled={loading}
+                        className="w-full py-2.5 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}

@@ -1,8 +1,9 @@
 import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
 
 export interface AdmitirYCrearExpedienteRequest {
-  nombre_secretario: string;
-  correo_secretario: string;
+  id_secretario_existente?: number;
+  nombre_secretario?: string;
+  correo_secretario?: string;
   telefono_secretario?: string;
 }
 

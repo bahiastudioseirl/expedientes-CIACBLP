@@ -14,8 +14,9 @@ class CrearExpedienteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_secretario' => ['required', 'string', 'max:255'],
-            'correo_secretario' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'id_secretario_existente' => ['nullable', 'integer', 'exists:usuarios,id_usuario'],
+            'nombre_secretario' => ['required_without:id_secretario_existente', 'string', 'max:255'],
+            'correo_secretario' => ['required_without:id_secretario_existente', 'email', 'max:255', 'unique:usuarios,correo'],
             'telefono_secretario' => ['nullable', 'string', 'max:20'],
         ];
     }
@@ -23,10 +24,12 @@ class CrearExpedienteRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nombre_secretario.required' => 'El nombre del secretario es obligatorio',
+            'id_secretario_existente.exists' => 'El secretario seleccionado no existe',
+            
+            'nombre_secretario.required_without' => 'El nombre del secretario es obligatorio cuando no se selecciona uno existente',
             'nombre_secretario.max' => 'El nombre del secretario no puede exceder 255 caracteres',
             
-            'correo_secretario.required' => 'El correo del secretario es obligatorio',
+            'correo_secretario.required_without' => 'El correo del secretario es obligatorio cuando no se selecciona uno existente',
             'correo_secretario.email' => 'El correo del secretario debe ser válido',
             'correo_secretario.unique' => 'Este correo ya está registrado en el sistema',
             
