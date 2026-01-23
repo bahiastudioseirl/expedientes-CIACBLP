@@ -87,8 +87,18 @@ class CredencialesService
                     // Guardar el mensaje con adjuntos
                     $this->mensajeService->crearMensaje($crearMensajeDTO, $usuariosDestinatarios, $adjuntos);
                     
+                    Log::info("Mensaje guardado exitosamente para credenciales", [
+                        'expediente' => $idExpediente,
+                        'asunto' => $asunto->id_asunto,
+                        'usuarios_destinatarios' => count($usuariosDestinatarios)
+                    ]);
+                    
                 } catch (Exception $e) {
                     // No fallar el flujo de credenciales si hay error al guardar mensaje
+                    Log::error("Error al guardar mensaje con credenciales: " . $e->getMessage(), [
+                        'expediente' => $idExpediente,
+                        'error' => $e->getTraceAsString()
+                    ]);
                 }
             }
             

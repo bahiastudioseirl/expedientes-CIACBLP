@@ -9,6 +9,7 @@ use App\Http\Requests\Flujos\CambiarFlujoRequest;
 use App\Http\Responses\CaminoFlujoResponse;
 use App\Http\Responses\FlujoResponse;
 use App\Services\FlujoService;
+use Illuminate\Support\Facades\Log;
 
 class FlujoController extends Controller
 {
@@ -143,6 +144,81 @@ class FlujoController extends Controller
                 'success' => false,
                 'message' => 'Error al obtener el camino del expediente',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Verifica si el expediente está en etapa 1, subetapa 5 para mostrar contadores
+     */
+    public function verificarMostrarContadores(int $idExpediente)
+    {
+        try {
+            $flujoActual = $this->flujoService->obtenerFlujoActual($idExpediente);
+            
+            if (!$flujoActual) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'mostrar_contadores' => false,
+                        'etapa_actual' => null,
+                        'subetapa_actual' => null,
+                        'etapa_orden' => null,
+                        'subetapa_orden' => null
+                    ],
+                    'message' => 'No hay flujo activo'
+                ]);
+            }
+
+            // Cargar las relaciones para acceder al campo 'orden'
+            $flujoActual->load(['etapa', 'subetapa']);
+            
+            // Debug: Verificar qué datos tenemos
+            Log::info('Flujo actual debug:', [
+                'id_flujo' => $flujoActual->id_flujo,
+                'id_etapa' => $flujoActual->id_etapa,
+                'id_subetapa' => $flujoActual->id_subetapa,
+                'etapa_existe' => $flujoActual->etapa ? true : false,
+                'subetapa_existe' => $flujoActual->subetapa ? true : false,
+                'etapa_orden' => $flujoActual->etapa ? $flujoActual->etapa->orden : 'NO_EXISTE',
+                'subetapa_orden' => $flujoActual->subetapa ? $flujoActual->subetapa->orden : 'NO_EXISTE'
+            ]);
+            
+            // Verificar si está en etapa orden 1, subetapa orden 5
+            $etapaOrden = $flujoActual->etapa ? $flujoActual->etapa->orden : null;
+            $subetapaOrden = $flujoActual->subetapa ? $flujoActual->subetapa->orden : null;
+            
+            $mostrarContadores = ($etapaOrden == 1 && $subetapaOrden == 5);
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'mostrar_contadores' => $mostrarContadores,
+                    'etapa_actual' => $flujoActual->id_etapa,
+                    'subetapa_actual' => $flujoActual->id_subetapa,
+                    'etapa_orden' => $etapaOrden,
+                    'subetapa_orden' => $subetapaOrden
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error en verificarMostrarContadores:', [
+                'expediente_id' => $idExpediente,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al verificar el estado del expediente',
+                'error' => $e->getMessage(),
+                'data' => [
+                    'mostrar_contadores' => false,
+                    'etapa_actual' => null,
+                    'subetapa_actual' => null,
+                    'etapa_orden' => null,
+                    'subetapa_orden' => null
+                ]
             ], 500);
         }
     }

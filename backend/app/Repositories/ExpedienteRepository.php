@@ -27,14 +27,28 @@ class ExpedienteRepository
 
     public function obtenerTodos(): Collection
     {
-        return Expediente::all();
+        return Expediente::with([
+            'plantilla',
+            'solicitud.demandante',
+            'solicitud.demandado', 
+            'participantes.usuario.rol',
+            'asunto.flujo.etapa.subEtapas',
+            'asunto.flujo.subetapa'
+        ])->get();
     }
 
     public function obtenerPorUsuario(int $idUsuario): Collection
     {
         return Expediente::whereHas('usuariosExpedientes', function ($query) use ($idUsuario) {
             $query->where('id_usuario', $idUsuario);
-        })->get();
+        })->with([
+            'plantilla',
+            'solicitud.demandante', 
+            'solicitud.demandado',
+            'participantes.usuario.rol',
+            'asunto.flujo.etapa.subEtapas',
+            'asunto.flujo.subetapa'
+        ])->get();
     }
 
     public function actualizar(int $id, array $data): bool

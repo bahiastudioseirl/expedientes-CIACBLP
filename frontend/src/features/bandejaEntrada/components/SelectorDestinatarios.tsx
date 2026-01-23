@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from 'lucide-react';
 import { obtenerNombreCompleto, getValidParticipantes } from '../utils/chatUtils';
-import type { ExpedienteAsignado } from '../schemas/BandejaEntradaSchema';
+import type { ExpedienteAsignado, Asunto } from '../schemas/BandejaEntradaSchema';
+import { verificarMostrarContadores } from '../services/flujoService';
 
 interface SelectorDestinatariosProps {
   expediente: ExpedienteAsignado;
@@ -15,6 +16,7 @@ interface SelectorDestinatariosProps {
     nombre: string;
   };
   deshabilitado?: boolean;
+  asunto?: Asunto | null; // Para determinar el flujo actual
 }
 
 export const SelectorDestinatarios: React.FC<SelectorDestinatariosProps> = ({
@@ -24,21 +26,26 @@ export const SelectorDestinatarios: React.FC<SelectorDestinatariosProps> = ({
   onToggleRol,
   variant = 'normal',
   currentUser,
-  deshabilitado = false
+  deshabilitado = false,
+  asunto
 }) => {
+  const [mostrarContadores, setMostrarContadores] = useState(false);
+  
+  // Verificar si debemos mostrar contadores al cargar el componente
+  useEffect(() => {
+    const verificarEstado = async () => {
+      if (expediente?.id) {
+        const resultado = await verificarMostrarContadores(expediente.id);
+        setMostrarContadores(resultado.data.mostrar_contadores || false);
+      }
+    };
+
+    verificarEstado();
+  }, [expediente?.id]);
   const isCheckboxDisabled = (rol: string, participante: any) => {
     if (!currentUser) return false;
 
     const esElMismoUsuario = participante.usuario.id_usuario === currentUser.id_usuario;
-    
-    if (participante.usuario.id_usuario === currentUser.id_usuario) {
-      console.log('BLOQUEANDO USUARIO:', {
-        participanteId: participante.usuario.id_usuario,
-        currentUserId: currentUser.id_usuario,
-        esElMismo: esElMismoUsuario
-      });
-    }
-    
     if (esElMismoUsuario) return true;
 
     if (currentUser.id_rol === 1) return false;
@@ -72,8 +79,33 @@ export const SelectorDestinatarios: React.FC<SelectorDestinatariosProps> = ({
     return false;
   };
 
-  const participantesValidos = getValidParticipantes(expediente);
+  const getValidParticipantes = (expediente: ExpedienteAsignado) => {
+    if (!expediente?.participantes) return [];
+
+    return expediente.participantes.filter((participante: any) => {
+      const usuario = participante.usuario;
+      if (!usuario) return false;
+
+      // Excluir al usuario actual
+      if (currentUser && usuario.id_usuario === currentUser.id_usuario) return false;
+
+      // Verificar que el usuario esté activo
+      if (usuario.activo === false) return false;
+
+      return true;
+    });
+  };
+
+  let participantesValidos = getValidParticipantes(expediente);
   
+  // Filtrar participantes según si debemos mostrar contadores:
+  if (!mostrarContadores) {
+    // En cualquier otra etapa que no sea etapa 1, subetapa 5: EXCLUIR contadores
+    participantesValidos = participantesValidos.filter((participante: any) => 
+      participante.usuario?.rol?.nombre !== 'Contador'
+    );
+  }
+
   // Agrupar participantes por rol
   const participantesPorRol = participantesValidos.reduce((grupos: any, participante: any) => {
     const rolNombre = participante.usuario?.rol?.nombre || 'Sin rol';
@@ -84,8 +116,8 @@ export const SelectorDestinatarios: React.FC<SelectorDestinatariosProps> = ({
     return grupos;
   }, {});
 
-  // Ordenar roles según prioridad
-  const rolesOrden = ['Demandante', 'Demandado', 'Secretario', 'Arbitro', 'Administrador'];
+  // Ordenar roles según prioridad (agregar Contador al final)
+  const rolesOrden = ['Demandante', 'Demandado', 'Secretario', 'Arbitro', 'Administrador', 'Contador'];
   const rolesOrdenados = Object.keys(participantesPorRol).sort((a, b) => {
     const indexA = rolesOrden.indexOf(a);
     const indexB = rolesOrden.indexOf(b);

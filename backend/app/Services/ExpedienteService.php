@@ -104,6 +104,9 @@ class ExpedienteService
                 fechaInicioSolicitud: $solicitud->created_at
             );
 
+            // 8.5. Vincular automáticamente todos los contadores al expediente (sin notificación)
+            $this->vincularContadoresAExpediente($expediente->id_expediente);
+
             // 9. Enviar notificaciones
             $this->enviarNotificaciones(
                 correosDemandante: $correosDemandante,
@@ -129,12 +132,12 @@ class ExpedienteService
 
     public function obtenerPorRolUsuario(int $idUsuario, int $idRol): Collection
     {
-        // Si es administrador (rol 1), puede ver todos los expedientes
-        if ($idRol === 1) {
+        // Si es administrador (rol 1) o contador (rol 6), puede ver todos los expedientes
+        if ($idRol === 1 || $idRol === 6) {
             return $this->expedienteRepository->obtenerTodos();
         }
         
-        // Si no es administrador, solo ve sus expedientes asignados
+        // Si no es administrador ni contador, solo ve sus expedientes asignados
         return $this->expedienteRepository->obtenerPorUsuario($idUsuario);
     }
 
@@ -189,6 +192,25 @@ class ExpedienteService
                 codigoExpediente: $codigoExpediente,
                 credenciales: $credencialesSecretario
             ));
+        }
+    }
+
+    /**
+     * Vincula automáticamente todos los contadores al expediente (sin notificación)
+     */
+    private function vincularContadoresAExpediente(int $idExpediente): void
+    {
+        // Obtener todos los usuarios con rol Contador (id_rol = 6)
+        $contadores = Usuarios::where('id_rol', 6)
+            ->where('activo', true)
+            ->get();
+
+        foreach ($contadores as $contador) {
+            // Vincular contador al expediente
+            $this->creadorUsuarios->vincularUsuarioExpediente(
+                idUsuario: $contador->id_usuario,
+                idExpediente: $idExpediente
+            );
         }
     }
 }

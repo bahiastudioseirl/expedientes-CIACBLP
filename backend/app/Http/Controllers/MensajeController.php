@@ -155,8 +155,22 @@ class MensajeController extends Controller
 
             // Obtener mensaje opcional del request
             $mensaje = $request->input('mensaje', '');
+            
+            // Manejar adjuntos si existen
+            $adjuntos = [];
+            if ($request->hasFile('adjuntos')) {
+                $adjuntos = $request->file('adjuntos');
+                if (!is_array($adjuntos)) {
+                    $adjuntos = [$adjuntos];
+                }
+            }
 
-            $resultado = $this->credencialesService->enviarCredencialesDemandado($idExpediente, $mensaje);
+            $resultado = $this->credencialesService->enviarCredencialesDemandado(
+                $idExpediente, 
+                $mensaje, 
+                $adjuntos, 
+                $usuario->id_usuario  // Pasar ID del usuario remitente
+            );
 
             if ($resultado['success']) {
                 return response()->json($resultado, 200);

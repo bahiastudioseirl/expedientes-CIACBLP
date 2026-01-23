@@ -166,7 +166,7 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
           return;
         }
 
-        // 2. Enviar credenciales primero
+        // 2. Enviar credenciales (esto ya incluye el mensaje y adjuntos)
         const idsUsuariosCreados = await handleEnviarCredenciales();
         if (idsUsuariosCreados.length === 0) {
           console.error('No se pudieron crear usuarios demandados');
@@ -174,11 +174,17 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
           return;
         }
 
-        // 3. Combinar staff existente + usuarios recién creados
-        const staffIds = destinatariosResponse.data.staff_ids;
-        destinatariosFinales = [...new Set([...staffIds, ...idsUsuariosCreados])];
+        console.log('Credenciales enviadas exitosamente con mensaje');
         
-        console.log('Destinatarios finales para mensaje:', destinatariosFinales);
+        // 3. NO enviar otro mensaje normal porque las credenciales ya incluyen el mensaje
+        // Limpiar y cerrar directamente
+        setMensaje('');
+        setAdjuntos([]);
+        setDestinatariosSeleccionados([]);
+        setEnviarCredencialesDemandados(false);
+        setSending(false);
+        onCancelar();
+        return;
 
       } catch (error) {
         console.error('Error en el proceso de credenciales:', error);
@@ -187,7 +193,7 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
       }
     }
 
-    // Enviar el mensaje normal si hay contenido (se guarda en BD)
+    // Enviar el mensaje normal solo si NO se enviaron credenciales
     if ((mensaje.trim() || adjuntos.length > 0) && destinatariosFinales.length > 0) {
       const success = await onEnviar(mensaje, adjuntos, destinatariosFinales);
       if (!success) {
@@ -285,6 +291,7 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
                 onToggleRol={toggleRol}
                 currentUser={currentUser}
                 deshabilitado={enviarCredencialesDemandados && puedeEnviarCredenciales}
+                asunto={expediente.asunto}
               />
 
 

@@ -53,7 +53,7 @@ class CreadorUsuariosExpedienteService
                 // Enviar credenciales por email solo si está habilitado
                 if ($enviarCorreo) {
                     $email = new CredencialesExpediente(
-                        correo: $correo,
+                        correo: $usuario->correo, // Usar el correo del usuario creado
                         contrasena: $contrasenaGenerada,
                         codigoExpediente: $expediente->codigo_expediente,
                         asuntoTitulo: $asuntoTitulo ?: 'Asunto',
@@ -61,7 +61,7 @@ class CreadorUsuariosExpedienteService
                         adjuntos: $adjuntos // Pasar adjuntos a la plantilla de correo
                     );
                     
-                    Mail::to($correo)->send($email);
+                    Mail::to($correo)->send($email); // Enviar al correo del destinatario
                 }
 
                 $credenciales[$correo] = [

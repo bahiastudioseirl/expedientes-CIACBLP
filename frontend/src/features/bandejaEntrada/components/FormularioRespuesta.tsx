@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Send, Paperclip, X, Reply } from 'lucide-react';
 import { getAllParticipanteIds } from '../utils/chatUtils';
 import { SelectorDestinatarios } from './SelectorDestinatarios';
-import type { ExpedienteAsignado } from '../schemas/BandejaEntradaSchema';
+import type { ExpedienteAsignado, Asunto } from '../schemas/BandejaEntradaSchema';
 
 interface FormularioRespuestaProps {
   expediente: ExpedienteAsignado;
@@ -13,13 +13,15 @@ interface FormularioRespuestaProps {
     id_rol: number;
     nombre: string;
   };
+  asunto?: Asunto;
 }
 
 export const FormularioRespuesta: React.FC<FormularioRespuestaProps> = ({
   expediente,
   onEnviar,
   onCancelar,
-  currentUser
+  currentUser,
+  asunto
 }) => {
   // Función para obtener destinatarios iniciales según el rol del usuario
   const getDestinatariosIniciales = () => {
@@ -123,6 +125,7 @@ export const FormularioRespuesta: React.FC<FormularioRespuestaProps> = ({
             onToggleDestinatario={toggleDestinatario}
             variant="response"
             currentUser={currentUser}
+            asunto={asunto}
           />
         </div>
         </div>

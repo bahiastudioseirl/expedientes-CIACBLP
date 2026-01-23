@@ -171,10 +171,10 @@ class UsuarioController extends Controller
         }
     }
 
-    public function listarArbitroYSecretarioYContadorExpediente(int $idExpediente): JsonResponse
+    public function listarArbitroYSecretario(int $idExpediente): JsonResponse
     {
         try {
-            $staff = $this->usuarioService->obtenerArbitroYSecretarioYContadorExpediente($idExpediente);
+            $staff = $this->usuarioService->obtenerArbitroYSecretarioExpediente($idExpediente);
             
             return UsuarioResponse::staffExpediente($staff);
         } catch (\Exception $e) {

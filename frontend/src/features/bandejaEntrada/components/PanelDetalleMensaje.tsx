@@ -90,6 +90,7 @@ export const PanelDetalleMensaje: React.FC<PanelDetalleMensajeProps> = ({
                   onEnviar={onEnviarRespuesta}
                   onCancelar={onCancelarRespuesta}
                   currentUser={currentUser}
+                  asunto={asunto}
                 />
               )}
             </>

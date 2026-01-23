@@ -50,8 +50,19 @@ class CredencialesExpediente extends Mailable
         $attachments = [];
         
         foreach ($this->adjuntos as $archivo) {
-            $attachments[] = Attachment::fromPath($archivo->getPathname())
-                ->as($archivo->getClientOriginalName());
+            if (is_object($archivo)) {
+                // Si es un UploadedFile
+                if (method_exists($archivo, 'getPathname')) {
+                    $attachments[] = Attachment::fromPath($archivo->getPathname())
+                        ->as($archivo->getClientOriginalName());
+                } elseif (method_exists($archivo, 'getRealPath')) {
+                    $attachments[] = Attachment::fromPath($archivo->getRealPath())
+                        ->as($archivo->getClientOriginalName() ?? $archivo->getOriginalName());
+                }
+            } elseif (is_string($archivo) && file_exists($archivo)) {
+                // Si es una ruta de archivo
+                $attachments[] = Attachment::fromPath($archivo);
+            }
         }
         
         return $attachments;
