@@ -18,6 +18,13 @@ class Etapa extends Model
         'orden',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'orden' => 'integer',
+        ];
+    }
+
     public function plantilla()
     {
         return $this->belongsTo(Plantilla::class, 'id_plantilla', 'id_plantilla');

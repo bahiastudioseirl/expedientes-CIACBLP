@@ -27,6 +27,8 @@ class SubEtapa extends Model
         return [
             'es_habil' => 'boolean',
             'es_obligatorio' => 'boolean',
+            'orden' => 'integer',
+            'dias_habiles' => 'integer',
         ];
     }
 

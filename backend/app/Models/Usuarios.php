@@ -36,6 +36,7 @@ class Usuarios extends Authenticatable implements JWTSubject
         return [
             'contrasena' => 'hashed',
             'activo' => 'boolean',
+            'id_rol' => 'integer',
         ];
     }
 

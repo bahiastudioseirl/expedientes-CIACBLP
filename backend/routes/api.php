@@ -179,7 +179,7 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::get('/{id}', [UsuarioController::class, 'obtenerUsuarioPorId']);
         Route::patch('/{id}', [UsuarioController::class, 'actualizarUsuario']);
         Route::put('/{id}/estado', [UsuarioController::class, 'cambiarEstadoUsuario']);
-        
+
         // Rutas para gestionar participantes de expedientes
         Route::get('/expediente/{idExpediente}/participantes/partes', [UsuarioController::class, 'listarParticipantesPartesExpediente']);
         Route::get('/expediente/{idExpediente}/staff', [UsuarioController::class, 'listarArbitroYSecretario']);
@@ -216,14 +216,9 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
         Route::post('/{id}/crear-expediente', [ExpedienteController::class, 'crearExpedienteDesdeAdmitida']);
         Route::get('/', [ExpedienteController::class, 'listarExpedientes']);
         Route::post('/{id}/credenciales/enviar-demandado', [CredencialesController::class, 'enviarCredencialesDemandado']);
-        Route::post('/{id}/arbitro', [ArbitroController::class, 'crearEnExpediente']);
     });
 
-    Route::get('/arbitros/buscar', [ArbitroController::class, 'buscar']);
-    Route::get('/arbitros/buscar-bd-primaria', [ArbitroController::class, 'buscarBDPrimaria']);
-    Route::get('/secretarios/buscar', [UsuarioController::class, 'buscarSecretarios']);
-    Route::get('/contadores/buscar', [UsuarioController::class, 'buscarContadores']);
-    
+
     Route::prefix('expedientes')->group(function () {
         Route::post('/{id}/vincular-staff', [UsuarioController::class, 'vincularStaffAExpediente']);
     });
@@ -248,9 +243,16 @@ Route::middleware(['force.json', \App\Http\Middleware\JWTAuthMiddleware::class, 
     });
 
     Route::prefix('expedientes')->group(function () {
+        Route::post('/{id}/arbitro', [ArbitroController::class, 'crearEnExpediente']);
         Route::get('/{idExpediente}/etapas-plantilla', [FlujoController::class, 'obtenerEtapasPlantillaExpediente']);
         Route::patch('/{idExpediente}/finalizar', [ExpedienteController::class, 'finalizarExpediente']);
     });
+
+
+    Route::get('/arbitros/buscar', [ArbitroController::class, 'buscar']);
+    Route::get('/arbitros/buscar-bd-primaria', [ArbitroController::class, 'buscarBDPrimaria']);
+    Route::get('/secretarios/buscar', [UsuarioController::class, 'buscarSecretarios']);
+    Route::get('/contadores/buscar', [UsuarioController::class, 'buscarContadores']);
 });
 
 

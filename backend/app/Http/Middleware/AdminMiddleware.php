@@ -12,7 +12,7 @@ class AdminMiddleware
     {
         $user = auth('api')->user();
         
-        if (!$user || $user->id_rol !== 1) {
+        if (!$user || (int)$user->id_rol !== 1) {
             return response()->json([
                 'success' => false,
                 'message' => 'Acceso denegado. Se requieren permisos de administrador.'

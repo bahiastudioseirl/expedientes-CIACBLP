@@ -145,40 +145,93 @@ class FlujoService
 
     private function notificarContadorSiEsNecesario(int $idExpediente, int $idEtapa, ?int $idSubetapa): void
     {
+        Log::info("Iniciando verificación de notificación al contador", [
+            'id_expediente' => $idExpediente,
+            'id_etapa' => $idEtapa,
+            'id_subetapa' => $idSubetapa
+        ]);
+
         if (!$idSubetapa) {
+            Log::info("No hay subetapa, omitiendo notificación");
             return;
         }
 
         // Verificar si es la etapa 1
         $etapa = $this->etapaRepository->obtenerEtapaPorId($idEtapa);
-        if (!$etapa || $etapa->orden !== 1) {
+        Log::info("Datos de etapa obtenidos", [
+            'etapa_encontrada' => $etapa ? 'sí' : 'no',
+            'etapa_orden' => $etapa ? $etapa->orden : 'N/A',
+            'etapa_orden_tipo' => $etapa ? gettype($etapa->orden) : 'N/A'
+        ]);
+        
+        if (!$etapa || (int)$etapa->orden !== 1) {
+            Log::info("No es la etapa 1, omitiendo notificación", [
+                'orden_actual' => $etapa ? $etapa->orden : 'N/A',
+                'comparacion_resultado' => $etapa ? ((int)$etapa->orden !== 1 ? 'no es 1' : 'es 1') : 'no hay etapa'
+            ]);
             return;
         }
 
         // Verificar si es la sub etapa 5
         $subetapa = $this->subEtapaRepository->obtenerPorId($idSubetapa);
-        if (!$subetapa || $subetapa->orden !== 5) {
+        Log::info("Datos de subetapa obtenidos", [
+            'subetapa_encontrada' => $subetapa ? 'sí' : 'no',
+            'subetapa_orden' => $subetapa ? $subetapa->orden : 'N/A',
+            'subetapa_orden_tipo' => $subetapa ? gettype($subetapa->orden) : 'N/A'
+        ]);
+        
+        if (!$subetapa || (int)$subetapa->orden !== 5) {
+            Log::info("No es la subetapa 5, omitiendo notificación", [
+                'orden_actual' => $subetapa ? $subetapa->orden : 'N/A',
+                'comparacion_resultado' => $subetapa ? ((int)$subetapa->orden !== 5 ? 'no es 5' : 'es 5') : 'no hay subetapa'
+            ]);
             return;
         }
 
         $expediente = $this->expedienteRepository->obtenerPorId($idExpediente);
         if (!$expediente) {
+            Log::error("Expediente no encontrado", ['id_expediente' => $idExpediente]);
             return;
         }
 
         $contador = $this->usuarioRepository->obtenerPorRol('Contador');
+        Log::info("Buscando contador", [
+            'contador_encontrado' => $contador ? 'sí' : 'no',
+            'contador_correo' => $contador ? $contador->correo : 'N/A',
+            'contador_activo' => $contador ? $contador->activo : 'N/A'
+        ]);
+        
         if (!$contador) {
             Log::warning("No se encontró usuario con rol Contador para notificar en expediente {$expediente->codigo_expediente}");
             return;
         }
 
+        if (!$contador->activo) {
+            Log::warning("El contador encontrado está inactivo", [
+                'contador_id' => $contador->id_usuario,
+                'contador_correo' => $contador->correo
+            ]);
+            return;
+        }
+
         try {
+            Log::info("Intentando enviar correo al contador", [
+                'destinatario' => $contador->correo,
+                'codigo_expediente' => $expediente->codigo_expediente
+            ]);
+            
             Mail::to($contador->correo)->send(new NotificacionContador(
                 codigoExpediente: $expediente->codigo_expediente,
                 nombreContador: $contador->nombre_completo
             ));
+            
+            Log::info("Correo enviado exitosamente al contador");
         } catch (\Exception $e) {
-            Log::error("Error al enviar notificación al contador: " . $e->getMessage());
+            Log::error("Error al enviar notificación al contador: " . $e->getMessage(), [
+                'exception' => $e,
+                'codigo_expediente' => $expediente->codigo_expediente,
+                'contador_correo' => $contador->correo
+            ]);
         }
     }
 

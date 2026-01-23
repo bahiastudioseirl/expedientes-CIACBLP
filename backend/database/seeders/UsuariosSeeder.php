@@ -11,10 +11,10 @@ class UsuariosSeeder extends Seeder
     {
         $usuarios = [
             [
-                'nombre_completo' => 'Victor Chavez',
-                'numero_documento' => '77777777',
-                'correo' => 'admindev@bahia.pe',
-                'contrasena' => 'admindev@bahia.pe',
+                'nombre_completo' => 'Admin CIACBLP',
+                'numero_documento' => '12345678',
+                'correo' => 'adminexpedientes@ciacblp.com',
+                'contrasena' => '4dminC!@#2026',
                 'telefono' => '123456789',
                 'activo' => true,
                 'id_rol' => 1
