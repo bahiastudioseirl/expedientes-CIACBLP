@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { 
   X, 
   MapPin,
-  Calendar,
   Clock,
   CheckCircle,
   AlertTriangle,
@@ -14,7 +13,6 @@ import {
   Phone,
   Mail,
   Users,
-  FileSpreadsheet
 } from 'lucide-react';
 import { obtenerCaminoExpediente } from '../services/obtenerCaminoExpediente';
 import { descargarHtmlCamino } from '../utils/generarHtmlCamino';
@@ -414,7 +412,7 @@ export default function ModalCaminoExpediente({
 
                       {/* Subetapas de esta etapa */}
                       <div className="ml-20 space-y-4">
-                        {flujosDeLaEtapa.map((flujo, subetapaIndex) => (
+                        {flujosDeLaEtapa.map((flujo, _subetapaIndex) => (
                           <div key={flujo.id_flujo} className="relative">
                             {/* Mini timeline node para subetapa */}
                             <div className="absolute -left-6 top-4 w-3 h-3 bg-white border-2 border-blue-400 rounded-full">

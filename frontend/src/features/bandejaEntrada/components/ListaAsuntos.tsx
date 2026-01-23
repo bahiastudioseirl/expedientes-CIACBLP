@@ -23,12 +23,14 @@ interface ListaAsuntosProps {
     expediente: ExpedienteAsignado;
     onBack: () => void;
     onSelectAsunto: (asunto: Asunto) => void;
+    userRole: number;
 }
 
 export default function ListaAsuntos({
     expediente,
     onBack,
     onSelectAsunto,
+    userRole: _userRole,
 }: ListaAsuntosProps) {
     const [asuntos, setAsuntos] = useState<Asunto[]>([]);
     const [loading, setLoading] = useState(true);
@@ -247,7 +249,7 @@ export default function ListaAsuntos({
                     asuntos.map((asunto) => {
                         // Extraer etapa y sub_etapa si existen
                         const etapa = asunto.flujo?.etapa;
-                        const subEtapa = etapa?.sub_etapa;
+                        const subEtapa = asunto.flujo?.subetapa;
                         return (
                             <div
                                 key={asunto.id_asunto}

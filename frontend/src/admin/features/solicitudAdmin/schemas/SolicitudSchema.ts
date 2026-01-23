@@ -64,10 +64,11 @@ export interface Solicitud {
 // Respuestas del API
 export interface SolicitudResponse {
   success: boolean;
+  message?: string;
   data: {
     solicitudes: Solicitud[];
   };
-  meta: {
+  meta?: {
     total: number;
   };
 }

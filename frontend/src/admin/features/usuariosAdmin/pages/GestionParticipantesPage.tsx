@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 import { 
-  Eye, 
   Plus, 
   ToggleLeft, 
   ToggleRight, 
@@ -25,7 +23,6 @@ import type {
 import ModalAgregarParticipante from '../components/ModalAgregarParticipante';
 
 export default function GestionParticipantesPage() {
-  const navigate = useNavigate();
   const [expedientes, setExpedientes] = useState<Expediente[]>([]);
   const [expedienteSeleccionado, setExpedienteSeleccionado] = useState<Expediente | null>(null);
   const [participantes, setParticipantes] = useState<{

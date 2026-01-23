@@ -1,4 +1,4 @@
-import { X, User, Phone, Mail, Plus, Trash2 } from "lucide-react";
+import { X, User, Phone, Mail } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { CrearUsuarioRequest, ActualizarUsuarioRequest, Usuario } from "../schemas/UsuarioSchema";
 

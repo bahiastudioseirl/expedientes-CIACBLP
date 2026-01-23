@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, X, Mail } from 'lucide-react';
+import { Send, Paperclip, X } from 'lucide-react';
 import { getAllParticipanteIds } from '../utils/chatUtils';
 import { SelectorDestinatarios } from './SelectorDestinatarios';
 import { enviarCredencialesDemandado, verificarPuedeEnviarCredenciales, obtenerDestinatariosCredenciales } from '../services/credencialesService';
@@ -133,7 +133,6 @@ export const FormularioNuevoMensaje: React.FC<FormularioNuevoMensajeProps> = ({
   };
 
   const toggleRol = (rol: string, seleccionar: boolean) => {
-    const participantesValidos = getAllParticipanteIds(expediente);
     const participantesExpediente = expediente.participantes || [];
 
     const participantesDelRol = participantesExpediente

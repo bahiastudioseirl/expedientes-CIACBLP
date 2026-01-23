@@ -450,7 +450,7 @@ export const generarHtmlCamino = (camino: CaminoExpedienteData, codigoExpediente
                 <h3 class="section-title">Camino del Expediente</h3>
                 
                 <div class="timeline">
-                    ${Object.entries(agruparFlujosPorEtapa(camino.flujos)).map(([nombreEtapa, flujosDeLaEtapa], etapaIndex) => `
+                    ${Object.entries(agruparFlujosPorEtapa(camino.flujos)).map(([nombreEtapa, flujosDeLaEtapa], _etapaIndex) => `
                         <div class="etapa">
                             <div class="etapa-node"></div>
                             
@@ -466,7 +466,7 @@ export const generarHtmlCamino = (camino: CaminoExpedienteData, codigoExpediente
 
                             <!-- Subetapas -->
                             <div class="subetapas">
-                                ${flujosDeLaEtapa.map((flujo, subetapaIndex) => `
+                                ${flujosDeLaEtapa.map((flujo, _subetapaIndex) => `
                                     <div class="subetapa">
                                         <div class="subetapa-node"></div>
                                         

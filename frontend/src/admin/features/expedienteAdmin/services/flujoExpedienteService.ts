@@ -1,7 +1,5 @@
 import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
 import type {
-  Etapa,
-  FlujoExpediente,
   CambiarEtapaExpedienteRequest,
   ActualizarFlujoExpedienteRequest,
   FlujoActualResponse,

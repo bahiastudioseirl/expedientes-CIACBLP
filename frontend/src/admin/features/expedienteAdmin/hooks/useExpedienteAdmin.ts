@@ -198,7 +198,6 @@ export function useExpedienteAdmin() {
     idSolicitudParaExpediente,
     isViewModalOpen,
     isGestionFlujoModalOpen,
-    isAgregarArbitroModalOpen,
     isCaminoModalOpen,
     
     // Paginación

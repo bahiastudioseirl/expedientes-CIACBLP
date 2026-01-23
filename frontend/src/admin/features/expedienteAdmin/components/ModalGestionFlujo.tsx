@@ -51,7 +51,7 @@ export default function ModalGestionFlujo({
   const [showActualizarFlujo, setShowActualizarFlujo] = useState(false);
   const [nuevaEtapa, setNuevaEtapa] = useState('');
   const [nuevaSubetapa, setNuevaSubetapa] = useState('');
-  const [asunto, setAsunto] = useState('');
+  const [_asunto, _setAsunto] = useState('');
 
   useEffect(() => {
     cargarDatos();
@@ -172,7 +172,7 @@ export default function ModalGestionFlujo({
         setShowCambiarEtapa(false);
         setNuevaEtapa('');
         setNuevaSubetapa('');
-        setAsunto('');
+        _setAsunto('');
         onSuccess?.();
       } else {
         setError(response.message || 'Error al cambiar la etapa');
@@ -207,7 +207,7 @@ export default function ModalGestionFlujo({
         setShowActualizarFlujo(false);
         setNuevaEtapa('');
         setNuevaSubetapa('');
-        setAsunto('');
+        _setAsunto('');
         onSuccess?.();
       } else {
         setError(response.message || 'Error al actualizar el flujo');

@@ -121,7 +121,17 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
 
     await onSave({
       nombre: value,
-      etapas,
+      etapas: etapas.map((etapa, index) => ({
+        ...etapa,
+        orden: index + 1,
+        sub_etapas: etapa.sub_etapas.map((sub, subIndex) => ({
+          nombre: sub.nombre,
+          orden: subIndex + 1,
+          dias_habiles: sub.duracion_dias || 0,
+          es_habil: !sub.tiene_tiempo,
+          es_obligatorio: !sub.es_opcional
+        }))
+      }))
     });
   };
 

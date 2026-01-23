@@ -5,14 +5,9 @@ import {
     Users,
     Shield,
     UserCog,
-    UserCheck,
-    UserX,
-    User,
     ClipboardList,
-    Settings,
     Paperclip,
     type LucideIcon,
-    ShieldCheck,
     Briefcase
 } from 'lucide-react';
 import { AuthStore } from '../../core/components/auth/services/AuthStore';
@@ -37,9 +32,7 @@ const getMenuItems = (): MenuItem[] => {
     console.log('getMenuItems - user:', user); // Debug log
     if (!user) return [];
 
-    const userRole = user.rol;
-    const isAdmin = userRole === 'Administrador';
-    
+    const userRole = user.rol;    
     console.log('getMenuItems - userRole:', userRole); // Debug log
 
     // Menú específico según el rol del usuario

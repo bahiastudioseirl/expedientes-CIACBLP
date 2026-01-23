@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'lucide-react';
-import { obtenerNombreCompleto, getValidParticipantes } from '../utils/chatUtils';
 import type { ExpedienteAsignado, Asunto } from '../schemas/BandejaEntradaSchema';
 import { verificarMostrarContadores } from '../services/flujoService';
 
@@ -27,7 +26,6 @@ export const SelectorDestinatarios: React.FC<SelectorDestinatariosProps> = ({
   variant = 'normal',
   currentUser,
   deshabilitado = false,
-  asunto
 }) => {
   const [mostrarContadores, setMostrarContadores] = useState(false);
   
@@ -135,10 +133,6 @@ export const SelectorDestinatarios: React.FC<SelectorDestinatariosProps> = ({
   const avatarIconClasses = variant === 'response'
     ? 'text-blue-600'
     : 'text-slate-600';
-
-  const roleClasses = variant === 'response'
-    ? 'text-blue-600'
-    : 'text-slate-500';
 
   const checkboxClasses = variant === 'response'
     ? 'text-blue-600 border-blue-300 focus:ring-blue-500'

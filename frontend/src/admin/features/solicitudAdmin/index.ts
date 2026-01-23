@@ -4,5 +4,5 @@ export * from './schemas/SolicitudSchema';
 export * from './services/obtenerSolicitudes';
 export * from './services/obtenerSolicitudDetalle';
 export * from './services/obtenerDatosPartes';
-export * from './services/admitirSolicitud';
+export { admitirSolicitud } from './services/admitirSolicitud';
 

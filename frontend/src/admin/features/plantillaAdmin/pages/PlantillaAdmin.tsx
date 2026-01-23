@@ -1,4 +1,4 @@
-import { Edit, Plus, Search, FileText, Building, CheckCircle, XCircle, ToggleLeft, ToggleRight } from "lucide-react";
+import { Edit, Search, FileText, Building, CheckCircle, XCircle, ToggleLeft, ToggleRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ModalAgregar from "../components/ModalAgregar";
 import ModalEditar from "../components/ModalEditar";
@@ -18,8 +18,6 @@ export default function PlantillaAdmin() {
     const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
-
-    const openModal = () => setIsModalOpen(true);
 
     useEffect(() => {
         cargarPlantillas();

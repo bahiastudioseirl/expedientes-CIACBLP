@@ -80,7 +80,6 @@ export default function BandejaEntradaMain({ currentUser }: BandejaEntradaMainPr
                         expediente={selectedExpediente}
                         onSelectAsunto={handleSelectAsunto}
                         onBack={handleBackToInbox}
-                        currentUser={user}
                         userRole={user.id_rol}
                     />
                 )}

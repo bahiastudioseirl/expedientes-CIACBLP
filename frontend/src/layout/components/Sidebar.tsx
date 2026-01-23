@@ -12,7 +12,6 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const menuItems = getMenuItems(); // Obtener los elementos del menú dinámicamente
 
   const toggleExpand = (titulo: string) => {
     setExpandedItems(prev =>

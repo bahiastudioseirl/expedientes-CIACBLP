@@ -51,7 +51,7 @@ export default function BandejaEntrada({
     const filteredData = useMemo(() => {
         return expedientes.filter(expediente =>
             expediente.codigo_expediente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (expediente.asunto || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (typeof expediente.asunto === 'string' ? expediente.asunto : expediente.asunto?.titulo || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             (expediente.plantilla.nombre || '').toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [expedientes, searchTerm]);
@@ -64,16 +64,6 @@ export default function BandejaEntrada({
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
-
-    const getRolParticipante = (participantes: any[], rol: string) => {
-        const participante = participantes.find(p =>
-            p.usuario?.rol_nombre?.toLowerCase().includes(rol.toLowerCase())
-        );
-        if (!participante) return "N/A";
-        return participante.usuario.nombre_empresa
-            ? participante.usuario.nombre_empresa
-            : `${participante.usuario.nombre || ''} ${participante.usuario.apellido || ''}`.trim();
-    };
 
     if (loading) {
         return (
@@ -159,17 +149,69 @@ export default function BandejaEntrada({
                                     </h3>
                                     <div className="space-y-1">
                                         <div className="text-base text-slate-800">
-                                            <span className="font-semibold text-slate-700">Demandante:</span> <span className="text-slate-900">{expediente.demandante?.map((d: any) => d.nombre_razon).join(', ')}</span>
+                                            <span className="font-semibold text-slate-700">Demandante:</span> <span className="text-slate-900">{
+                                                (() => {
+                                                    // Intentar múltiples formas de obtener demandantes
+                                                    const demandantes = expediente.participantes?.filter(p => 
+                                                        p.usuario?.rol_nombre === 'Demandante' ||
+                                                        p.usuario?.id_rol === 4
+                                                    ).map(p => 
+                                                        p.usuario?.nombre_empresa ||
+                                                        `${p.usuario?.nombre || ''} ${p.usuario?.apellido || ''}`.trim()
+                                                    ).filter(name => name && name.trim() !== '');
+                                                    
+                                                    return demandantes?.length ? demandantes.join(', ') : 
+                                                           (expediente as any).demandante?.map?.((d: any) => d.nombre_razon || d.nombre_completo)?.join(', ') ||
+                                                           'N/A';
+                                                })()
+                                            }</span>
                                         </div>
                                         <div className="text-base text-slate-800">
-                                            <span className="font-semibold text-slate-700">Demandado:</span> <span className="text-slate-900">{expediente.demandado?.map((d: any) => d.nombre_razon).join(', ')}</span>
+                                            <span className="font-semibold text-slate-700">Demandado:</span> <span className="text-slate-900">{
+                                                (() => {
+                                                    // Intentar múltiples formas de obtener demandados
+                                                    const demandados = expediente.participantes?.filter(p => 
+                                                        p.usuario?.rol_nombre === 'Demandado' ||
+                                                        p.usuario?.id_rol === 5
+                                                    ).map(p => 
+                                                        p.usuario?.nombre_empresa ||
+                                                        `${p.usuario?.nombre || ''} ${p.usuario?.apellido || ''}`.trim()
+                                                    ).filter(name => name && name.trim() !== '');
+                                                    
+                                                    return demandados?.length ? demandados.join(', ') : 
+                                                           (expediente as any).demandado?.map?.((d: any) => d.nombre_razon || d.nombre_completo)?.join(', ') ||
+                                                           'N/A';
+                                                })()
+                                            }</span>
                                         </div>
                                         <div className="flex flex-wrap gap-4 mt-2">
                                             <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200">
-                                                <span className="font-semibold">Secretario:</span> {expediente.secretario?.nombre_completo || 'N/A'}
+                                                <span className="font-semibold">Secretario:</span> {
+                                                    (() => {
+                                                        const secretario = expediente.participantes?.find(p => 
+                                                            p.usuario?.rol_nombre === 'Secretario' ||
+                                                            p.usuario?.id_rol === 3
+                                                        );
+                                                        return secretario?.usuario?.nombre_empresa ||
+                                                               `${secretario?.usuario?.nombre || ''} ${secretario?.usuario?.apellido || ''}`.trim() ||
+                                                               (expediente as any).secretario?.nombre_completo ||
+                                                               'N/A';
+                                                    })()
+                                                }
                                             </span>
                                             <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200">
-                                                <span className="font-semibold">Árbitro:</span> {expediente.arbitro?.nombre_completo || 'N/A'}
+                                                <span className="font-semibold">Árbitro:</span> {
+                                                    (() => {
+                                                        const arbitro = expediente.participantes?.find(p => 
+                                                            p.usuario?.rol_nombre === 'Arbitro' ||
+                                                            p.usuario?.id_rol === 2
+                                                        );
+                                                        return arbitro?.usuario?.nombre_empresa ||
+                                                               `${arbitro?.usuario?.nombre || ''} ${arbitro?.usuario?.apellido || ''}`.trim() ||
+                                                               (expediente as any).arbitro?.nombre_completo ||
+                                                               'N/A';
+                                                    })()
+                                                }
                                             </span>
                                         </div>
                                     </div>
@@ -185,7 +227,7 @@ export default function BandejaEntrada({
                                 <span className="text-xs text-slate-500">Creado: {expediente.created_at ? new Date(expediente.created_at).toLocaleDateString('es-PE', {
                                     year: 'numeric', month: '2-digit', day: '2-digit'
                                 }) : 'N/A'}</span>
-                                <span className="text-xs text-blue-700 font-medium">ID Solicitud: {expediente.id_solicitud}</span>
+                                <span className="text-xs text-blue-700 font-medium">ID Solicitud: {(expediente as any).id_solicitud || expediente.id}</span>
                                 <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
                             </div>
                         </div>

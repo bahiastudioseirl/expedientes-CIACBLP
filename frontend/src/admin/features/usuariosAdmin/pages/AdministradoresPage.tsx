@@ -2,42 +2,22 @@ import { Shield } from 'lucide-react';
 import { useState } from 'react';
 import ListaUsuarios from '../components/ListaUsuarios';
 import ModalUsuarioPersona from '../components/ModalUsuarioPersona';
-import { obtenerAdministradores, crearAdministrador, actualizarUsuario } from '../services/usuariosService';
-import type { CrearUsuarioRequest, ActualizarUsuarioRequest, Usuario } from '../schemas/UsuarioSchema';
+import { obtenerAdministradores, actualizarUsuario } from '../services/usuariosService';
+import type { ActualizarUsuarioRequest, Usuario } from '../schemas/UsuarioSchema';
 
 export default function AdministradoresPage() {
-  const [isCrearModalOpen, setIsCrearModalOpen] = useState(false);
+  const [_isCrearModalOpen, _setIsCrearModalOpen] = useState(false);
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [_saving, _setSaving] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const handleCrear = () => {
-    setIsCrearModalOpen(true);
-  };
 
   const handleEditar = (usuario: Usuario) => {
     setSelectedUsuario(usuario);
     setIsEditarModalOpen(true);
   };
 
-  const handleSave = async (data: CrearUsuarioRequest) => {
-    setSaving(true);
-    try {
-      const response = await crearAdministrador(data);
-      
-      if (response.success) {
-        setIsCrearModalOpen(false);
-        setRefreshTrigger(prev => prev + 1);
-      }
-    } catch (err: any) {
-      console.error('Error al crear administrador:', err);
-      // El error se maneja en el modal
-      throw err;
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleUpdate = async (data: ActualizarUsuarioRequest) => {
     if (!selectedUsuario) return;

@@ -3,7 +3,6 @@ import { Navigate } from 'react-router-dom';
 import { LazyWrapper } from './components/LazyWrapper';
 import { ProtectedRoute } from './guard/ProtectedRoute';
 import { AdminLayout } from '../../layout/components/AdminLayout';
-import path from 'path';
 
 // LOGIN FORMS
 const LoginForm = lazy(() =>
