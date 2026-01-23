@@ -2,7 +2,7 @@
 
 namespace App\DTOs\Usuarios;
 
-class AgregarUsuarioExpedienteDTO
+class AgregarUsuarioParteExpedienteDTO
 {
     public function __construct(
         public string $correo,
