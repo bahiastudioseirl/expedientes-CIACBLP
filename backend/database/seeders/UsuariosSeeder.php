@@ -13,8 +13,11 @@ class UsuariosSeeder extends Seeder
             [
                 'nombre_completo' => 'Admin CIACBLP',
                 'numero_documento' => '12345678',
-                'correo' => 'adminexpedientes@ciacblp.com',
+                /*'correo' => 'adminexpedientes@ciacblp.com',
                 'contrasena' => '4dminC!@#2026',
+                */
+                'correo' => 'admindev@bahia.pe',
+                'contrasena' => 'admindev@bahia.pe',
                 'telefono' => '123456789',
                 'activo' => true,
                 'id_rol' => 1
