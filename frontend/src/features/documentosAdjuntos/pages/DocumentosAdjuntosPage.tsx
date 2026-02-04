@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, FolderOpen, Loader2, Paperclip, FileText, Search } from 'lucide-react';
+import { Download, FolderOpen, Loader2, Paperclip, FileText, Search, MapPin } from 'lucide-react';
 import { useDocumentosAdjuntos } from '../hooks/useDocumentosAdjuntos';
+import ModalCaminoExpediente from '../../../admin/features/expedienteAdmin/components/ModalCaminoExpediente';
 
 export default function DocumentosAdjuntosPage() {
 	const [searchTerm, setSearchTerm] = useState('');
+	const [modalCaminoAbierto, setModalCaminoAbierto] = useState(false);
+	const [expedienteCamino, setExpedienteCamino] = useState<{id: number, codigo: string} | null>(null);
 	const {
 		expedientes,
 		adjuntos,
@@ -29,6 +32,16 @@ export default function DocumentosAdjuntosPage() {
 			seleccionarExpediente(filteredExpedientes[0].id);
 		}
 	}, [expedienteSeleccionado, filteredExpedientes, seleccionarExpediente]);
+
+	const handleAbrirCamino = (expediente: {id: number, codigo_expediente: string}) => {
+		setExpedienteCamino({ id: expediente.id, codigo: expediente.codigo_expediente });
+		setModalCaminoAbierto(true);
+	};
+
+	const handleCerrarCamino = () => {
+		setModalCaminoAbierto(false);
+		setExpedienteCamino(null);
+	};
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
@@ -79,7 +92,7 @@ export default function DocumentosAdjuntosPage() {
 					</div>
 				)}
 
-				<div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
+				<div className="grid grid-cols-1 lg:grid-cols-[550px_1fr] gap-6">
 					{/* Lista de expedientes */}
 					<div className="bg-white border border-slate-200 rounded-xl shadow-sm">
 						<div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -104,23 +117,40 @@ export default function DocumentosAdjuntosPage() {
 							{filteredExpedientes.map((expediente) => {
 								const activo = expedienteSeleccionado === expediente.id;
 								return (
-									<button
+									<div
 										key={expediente.id}
-										onClick={() => seleccionarExpediente(expediente.id)}
-										className={`w-full text-left px-5 py-4 transition ${
+										className={`w-full px-5 py-4 transition ${
 											activo
 												? 'bg-blue-50/70 border-l-4 border-blue-500'
 												: 'hover:bg-slate-50'
 										}`}
 									>
-										<div className="flex items-center justify-between">
-											<div>
-												<p className="text-xs uppercase tracking-wide text-slate-500 mb-1">Código</p>
-												<p className="text-sm font-semibold text-slate-900">{expediente.codigo_expediente}</p>
-											</div>
-											<span className="text-xs text-slate-500">#{expediente.id}</span>
+										{/* Primera fila: CÓDIGO y Botón */}
+										<div className="flex items-center justify-between mb-2">
+											<p className="text-xs uppercase tracking-wide text-slate-500">Código</p>
+											<button
+												onClick={(e) => {
+													e.stopPropagation();
+													handleAbrirCamino(expediente);
+												}}
+												className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors cursor-pointer"
+											>
+												<MapPin className="w-4 h-4" />
+												Camino del expediente
+											</button>
 										</div>
-									</button>
+										
+										{/* Segunda fila: Número de expediente e ID */}
+										<button
+											onClick={() => seleccionarExpediente(expediente.id)}
+											className="w-full text-left"
+										>
+											<div className="flex items-center justify-between">
+												<p className="text-sm font-semibold text-slate-900">{expediente.codigo_expediente}</p>
+												<span className="text-xs text-slate-500">#{expediente.id}</span>
+											</div>
+										</button>
+									</div>
 								);
 							})}
 						</div>
@@ -180,6 +210,15 @@ export default function DocumentosAdjuntosPage() {
 					</div>
 				</div>
 			</div>
+			
+			{/* Modal Camino Expediente */}
+			{modalCaminoAbierto && expedienteCamino && (
+				<ModalCaminoExpediente
+					expedienteId={expedienteCamino.id}
+					codigoExpediente={expedienteCamino.codigo}
+					onClose={handleCerrarCamino}
+				/>
+			)}
 		</div>
 	);
 }

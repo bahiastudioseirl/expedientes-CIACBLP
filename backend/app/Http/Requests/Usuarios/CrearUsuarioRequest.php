@@ -15,6 +15,7 @@ class CrearUsuarioRequest extends FormRequest
     {
         return [
             'nombre_completo' => 'required|string|max:100',
+            'numero_documento' => 'nullable|string|max:50',
             'correo' => 'required|string|email|max:150|unique:usuarios,correo',
             'telefono' => 'nullable|string|max:20',
         ];
@@ -25,6 +26,9 @@ class CrearUsuarioRequest extends FormRequest
             'nombre_completo.required' => 'El nombre completo es obligatorio.',
             'nombre_completo.string' => 'El nombre completo debe ser texto.',
             'nombre_completo.max' => 'El nombre completo no puede exceder 100 caracteres.',
+
+            'numero_documento.string' => 'El número de documento debe ser texto.',
+            'numero_documento.max' => 'El número de documento no puede exceder 50 caracteres.',
 
             'correo.required' => 'El correo electrónico es obligatorio.',
             'correo.string' => 'El correo electrónico debe ser texto.',

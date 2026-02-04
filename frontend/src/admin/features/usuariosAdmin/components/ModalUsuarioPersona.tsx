@@ -12,23 +12,24 @@ type Props = {
   tipoUsuario: 'administrador' | 'secretario' | 'arbitro' | 'contador';
 };
 
-export default function ModalUsuarioPersona({ 
-  open, 
-  onClose, 
-  onSave, 
+export default function ModalUsuarioPersona({
+  open,
+  onClose,
+  onSave,
   onUpdate,
-  loading = false, 
+  loading = false,
   usuario = null,
   tipoUsuario
 }: Props) {
   const isEditing = !!usuario;
-  
+
   const [formData, setFormData] = useState<CrearUsuarioRequest>({
     nombre_completo: "",
+    numero_documento: "",
     telefono: "",
     correo: ""
   });
-  
+
   const [error, setError] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -54,12 +55,14 @@ export default function ModalUsuarioPersona({
       if (isEditing && usuario) {
         setFormData({
           nombre_completo: usuario.nombre_completo,
+          numero_documento: usuario.numero_documento,
           telefono: usuario.telefono,
           correo: usuario.correo
         });
       } else {
         setFormData({
           nombre_completo: "",
+          numero_documento: "",
           telefono: "",
           correo: ""
         });
@@ -79,11 +82,11 @@ export default function ModalUsuarioPersona({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(!formData.nombre_completo.trim()) {
+    if (!formData.nombre_completo.trim()) {
       setError("El nombre completo es obligatorio");
       return;
     }
-    if(!formData.correo.trim()) {
+    if (!formData.correo.trim()) {
       setError("El correo electrónico es obligatorio");
       return;
     }
@@ -101,7 +104,7 @@ export default function ModalUsuarioPersona({
       } else if (!isEditing && onSave) {
         await onSave(formData);
         // Solo limpiar formulario si es creación
-        setFormData({ nombre_completo: "", telefono: "", correo: "" });
+        setFormData({ nombre_completo: "", numero_documento: "", telefono: "", correo: "" });
       }
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || `Error al ${isEditing ? 'actualizar' : 'crear'} el ${tipoUsuario}`;
@@ -112,11 +115,11 @@ export default function ModalUsuarioPersona({
   if (!open) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50"
       onClick={onClose}
     >
-      <div 
+      <div
         className="relative w-full max-w-2xl bg-white rounded-xl shadow-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -163,6 +166,22 @@ export default function ModalUsuarioPersona({
                 placeholder="Ingresa el nombre completo"
               />
             </div>
+
+            <div>
+              <label htmlFor="numero_documento" className="block mb-2 text-sm font-medium text-slate-700">
+                Número de Documento
+              </label>
+              <input
+                type="text"
+                id="numero_documento"
+                value={formData.numero_documento}
+                onChange={(e) => setFormData({ ...formData, numero_documento: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Ingresa el número de documento"
+              />
+            </div>
+
+
             <div>
               <label htmlFor="telefono" className="block mb-2 text-sm font-medium text-slate-700">
                 <Phone className="inline w-4 h-4 mr-1" />

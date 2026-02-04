@@ -96,6 +96,7 @@ export interface AgregarParticipanteResponse {
 // Request types para crear usuarios por tipo
 export interface CrearUsuarioRequest {
   nombre_completo: string;
+  numero_documento: string;
   correo: string;
   telefono: string;
 }
@@ -105,6 +106,7 @@ export interface ActualizarUsuarioRequest {
   nombre_completo?: string;
   correo?: string;
   telefono?: string;
+  numero_documento?: string;
 }
 
 // Response para crear usuarios

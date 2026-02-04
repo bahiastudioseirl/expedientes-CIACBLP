@@ -27,6 +27,7 @@ export default function ModalCrearArbitro({
 
   const [formData, setFormData] = useState<CrearUsuarioRequest>({
     nombre_completo: '',
+    numero_documento: '',
     correo: '',
     telefono: '',
   });
@@ -41,6 +42,7 @@ export default function ModalCrearArbitro({
       setUseManualEntry(false);
       setFormData({
         nombre_completo: '',
+        numero_documento: '',
         correo: '',
         telefono: '',
       });
@@ -83,6 +85,7 @@ export default function ModalCrearArbitro({
   const handleSelectArbitro = (arbitro: ArbitroBusqueda) => {
     setFormData({
       nombre_completo: arbitro.nombre_completo,
+      numero_documento: arbitro.numero_documento || '',
       correo: arbitro.correo,
       telefono: arbitro.telefono || '',
     });
@@ -164,7 +167,7 @@ export default function ModalCrearArbitro({
                   setDatosFromBusqueda(false);
                   setSearchTerm('');
                   setError('');
-                  setFormData({ nombre_completo: '', correo: '', telefono: '' });
+                  setFormData({ nombre_completo: '', numero_documento: '', correo: '', telefono: '' });
                 }}
                 className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
                   !useManualEntry
@@ -293,6 +296,19 @@ export default function ModalCrearArbitro({
                     setError('');
                   }}
                   placeholder="Nombre completo del árbitro"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Número de Documento
+                </label>
+                <input
+                  type="text"
+                  value={formData.numero_documento}
+                  onChange={(e) => setFormData({ ...formData, numero_documento: e.target.value })}
+                  placeholder="Número de documento"
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>

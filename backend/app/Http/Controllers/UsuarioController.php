@@ -251,7 +251,7 @@ class UsuarioController extends Controller
             
             $dto = CrearUsuarioDTO::fromArray([
                 'nombre_completo' => $data['nombre_completo'],
-                'numero_documento' => null,
+                'numero_documento' => $data['numero_documento'] ?? null,
                 'correo' => $data['correo'],
                 'telefono' => $data['telefono'] ?? null,
                 'id_rol' => 3, // Rol secretario
@@ -284,7 +284,7 @@ class UsuarioController extends Controller
             // Crear DTO con los datos del request
             $dto = CrearUsuarioDTO::fromArray([
                 'nombre_completo' => $data['nombre_completo'],
-                'numero_documento' => null,
+                'numero_documento' => $data['numero_documento'] ?? null,
                 'correo' => $data['correo'],
                 'telefono' => $data['telefono'] ?? null,
                 'id_rol' => 2, // Rol árbitro
@@ -317,7 +317,7 @@ class UsuarioController extends Controller
             // Crear DTO con los datos del request
             $dto = CrearUsuarioDTO::fromArray([
                 'nombre_completo' => $data['nombre_completo'],
-                'numero_documento' => null,
+                'numero_documento' => $data['numero_documento'] ?? null,
                 'correo' => $data['correo'],
                 'telefono' => $data['telefono'] ?? null,
                 'id_rol' => 6, // Rol contador
