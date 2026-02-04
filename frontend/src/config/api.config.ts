@@ -1,7 +1,7 @@
 
 export const API_CONFIG = {
-  BASE_URL: 'https://localhost:8000',          //DOMINIO DEL BACK
-  APP_URL: 'https://localhost:5173',               //DOMINIO DEL FRONT
+  BASE_URL: 'https://api.expedientes.ciacblp.com',          //DOMINIO DEL BACK
+  APP_URL: 'https://expedientes.ciacblp.com',               //DOMINIO DEL FRONT
   
   getFullUrl: (path: string) => {
     if (path.startsWith('http://') || path.startsWith('https://')) {
